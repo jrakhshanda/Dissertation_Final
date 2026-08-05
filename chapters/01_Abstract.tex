@@ -1,0 +1,54 @@
+\begin{abstract}
+{\small
+% Introduction, background
+Real-world software applications need to evolve continuously or else become increasingly useless.
+Software evolution happens during the development of new applications, or when an existing application is adapted to new requirements, receives corrections, or is changed to accommodate future functionality.
+Software quality models and continuous code inspection tools are typical measures for direct software quality control in that situation.
+However, we find not only a significant positive correlation between the quality of the development process and the manufactured product, but also strong causation.
+Improving the process, therefore, constitutes another valid, yet indirect measure to improving the product.
+In turn, this requires that we can learn effectively from past processes.
+Indeed, this is frequently embraced in post-mortem organizational learning.
+Using mostly unstructured artifacts that are typically produced during the development, experts engage in qualitative evaluation of past projects.
+However, beyond large artifacts, the application lifecycle management that governs software processes typically captures a considerable number of smaller, mostly quantitative changes.
+While such small changes have been used for fault prediction and prevention, they have not yet been used to detect complex phenomena that manifest not only in software metrics but predominantly in project culture and management.
+
+
+% Problem?
+% Method, how did we try to solve the problem?
+% Results/Analysis, what was the outcome?
+% Discussion, what do the results mean?
+Software evolution was previously captured by the size of the changes made.
+However, the lack of consensus on what constitutes a versatile and robust quantification of size currently prevents its use as a dependable software metric.
+Different notions of size were also previously used to capture the nature of each change.
+However, these classifications cannot describe the nature of evolution with sufficient reliability.
+While application lifecycle management data is typically rich, we do not currently know which artifacts can be leveraged to model managerial anti-patterns, which are malpractices with adverse effects on process quality.
+Approaches such as simulation modeling, discrete events simulation, or Bayesian networks have only limited ability to exploit continuous-time process models of such phenomena.
+Even worse, the accessibility and mechanistic insight into such gray- or black-box models are typically very low.
+%
+We suggest that a synthesis of objectively captured digital artifacts from application lifecycle management, together with qualitative analysis can be exploited for efficient organizational learning.
+We first propose a new, language-independent metric that can robustly capture the size of changes.
+Then, these new size-based measurements are used to considerably boost the classification accuracy of the nature of these changes.
+We explore, visualize, and suggest maintenance activities as derived from the classified changes and can reliably predict the presence and severity of malpractice, even from ``little data''.
+Lastly, we make parts of the automatic quantitative analysis accessible and allow it to partially replace qualitative expert-based analysis.
+
+
+
+
+
+}
+\bigskip
+\vfill
+\noindent
+\textbf{Keywords:}
+Software Size, Software Metrics, Commit Classification, Maintenance Activities, Software Quality, Process Quality, Project Management, Organizational Learning, Machine Learning, Visualization, Optimization
+
+\end{abstract}
+\cleardoublepage
+
+% Software systems evolve continuously, and their architecture documentation is often missing, incomplete, or outdated. This may intensify as AI coding assistants raise code volume without matching documentation. Recovering a medium-sized system's architecture manually is labor-intensive and can take hundreds of expert hours, motivating automated SAR, which infers a system's modular decomposition from its implementation.
+
+% Software systems are relational: files are linked by typed static dependencies, organized in folder hierarchies, and carry semantic cues in code identifiers, so SAR suits AI methods that learn from heterogeneous evidence. Many traditional SAR methods rely on hand-crafted heuristics or fixed fusion rules rather than integrating these signals in a data-driven way. Earlier representation-learning work used node2vec over dependency graphs, capturing structure but not code semantics or hierarchy. Recent work applies large language models, but this can be costly at industrial scale, and evaluation on public benchmarks makes it hard to separate genuine reasoning from pretraining exposure.
+
+% We study how GNN-based representation learning can improve SAR through three linked questions. First, can learned dependency representations outperform fixed heuristic fusion? Architecture Representation Learning (ARL) trains a heterogeneous graph-attention encoder with a contrastive objective over typed dependencies and adds edge attributes for member-level interactions. Second, does replacing the contrastive objective with reconstruction, while combining all signals, change what the encoder learns? Graph Auto-Encoders for Architecture Recovery (GAER) addresses this with a graph auto-encoder integrating folder hierarchy and code semantics as node features, and compares GCN and GAT encoders. Third, how much does folder organization add beyond dependencies alone, and can diffusion-based rewiring recover similar gains? A controlled variational-GAE study fixes the encoder and varies only the input graph across dependency-only, diffusion-rewired, and folder-augmented variants to isolate each signal.
+
+% On open-source Java, C, and C++ systems, ARL and GAER significantly improve over heuristic fusion and node2vec-style baselines, with ARL's largest gains on more homophilic systems, only marginal gains from its edge attributes, and GAT consistently outperforming GCN in GAER. The controlled study shows that recovery from dependencies alone is bounded more by the structural context reaching the encoder than by the encoder itself. Folder structure helps mainly where dependency cohesion is weak, trading dependency-based modularity for closer alignment with the reference decomposition. The results suggest that GNN-based SAR succeeds not merely through a stronger encoder, but by learning to expose and combine complementary forms of architectural evidence. All methods scale to industry-sized systems, finishing in under five minutes on Chromium at roughly 18,000 files.

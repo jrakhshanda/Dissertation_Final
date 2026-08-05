@@ -1,0 +1,85 @@
+\newcommand{\printpublication}[1]{\AtNextCite{\defcounter{maxnames}{99}}\fullcite{#1}}
+\newcommand{\myfullcite}[1]{\printpublication{#1}~\cite{#1}. {\footnotesize\textsc{In Appendix:}}~\ref{app:publ-#1}. Materials appear in Chapter}
+\newcommand{\myfullcitedata}[1]{\printpublication{#1}~\cite{#1}. Materials used or appear in Chapter}
+\newcommand{\myfullcitenoapp}[1]{\printpublication{#1}~\cite{#1}.}
+
+
+
+\chapter*{List of Publications}
+\addcontentsline{toc}{chapter}{List of Publications}
+\markboth{List of Publications}{List of Publications}
+
+
+\noindent\textbf{Canonical reference to this dissertation}
+(the digital object identifier always points to the most recent master copy that receives corrections to errata found after print):
+
+\begin{enumerate}[leftmargin=*]
+    \item[]\printpublication{honel2023_phdthesis}~\cite{honel2023_phdthesis}.
+\end{enumerate}
+
+
+\bigskip
+\bigskip
+\noindent\textbf{This dissertation is based on the following refereed publications in chronological order} 
+(I have contributed to all stages of work in the role of a lead author and have
+implemented all tools):
+
+
+
+\begin{enumerate}[series=publ,start=1,leftmargin=*]%[label=(\Alph*)]
+    \item\myfullcite{honel2018changeset}~\ref{chap:obj-1}.
+    \item\myfullcite{honel19importance}~\ref{chap:obj-1}.
+    \item\myfullcite{honel2020using}~\ref{chap:obj-1}.
+\end{enumerate}
+\clearpage
+\begin{enumerate}[resume*=publ]
+    \item\myfullcite{picha_honel22pilot}~\ref{chap:obj-2}.
+    \item\myfullcite{honel2022qrsmas}~\ref{chap:obj-3}.
+    \item\myfullcite{honel2023hmm}~\ref{chap:obj-1}.
+    \item\myfullcite{honel2023embedded}~\ref{chap:obj-2}.
+    \item\myfullcite{honel2023masjoss}~\ref{chap:obj-3}.
+\end{enumerate}
+
+
+\newpage
+\noindent\textbf{This dissertation is based on and produced the following replication packages, technical reports, posters, datasets, and software artifacts}
+(I have contributed to these either exclusively or in the role of a lead author):
+
+
+\begin{enumerate}[series=publ1,start=1,leftmargin=*]
+    \item\myfullcitedata{honel2023dissrepl}s~\ref{chap:intro} through~\ref{chap:conclusions-future-work}.
+    \item\myfullcitedata{honel2023fdtr}s~\ref{chap:obj-1},~\ref{chap:obj-2}, and~\ref{chap:obj-3}.
+    \item\myfullcitedata{honel2018changeset_poster}~\ref{chap:obj-1}.
+    \item\myfullcitedata{honel2019gitdens}~\ref{chap:obj-1}.
+    \item\myfullcitedata{honel2019commits}~\ref{chap:obj-1}.
+    \item\myfullcitedata{honel2023hmm_dataset}~\ref{chap:obj-1}.
+    \item\myfullcitedata{honel2023fddataset}~\ref{chap:obj-2}.
+\end{enumerate}
+\clearpage
+\begin{enumerate}[resume*=publ1]
+    \item\myfullcitedata{honel2023fdgithub}~\ref{chap:obj-2}.
+    \item\myfullcitedata{honel2023qcc}~\ref{chap:obj-3}.
+    \item\myfullcitedata{honel2023masgithub}~\ref{chap:obj-3}.
+\end{enumerate}
+
+
+%\newpage
+%\vfill
+%\vspace{40pt}
+\bigskip
+\bigskip
+\noindent\textbf{Further publications not related to this dissertation}
+(I have contributed to all
+or some stages of work in conceptualization, implementation, writing, or implementation of related tools):
+
+\begin{enumerate}
+    \item\myfullcitenoapp{ulan_honel2018qmio}
+    \item\myfullcitenoapp{ulan_honel2018qmio_artifact}
+    \item\myfullcitenoapp{honel2022pareto}
+\end{enumerate}
+
+
+
+
+
+\cleardoublepage

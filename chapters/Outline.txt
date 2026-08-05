@@ -1,0 +1,229 @@
+% =====================================================================
+% PhD KAPPA - NARRATIVE SKELETON (v0, structure only)
+% Purpose: agree the spine before writing prose. Nothing here is final text.
+% Ordering: THEMATIC (unsupervised recovery block -> supervised mapping block).
+% Overarching RQs are deferred: they appear in Ch.3, AFTER background+motivation.
+% Notes in % comments explain the intent of each section and which paper feeds it.
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% CHAPTER 1 — INTRODUCTION
+% Job: establish the problem and the single thesis. NO overarching RQs here.
+% ---------------------------------------------------------------------
+\chapter{Introduction}
+
+% 1.1 The problem, stated once, concretely.
+%   - Architecture drifts/erodes; documentation goes stale; mappings are missing.
+%   - SAR and C2A mapping defined and distinguished (recovery = discover the
+%     decomposition; mapping = assign entities given partial known architecture).
+%   - Cost anchor: expert C2A mapping is ~107 person-hours/system; Chromium took
+%     ~2 years. This is the "why automate" evidence, not rhetoric.
+\section{Software architecture erosion and the recovery problem}
+
+% 1.2 Why the obvious approaches are insufficient (motivates the whole thesis).
+%   - Dependency-only clustering: "connected by an edge" != "same module".
+%   - Hand-tuned fusion (SARIF): fixed weights don't generalise across systems/scale.
+%   - The gap: no single signal suffices, and hand-weighting them doesn't either.
+\section{Why architectural signal is hard to use}
+
+% 1.3 The thesis statement (the spine). State it plainly:
+%   Architectural structure is distributed across several implementation signals
+%   (typed dependencies, folder organisation, lexical identifiers, member-level
+%   detail). Learned graph representations integrate them better than hand-tuned
+%   fusion; and recovery is bounded not by the encoder but by whether the target
+%   architecture is reflected in the chosen signal and whether the model's reach
+%   matches system scale and granularity.
+\section{Thesis statement and scope}
+
+% 1.4 Contributions of the thesis as a whole (not per-paper yet).
+%   - C1: learned representations beat hand-tuned fusion, most clearly at scale.
+%   - C2: isolation of what each signal contributes and where it fails.
+%   - C3: the same signals/systems hold across unsupervised recovery AND
+%         supervised mapping (the duality that no single paper can claim).
+%   - C4: directory structure as a strong architectural proxy, shown by removing it.
+\section{Contributions}
+
+% 1.5 Included papers + author roles + a one-line "what each isolates".
+\section{Included publications}
+
+% 1.6 Thesis outline (short).
+\section{Outline}
+
+
+% ---------------------------------------------------------------------
+% CHAPTER 2 — BACKGROUND
+% Job: give the reader the shared vocabulary the RQs will need.
+% Kept tight; this is not a survey.
+% ---------------------------------------------------------------------
+\chapter{Background}
+
+\section{Software architecture, drift, and conformance checking}
+% Reflexion modelling / SACC as the practical motivation for mapping.
+
+\section{From dependency graphs to representation learning for SAR}
+% SDG assumption; clustering vs search vs fusion; then GNNs/GAE/embeddings.
+
+\section{Graph neural networks and encoders used in this thesis}
+% GCN, GAT, VGAE/GAE, HGT — only what's needed to read the contributions.
+% Homophily / heterophily; message-passing reach; why encoder != the bound.
+
+\section{Evaluation: metrics, ground truth, and their limits}
+% MoJoFM/A2A/C2Ccvg/ARI/TurboMQ; precision-recall-F1 for mapping.
+% Why we read metrics jointly; GT is human-made and contestable; effect sizes.
+
+
+% ---------------------------------------------------------------------
+% CHAPTER 3 — RESEARCH PROBLEM AND QUESTIONS
+% Job: NOW state the overarching RQs, once background makes them legible.
+% These are the THESIS-LEVEL RQs, distinct from each paper's internal RQs.
+% ---------------------------------------------------------------------
+\chapter{Problem Statement and Research Questions}
+
+% Frame the two axes that organize the whole thesis:
+%   (axis A) which signal + which representation recovers architecture?
+%   (axis B) does this hold unsupervised (recovery) and supervised (mapping)?
+%
+% Draft overarching RQs (to refine with you):
+%   ORQ1: Do learned graph representations recover software architecture more effectively than hand-tuned multi-signal fusion, and where does the advantage concentrate?
+%   ORQ2: What does each implementation signal (typed dependencies, folder organization, lexical identifiers, member-level detail) contribute to recovery, and what bounds each signal's usefulness?
+%(Fed by all five papers. This is where folder-as-proxy lives alongside dependency reach, lexical representation quality, member granularity, and the homophily/cohesion %boundary conditions. It's the biggest RQ and the thesis's center of gravity.)
+
+%   ORQ3: Is the encoder or the model's reach the binding constraint on
+%         dependency-based recovery?
+%   ORQ4: Do these findings hold across both unsupervised architecture recovery and semi-supervised code-to-architecture mapping?
+%   ORQ5: How strongly does directory structure alone stand in for architecture, and what compensates when it is removed?
+\section{Overarching research questions}
+
+\section{Methodological approach common to the studies}
+% Shared spine: Depends extraction; the benchmark systems; 100-run protocol;
+% median + nonparametric tests + Cliff's delta; granularity as a modelling choice.
+% Stating this once here means the paper chapters don't each re-explain it.
+
+
+% =====================================================================
+% PART I — UNSUPERVISED ARCHITECTURE RECOVERY
+% (ARL, GAER, StructSAR) — "discover the decomposition from signal alone"
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% CHAPTER 4 — LEARNED REPRESENTATIONS BEAT HAND-TUNED FUSION  [ARL + GAER]
+% ---------------------------------------------------------------------
+\chapter{Learning architecture-aware embeddings}
+% Feeds ORQ1, ORQ3(seed).
+% ARL: heterogeneous GAT + contrastive (DGI); ARL-E edge attributes.
+%   Result: beats SARIF; edge attributes marginal, hurt under low homophily.
+%   First appearance of "homophily bounds recovery".
+% GAER: matured to GAE/link-reconstruction; GCN vs GAT; granularity study;
+%   stability study; 10 systems incl. Chromium.
+%   Result: GAT>=GCN; learning wins *at scale* (Chromium) where fusion is brittle;
+%   granularity is a modelling choice; C2Ccvg is fragmentation-sensitive.
+\section{ARL: contrastive representation learning over multi-relational graphs}
+\section{GAER: graph auto-encoders, encoder choice, and granularity}
+\section{What this establishes: fusion is learnable, and scale is where it pays}
+% Synthesis paragraph tying both to ORQ1/ORQ3, not a per-paper summary.
+
+
+% ---------------------------------------------------------------------
+% CHAPTER 5 — WHICH SIGNAL, AND WHY IT STOPS WORKING  [StructSAR]
+% ---------------------------------------------------------------------
+\chapter{Isolating the signal: dependencies versus organisation}
+% Feeds ORQ2, ORQ3, ORQ5(seed).
+% Fix the model (GAT+VGAE), vary only the input graph.
+%   RQ1: dependency-only — bound is the model's REACH not the encoder
+%        (shallow GAT too local; node2vec walks & PPR diffusion expand context).
+%   RQ2: add folder nodes — helps exactly where dependency cohesion is weak,
+%        by drifting from dependency modularity toward developer intent
+%        (the TMQnorm trade-off: better GT alignment, lower internal modularity).
+%   RQ3(theirs): cheap to run/tune — representation learning is not the bottleneck.
+\section{Fixing the model to isolate the input}
+\section{Reach, not encoder, bounds dependency-only recovery}
+\section{Folder organisation as a complementary signal, and its trade-off}
+\section{What this establishes: no signal is sufficient; each has a regime}
+
+
+% =====================================================================
+% PART II — SUPERVISED CODE-TO-ARCHITECTURE MAPPING
+% (C2A extension, HetMap) — "propagate partial known architecture"
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% CHAPTER 6 — WHAT THE GRAPH ADDS OVER FEATURES ALONE  [C2A extension]
+% ---------------------------------------------------------------------
+\chapter{Semi-supervised mapping and the graph's marginal value}
+% Feeds ORQ2, ORQ4 (the recovery->mapping transfer), ORQ3.
+% Pivot from recovery to mapping (reflexion motivation).
+%   GCN/GAT vs graph-free MLP on identical features + self-training.
+%   Result: graph's real contribution is per-file decision REPEATABILITY and a
+%     precision shift (features lean recall); MLP wins on small/sparse graphs;
+%     clean degree-asymmetry failure mode; industrial scale (Chrome) holds.
+%   This is the counterfactual the unsupervised papers couldn't run
+%     (no non-graph baseline there).
+\section{From recovery to mapping under limited supervision}
+\section{Isolating the graph: the non-graph baseline}
+\section{Repeatability, the precision-recall shift, and where the graph fails}
+\section{What this establishes: the graph's value is consistency, not raw F1}
+
+
+% ---------------------------------------------------------------------
+% CHAPTER 7 — DIRECTORY STRUCTURE AS AN ARCHITECTURAL PROXY  [HetMap]
+% ---------------------------------------------------------------------
+\chapter{HetMap: how far the folder signal carries, and what replaces it}
+% Feeds ORQ2, ORQ5 (centrepiece), ORQ4.
+% The best mapping model AND the sharpest signal test.
+%   - Richest representation: folder+file+member nodes, containment + typed deps,
+%     one large heterogeneous graph -> HGT (meta-relation attention), which is
+%     WHY the GNN choice changes vs GAT+VGAE.
+%   - Core experiment: REMOVE the folder/directory signal and see what survives.
+%     Directory structure is a strong proxy for architecture; the drop when it's
+%     gone measures how strong.
+%   - The sharp finding: a dependency-guided language-transfer model, contrastively
+%     fine-tuned with 2-hop dependency neighbours as positive pairs, OVERTAKES the
+%     folder-signal models once folders are removed. The lexical/structural signal
+%     can substitute for directory structure.
+%   - Ablations: semantic vs randomised folder tokens (hierarchy vs names),
+%     W2V vs LPE init, member granularity.
+%   - NOTE: no scalability RQ. Design + signal only.
+\section{A heterogeneous folder-file-member graph and why HGT}
+\section{Directory structure as a proxy: removing the folder signal}
+\section{Contrastive dependency-guided transfer as a substitute signal}
+\section{Ablations: folder names vs hierarchy, lexical vs structural init}
+\section{What this establishes: the proxy is strong but not irreplaceable}
+
+
+% =====================================================================
+% CHAPTER 8 — DISCUSSION (the synthesis that makes it a thesis)
+% =====================================================================
+\chapter{Discussion}
+
+\section{Recovery is bounded by signal, not by encoder}
+% Pull the thread across ALL five: homophily (ARL/C2A), reach (StructSAR),
+% degree-asymmetry (C2A), cohesion+granularity (everywhere).
+
+\section{The unsupervised-supervised duality}
+% Same graphs/signals/systems, two evaluation regimes; what transfers, what doesn't.
+
+\section{Directory structure and the nature of ground truth}
+% Folder layout is not independent of GT (experts use it); TMQnorm trade-off;
+% "no single decomposition is objectively correct".
+
+\section{Granularity as a first-class modelling choice}
+% k / cluster count / target resolution as a recurring axis, not a nuisance.
+
+\section{Practical guidance}
+% When to use which signal/model: sparse+small -> features/MLP; scale -> learned
+% integration; folders present -> use them; folders absent -> dependency-guided
+% transfer. Effect sizes over p-values.
+
+
+% =====================================================================
+% CHAPTER 9 — THREATS, LIMITATIONS, FUTURE WORK, CONCLUSION
+% =====================================================================
+\chapter{Threats to validity and limitations}
+% Consolidated across papers: benchmark coverage (11 systems, 3 languages, no
+% Python/dynamic); static extraction misses edges; GT is human-made; file-level
+% granularity; multiple-comparison + large-N significance -> effect sizes.
+
+\chapter{Conclusion and future directions}
+% Restate the spine as demonstrated, not promised. Future: joint typed-relation
+% modelling; neuro-symbolic direction (ARL's original future work); cluster naming;
+% AI-generated code as a new dependency regime.

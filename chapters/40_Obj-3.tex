@@ -1,0 +1,319 @@
+\chapter{%
+%Exploiting and
+%Operationalization of Activities for Organizational Learning%
+Towards Accessible Organizational Learning%
+}\label{chap:obj-3}%
+\vspace{5pt}
+\epigraph{%
+\emph{``Bluntly, the code metric values, when inspected out of context, mean nothing.''}\;---\;\citeauthor{gil2016meannothing}~\cite{gil2016meannothing}%
+}
+\restoregeometry
+\vspace{5pt}
+\chaptertoc
+\chaptermark{Accessible Organizational Learning}
+
+%\section{Overview and Objective}
+\noindent
+The contributions of the first half of this chapter are mainly based on the two publications~\citepaper{honel2022qrsmas} (refereed) and~\citearticle{honel2023masjoss} (manuscript submitted for publication), summarized in Sections~\ref{ssec:summary-honel2022qrsmas} and~\ref{ssec:summary-honel2023masjoss}, respectively.
+In the second half, starting with Section~\ref{sec:ac}, we contemplate an approach that extends the methodology and results of these publications.
+
+
+In \textbf{\citepaper{honel2022qrsmas}}, we argue that raw software metrics lack meaningful comparisons or aggregations due to, e.g., different scales and ranges.
+A contextual approach assigns scores by leveraging ideal values and observed data, transforming metrics into having a uniform distribution afterward.
+This transformation applies to various numeric quantities, including software metrics.
+Metrics vary significantly across application domains, requiring careful consideration for accurate quality determination.
+Validation against domain-specific quality models is crucial to avoid misleading results.
+In \mbox{\textbf{\citearticle{honel2023masjoss}}}, we introduce a tool- and (visual) analysis suite that implements said contextual approach.
+
+
+\section{Objective and Problems}
+%\vspace{10pt}
+%\noindent
+This chapter is dedicated to the last of the three objectives (see Section~\ref{sec:objectives}).
+In the first half, it summarizes the results of the two publications that we previously recapped.
+In the second half, we contemplate a potential solution to the last problem.
+This chapter's objective and its related problems are defined as follows.
+
+\vspace{10pt}
+\begin{mdframed}
+    \textbf{O-III:}~\textit{Enhance the explainability of quantitative data and reduce the amount of required qualitative analysis.}
+\end{mdframed}
+\vspace{5pt}
+
+\noindent In order to achieve the objective, the following problems need to be solved:
+
+\begin{enumerate}[itemsep=.5ex, leftmargin=3.5em]
+    \item[\textbf{P\=/VI:}] Find a technique for raw quantities that allows them to be understood, compared, and associated with quality.
+    \item[\textbf{P\=/VII:}] Suggest a solution that can provide details about phenomenon severity and serve as a data-based drop-in replacement for qualitative evaluation.
+\end{enumerate}
+
+
+\section{Black- and White-Box Models}
+%
+Models considered to be ``white-box'' models use a reasonably restricted number of components and provide traceability and transparency in their decision-making~\cite{Rai2019xai}.
+The previous chapter concluded with the results of our most recent case study~\citearticlep{honel2023embedded}, one of which is a predictive model for the Fire Drill severity.
+In contrast to white-box models such as Bayesian networks, additive models, or linear regressions, this model is considered a ``black-box'' model.
+We can inspect the architecture and weights of such a model, but the degree of mechanistic insight into such a system is low as it defies human comprehension, most often because of non-linear mechanics, too-large capacities, or both.
+We identify two problems that prominently inhibit the understanding of black-box models, which are the incomprehensibility of the inputs, and  too-complex aggregations thereof.
+The result of these circumstances is a lack of a clear association between the data passed into a model and the qualitative meaning of the result.
+For example, if our champion model for predicting the Fire Drill were to output an unexpected severity, then perhaps only a thorough qualitative analysis would allow us to find out why.
+
+
+
+The definition of what constitutes \emph{understandability} is subjective and often context-dependent~\cite{zagzebski2017whatis}.
+Consider a predictive model that uses the metrics \emph{Lines Of Code} and \emph{Cyclomatic Complexity} as its inputs.
+Only the latter of both metrics has a meaning, that is, lower complexity is more desirable.
+Yet, while we know that the lowest possible value for it $\utight{=}1$, achieving this value is unrealistic for a reasonably sized software~\cite{McCabe76}.
+Worse, \emph{Cyclomatic Complexity} is unbounded, i.e., it lies in the interval $\interval{1}{\infty}$.
+Lastly, even if we had knowledge about the practical range of values this metric typically assumes, how can we know that any two unit changes can be considered equally good/bad?
+For example, is a decrease in complexity from ten to nine equally valuable as a decrease from two to one?
+As for \emph{Lines Of Code}, the problem is further exacerbated, since this metric does not even have any such meaning as, e.g., lower is better.
+What constitutes a desirable value is highly context-sensitive.
+In fact, most software metrics are meaningless when captured out of context~\cite{gil2016meannothing}.
+These circumstances inhibit any two quantities (such as software metrics) to be properly understood, compared, or to be associated with a notion of quality.
+In Section~\ref{sec:transf-to-scores} we offer a solution to these problems, by transforming quantities using a previously derived ideal value into \textbf{scores}.
+Any two scores possess the same traits: they are scaled into the range $\interval{0}{1}$, higher is better, and all unit increments are considered to be equally valuable, making them perfectly comparable.
+Consequently, we characterize understandability as transforming quantities into their respective scores.
+%
+A characterization of added understandability in the context of predictive (black-box) models is to exploit scores in conjunction with variable importance~\cite{zhu2015varimp} in order to replace certain aspects of organizational learning that would otherwise have to rely on qualitative evaluation.
+In the context of phenomena that unfold over time (as are activity-based anti-patterns), using scores as inputs and simultaneously knowing about their importance can be leveraged to assess single segments in which the severity is high or low.
+
+
+The champion model used in the embedded case study for Fire Drill severity prediction is a typical black-box model:
+we do not understand its inputs, and we most likely cannot comprehend its inner workings, since it is a multilayer perceptron (computations of computations implemented as a feedforward artificial neural network) with non-linear activations.
+The features that served as inputs were z-standardized and in some cases pre-processed using principal components analysis~\cite{pearson1901pca}.
+Z-standardization scales and translates all quantities to have zero mean and unit variance, which is detrimental to the interpretability of the original quantity.
+Decomposing features into their principal components is a ``one-way street'' for interpretability, too, as the components cannot be clearly associated with or traced back to the original features afterward.
+Yet, this model is able to predict the desired outcome with an acceptable error, thereby allowing us to bypass the expert-based and expensive qualitative evaluation that would be otherwise required to get to a similar result.
+Thanks to the extensive evaluation of that model, we can be reasonably certain that the prediction is accurate.
+The question, however, is how that model derives its answer from the inputs we provided.
+Suppose that, for a previously unseen project, that model predicts a severity of six out of ten.
+If we would want to know \emph{how} this severity came to be, the only option would be to conduct a qualitative analysis of the artifacts, which\,---\,compared to the model\,---\,requires experts, is expensive, labor-intensive, and error-prone and often requires the evaluation of large bodies of unstructured information~\cite{Matsubara2021,muram2018,samalikova2014}.
+This circumstance is reflected in problem \textbf{P\=/VII}.
+
+
+
+
+\section{Transformation to Scores}\label{sec:transf-to-scores}
+%
+Problem \textbf{P-VI} is perhaps more intricate than it appears at first.
+We have previously given the obvious example of standardized or pre-processed features that aggravate their interpretation.
+Consider the following example of the software metric \emph{Number Of Packages} with a value of $\mathsf{NOP}\tight{=}23$.
+Suppose the quality model is not abstract, i.e., there is a mathematical definition (an aggregation scheme) for how this and other metrics relate to a defined quality goal, such as \emph{maintainability}~\cite{wagner2015quamoco,bouwers2013software}.
+If this metric is used as input to a predictive model, such as a software quality model, we would know what this value means and could make sense of it.
+However, we cannot know whether this value is a ``good'' value, that is, without \emph{context}, it is impossible to decide whether (and to what degree) $23$ packages are appropriate for the software in question.
+The context may be given by, e.g., the software's corresponding application domain.
+
+
+
+\subsection{Metrics as Scores}\label{ssec:summary-honel2022qrsmas}
+%
+\paragraph{Summary of~\citepaper{honel2022qrsmas}.}
+Representing a raw software metric as a score attaches a meaning such as good/\allowbreak
+bad, acceptable/\allowbreak
+alarming, or common/\allowbreak
+extreme to it.
+Raw software metrics cannot generally be compared or aggregated because they have different scales and ranges~\cite{ulan2018qms}.
+However, being able to compare software metrics, especially across projects or application domains is vital, since it was previously shown that such metrics are meaningless when captured out of context~\cite{gil2016meannothing}.
+In a recent study, we have shown that freestanding software metrics cannot be compared to other metrics and are of limited use because there is no quality directly associated with them.
+However, we introduce an approach that leverages contextual information and ideal values that eventually allow us to assign a score to a concrete metric value.
+The previous example of $\mathsf{NOP}\tight{=}23$ can now be properly solved.
+The transformation to a score is done using a context first, which, for software applications, can be given by the application domain (e.g., database application, game, middleware, etc.).
+Then, for each context, there is an assumed \emph{ideal} value, which may be user-defined or derived using, e.g., non-parametric methods, such as the expectation $\mathbb{E}\left[\mathcal{X}\right]\tight{=}\int_{-\infty}^{\infty}\,x\,f_{\mathcal{X}}(x)\,dx$, the mode $\hat{x}\tight{=}\mathrm{arg\,\!max}_{x\tight{\in}\mathcal{X}}\,f_{\mathcal{X}}(x)$, the median ($50$th percentile), and observed infimum/supremum (where $f_{\mathcal{X}}$ is the probability density of the random variable $\mathcal{X}$).
+The ideal value, together with context-typical observed values, is then used to transform the raw software metric into a distribution of distances from that ideal value.
+Then, the complementary cumulative distribution function (CCDF) is used to transform the quantity by changing its distribution to be uniform and forcing it into the range $\interval{0}{1}$.
+This can be understood as the first step of the probability integral transform, giving the original quantity a uniform distribution.
+The CCDF expresses the cumulative probability to find a score that is less than the given metric, which here means the probability to find a metric value with a higher distance from the used ideal value.
+In other words, the score is high for low distances and low for high distances from the ideal value.
+
+
+This approach to transforming quantities to scores is applicable to arbitrary numeric quantities and not limited to software metrics.
+The transformation using an ideal value can be understood as the generalization of a previous approach by \citeauthor{ulan2021copula}~\cite{ulan2021copula}.
+In our work, we examined software metrics from the ``Qualitas.class corpus,'' which holds $23$ different types of software metrics for $111$ applications that are spread across eleven application domains~\cite{terra2013qualitas,honel2023qcc}.
+The to-score transformation would be useless if raw quantities such as software metrics were distributed uniformly.
+None of the metrics in the corpus follows a uniform distribution, meaning that the raw metrics cannot be compared, understood, or aggregated in a straightforward manner.
+Applying the to-score transformation to a uniformly distributed quantity, however, would not have a negative impact.
+Therefore, we recommend always applying the transform.
+We also find that metrics are often\,---\,some metrics always\,---\,statistically significantly different across application domains.
+For example, the metrics \emph{Depth Of Inheritance Tree}, \emph{Nested Block Depth}, or \emph{Cyclomatic Complexity} are commonly used in software quality models and we find them to always be different.
+That means, that these metrics must be used with utmost care if the quality of the software product is to be determined by some mathematical aggregation.
+Looking at the same problem from an application domain perspective unveils that the contexts in their individual entirety (i.e., including all metrics) are considerably different from each other.
+That means that an application needs to be validated against a quality model that solely uses metrics from the application's target domain as otherwise, the results may be strongly misleading.
+
+
+
+\begin{figure}[t!]
+    \centering
+    %\makebox[\textwidth][c]{\includegraphics[width=1.4\textwidth]{images/ac-proc.png}}
+    \makebox[\textwidth][c]{\input{figures/ac-proc}}
+    \caption[Automatic Calibration of a process model using simulated random processes.]{{\small Random processes (light gray lines) are simulated to obtain marginal probability distributions for each defined deviation (blue, green, and red areas), which, in turn, are used for rank normalization/transformation.}}% The distributions are then used to transform the deviations between the process model (red line) and the newly observed process (black line) into scores.}}
+    %\caption{{\small The process of Automatic Calibration, where the process model \textsf{REQ} and deviations are calibrated using random processes.}}
+    \label{fig:ac-proc}
+\end{figure}
+
+
+
+\subsection{Interactive Transformations}\label{ssec:summary-honel2023masjoss}
+%
+\paragraph{Summary of~\citearticle{honel2023masjoss}.}
+Many of the initial results of~\citepaper{honel2022qrsmas} were found by using the interactive application ``Metrics As Scores''~\cite{honel2023masgithub}.
+%~\cite{honel2022masjoss,honel2023masgithub}.
+While initially it was created to examine the Qualitas.class corpus, it has been adapted to work with own or arbitrary datasets, such as the well-known Iris flower- and Diamonds datasets~\cite{fisher1936iris,honel2023iris,honel2023diamonds}.
+The interactive application can be thought of as a multiple analysis of variance~\cite{chambers2017statistical}.
+While it also supports a large variety of statistical tests and the fitting of more than $\approx\utight{120}$ parametric distributions, its main goal is to enable the visual exploration of probability densities, cumulative distributions, scores (in terms of CCDFs), and quantile functions for all quantities across all the dataset's contexts.
+Next to that, the application supports the automated creation of summary statistics and the generation of scientific reports that allow detailed insights into the differences and similarities among the studied contexts.
+
+
+
+
+\section{Automatic Calibration}\label{sec:ac}
+%
+In order to transform an arbitrary numeric quantity into a score, we have established that this exercise requires a set of previously observed, context-specific values, as well as an ideal value.
+Problem \textbf{P-VII} arose from the desire to minimize the qualitative effort required to evaluate a past software process in order to understand how severely affected it is by a problem such as the Fire Drill anti-pattern.
+In \emph{Automatic Calibration}, we implement the solution of \textbf{P-VI} and apply the to-score transformation to deviations and divergences as previously observed between continuous\allowbreak
+-time processes (continuous probability distributions of the temporal accumulation of each activity).
+Simulating a large number of potential probability distributions allows us to approximate marginal distributions and optionally practical ideal values for each defined deviation or divergence.
+
+
+\vspace{10pt}
+\begin{mdframed}
+    %\begin{center}
+        For the remainder of this chapter, consider the following example which is also further illustrated by the figures and tables in this chapter.
+    %\end{center}
+\end{mdframed}
+%
+
+
+\paragraph{Example.}
+Recall that we suggest modeling projects' activities using continuous\allowbreak%
+-time processes.
+Having observed a number of projects affected by the Fire Drill allowed us to compose weighted mixtures for each activity (see Section~\ref{ssec:obj2-quant-data}).
+Each of these weighted mixtures represents a \emph{typical} accumulation for a given activity.
+Suppose we were to observe many more affected projects and incorporate them into these existing mixtures according to their weight (severity).
+Then, the mixtures would become sufficiently stable to serve as a \emph{continuous process model} (\textsf{PM}).
+Having this process model and a new, previously unseen project (the process, \textsf{P}) at hand, we would use a previously trained regression model to predict the severity (see Section~\ref{sec:obj2-predict}).
+Technically, this would be a curve comparison.
+Using multiple measurement points, we would quantify where and how exactly two curves deviate from each other.
+The regression model would use these \emph{raw features} as inputs.
+Now suppose that the predicted severity is interesting enough to warrant an otherwise qualitative evaluation in order to find out how the concrete decision was arrived at (since the predictive model is a black box).
+Then in order to reduce the qualitative efforts, Automatic Calibration suggests transforming each of the raw features into scores.
+After calibration, the task of comparing curves becomes trivial, as scores can be compared in an apples-to-apples manner.
+Furthermore, inspecting individual scores as per the result $\divergence{\mathsf{PM}}{\mathsf{P}}$ allows to get a simplified understanding of how strong the deviations actually are.
+
+
+
+\subsection{Calibration}
+%
+An exemplary calibration process is depicted in Figures~\ref{fig:ac-proc} and~\ref{fig:ac-approx}.
+Here, we have taken the weighted mixture for the requirements-activity found in issue-tracking data as the process model \textsf{PM}.
+Three different deviations are measured:
+%
+\begin{enumerate}[itemsep=.5ex]
+    \item $\operatorname{\mathbf{corr}}$: Pearson sample correlation coefficient on the segment $\interval{0.1}{0.3}$ \cite{pearson1895corr} \cite[p.~116]{honel2023fdtr}. The coefficient has a range of $\interval{-1}{1}$, where $1$ means a strong positive linear correlation and is considered to be the best achievable value (the \emph{utopian} ideal value). $0$ means no correlation and we consider negative correlations to be even worse (that is, $-1$ is the worst possible value).
+    \item $\operatorname{\mathbf{jsd}}$: Jensen--Shannon divergence on the segment $\interval{0.4}{0.6}$~\cite{Menendez1997jsd}. This divergence is symmetric (commutative) and measures the similarity between two probability distributions. Since we take the negative logarithm of it, its utopian ideal value is $\infty$. However, for reasons of numerical stability, we assume that the smallest observed divergence during calibration is the practically lowest-achievable divergence and use that as the ideal value, i.e., $i_{\operatorname{jsd}}\tight{=}\operatorname{\mathbf{sup}}\left[-\log{\left(X\right)}\right]$, where $X$ is the set of observed divergences.
+    \item $\operatorname{\mathbf{area}}$: Absolute (total) area between curves, $\int\,\abs{\mathsf{PM}(x)-\mathsf{P}(x)}\,dx$, on the segment $\interval{0.7}{0.9}$. Since the theoretically lowest possible area between two lines or curves is $0$, we define $i_{\operatorname{area}}\tight{=}0$.
+\end{enumerate}
+
+
+\begin{figure}[!t]
+    \makebox[\textwidth][c]{\input{figures/ac-approx}}
+    \caption[Approximation of the kernel density estimates for the rank transform used in Automatic Calibration.]{{\small Approximation of the kernel density estimates for the rank transform used in Automatic Calibration after $n\tight{=}\set{10,20,50,10^4}$ epochs (top to bottom). Gaussian kernels and the Sheather--Jones rule for estimating the bandwidth are used. The left axis is the relative likelihood of the PDF and the right axis is the cumulative probability of the CDF.}}
+    \label{fig:ac-approx}
+\end{figure}
+
+
+The calibration itself requires \emph{usual} (context-specific/-dependent) values.
+In order to gather these, we simulate a large number of processes as they \emph{might} occur (that is, we have not incorporated any further expectations into the simulation at this point).
+For each simulated process, we calculate the three individual deviations and store the result.
+After having observed sufficiently many random processes (and deviations), we can precisely approximate the empirical density and cumulative distribution function for each of the three features individually.
+Instead of step-wise empirical cumulative distribution functions, we derive a smooth, closed-form CCDF from the kernel density estimate using Gaussian kernels (Equation~\ref{eq:kde}).
+The bandwidth parameter $h$ (Equation~\ref{eq:kernel-bw}) is estimated using the Sheather--Jones (``SJ'') rule~\cite{sj1991bandwidth}.
+For example, suppose the random variable $X$ holds all the observed areas.
+The utopian ideal value $i_{\operatorname{area}}$ for the absolute area between two curves on any segment is zero (coincident lines).
+The complementary random variable $D\tight{=}\abs{X-i_{\operatorname{area}}}$.
+Since the areas are defined to be greater than or equal to zero and $i_{\operatorname{area}}\tight{=}0$, $X=D$.
+The associated complementary CDF $\bar{F}_{\operatorname{area}}(x)$ is defined as in Equation~\eqref{eq:kde-ccdf}.
+In cases where the ideal value $\utight{\neq}0$ and/or the deviation/divergence may assume arbitrary real values, we use the formulation of Equation~\eqref{eq:kde} to achieve the same result.
+
+
+\begin{align}
+%1 / length(temp) * sum(pnorm((x - temp) / h))
+    \Phi(x)=&\;\frac{1}{2}\left(1+\operatorname{erf}\left(2^{-\sfrac{1}{2}}\,x\right)\right)\text{, the standard normal CDF,}\nonumber
+    \\[1ex]
+    N=&\;\operatorname{\mathbf{card}}\left(X\right)\text{, number of observations in $X$,}\nonumber
+    \\[1ex]
+    h\,\ldots&\;\text{Kernel bandwidth,}\label{eq:kernel-bw}
+    \\[1ex]
+    \bar{F}_{\operatorname{area}}(x)=&\;1-\frac{1}{N}\,\sum_{j=1}^{N}\,\Phi\left(\frac{\abs{x-i_{\operatorname{area}}}-D_j}{h}\right),\label{eq:kde}
+    \\[0ex]
+    &\;\text{using}\;X\tight{=}D\;\text{and}\;i_{\operatorname{area}}\tight{=}0\nonumber
+    \\[1ex]
+    =&\;1-\frac{1}{N}\,\sum_{i=1}^{N}\,\Phi\left(\left(x-X_{i}\right)\,h^{-1}\right).\label{eq:kde-ccdf}
+\end{align}
+
+
+Figure~\ref{fig:ac-approx} shows the approximated probability density (black) and cumulative distribution function (red) using Gaussian kernels for each of the three defined deviations.
+The approximations are shown after $n\tight{=}\set{10,20,50,10^4}$ random processes.
+With each observed deviation, the approximation gets more precise.
+The differences between $50$ and $10^4$ simulated random processes are less significant than those between, e.g., ten and $20$ observations.
+This suggests that Automatic Calibration requires comparatively few observations for a sufficiently accurate to-score transformation.
+
+
+
+\subsection{Comparing Scores}
+%
+Having previously calibrated the raw features and derived scores, allows us now to compare them to the raw or z-standardized features.
+Figure~\ref{fig:ac-raw-vs-scores} shows the three deviations that are computed in this chapter's example.
+The \textsf{REQ} activity shown was taken from a project that has a ground truth of one out of ten (scaled to $0.1$).
+Table~\ref{tab:ac-raw-vs-scores} shows the values of the raw features, the scaled features, the corresponding score, and the weighted score (using relative importance).
+It becomes apparent now that the first two are of no value for the purpose of interpreting whether or not the two curves constitute a good match or not (they cannot \emph{explain} the ground truth).
+We observe low and very low scores for this particular curve comparison.
+Especially the Jensen--Shannon divergence does score particularly low, which is no surprise given how differently the two curves behave on segment $\interval{0.4}{0.6}$ and how important this score is.
+The variable importance was determined by training a random forest.
+While the average score is $\utight{\approx}0.239$, the dot product of the variable importance with the scores is $\utight{\approx}0.155$ and the random forest predicted a value of $\utight{\approx}0.08$, which all seem to be reasonable values given this toy example.
+Note that the random forest was trained using leave-one-out, so its empirical estimate of the generalization error has a slightly pessimistic bias (i.e., it is likely to be lower in reality)~\cite{cawley2010overfitting}.
+
+
+
+\begin{table}[t!]
+    \centering
+    %\resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|r|r|r}
+            & $\operatorname{\mathbf{corr}}_{\interval{0.1}{0.3}}$ & $\operatorname{\mathbf{jsd}}_{\interval{0.4}{0.6}}$ & $\operatorname{\mathbf{area}}_{\interval{0.7}{0.9}}$ \\ \hline
+        Raw Feature     & $-0.59459$    & $0.01749$  & $0.08280$ \\
+        Z-Standardized  & $-1.49961$    & $3.75691$  & $2.57750$ \\
+        As Score        & $0.28010$     & $0.02479$  & $0.41277$ \\
+        Weighted Score  & $0.08428$     & $0.01395$  & $0.05638$ \\ \hline
+        Relative Importance & $30.09$\% & $56.25$\% & $13.66$\% \\
+    \end{tabular}
+    %}
+    \caption[Comparison of raw features against z-standardized and rank-transformed features.]{{\small Comparing raw features against z-standardized and rank-transformed features for the example shown in Figure~\ref{fig:ac-proc}.}}
+    \label{tab:ac-raw-vs-scores}
+\end{table}
+
+
+\begin{figure}[t!]
+    \centering
+    \makebox[\textwidth][c]{\input{figures/ac-raw-vs-scores}}
+    \caption[Three different deviations between two continuous software processes.]{{\small The deviations between the weighted mixture (red) and a project (black) for the activity \textsf{REQ}.}}
+    \label{fig:ac-raw-vs-scores}
+\end{figure}
+
+
+A unit change is equal across any two scores that were previously calibrated using Automatic Calibration.
+Therefore, we can also compare the achieved scores even though their underlying quantities are vastly different.
+The correlation on the first segment achieved a score of $\utight{\approx}0.28$ out of $1.0$.
+This seems reasonable when inspecting Figure~\ref{fig:ac-raw-vs-scores}, where only a smaller portion of the curves has a positive correlation.
+The Jensen--Shannon divergence on the second segment scored very low with $\utight{\approx}0.02$.
+Given that the two curves on that segment not only behave completely differently but also have a large spatial distance, a large divergence (and hence a low score) appears to be sound.
+Lastly, the area in between curves scored $\utight{\approx}0.41$ on the last segment.
+We observe a somewhat large area between the curves and this score tells us that more than $40$\% of the other simulated curves' area on that segment is even larger.
+
+The achieved scores can be ordered as $\mathbf{area}>\mathbf{corr}>\mathbf{jsd}$ and their relative importance can be used to calculate an approximate result (total match).
+However, only individual scores should be evaluated in order to replace portions of the qualitative evaluation, as a simple aggregation of scores might be misleading as it cannot capture more complex relations and non-linearities between scores and the dependent variable (even a simple aggregation is a kind of regression model, too, and it is likely to be different from the trained model).
+
+When evaluating individual scores in order to find the smallest or largest deviations, we may also use the (scaled) variable importance to produce weighted scores, in order to better understand the outcome of the regression model (see Table~\ref{tab:ac-raw-vs-scores}).
+The order for the scaled scores changes to $\mathbf{corr}>\mathbf{area}>\mathbf{jsd}$.
+While we still have the lowest score/largest deviation/biggest problem with the divergence in the middle segment, the second-largest problem appears now to be the area between curves in the last segment.
+It is these quantitatively derived insights that we suggest can add to the picture of qualitative evaluation.
+
