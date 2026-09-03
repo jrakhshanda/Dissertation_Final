@@ -28,7 +28,7 @@
 
 % 1.3 The thesis statement (the spine). State it plainly:
 %   Architectural structure is distributed across several implementation signals
-%   (typed dependencies, folder organisation, lexical identifiers, member-level
+%   (typed dependencies, folder organization, lexical identifiers, member-level
 %   detail). Learned graph representations integrate them better than hand-tuned
 %   fusion; and recovery is bounded not by the encoder but by whether the target
 %   architecture is reflected in the chosen signal and whether the model's reach
@@ -58,7 +58,7 @@
 \chapter{Background}
 
 \section{Software architecture, drift, and conformance checking}
-% Reflexion modelling / SACC as the practical motivation for mapping.
+% Reflexion modeling / SACC as the practical motivation for mapping.
 
 \section{From dependency graphs to representation learning for SAR}
 % SDG assumption; clustering vs search vs fusion; then GNNs/GAE/embeddings.
@@ -227,3 +227,71 @@
 % Restate the spine as demonstrated, not promised. Future: joint typed-relation
 % modelling; neuro-symbolic direction (ARL's original future work); cluster naming;
 % AI-generated code as a new dependency regime.
+
+\part{Thesis Overview}
+
+\chapter{Introduction}
+\section{The Architectural Knowledge Problem}
+\section{Software Architecture Recovery and Code-to-Architecture Mapping}
+\section{Why Architectural Evidence Is Difficult to Use}
+\section{Aim and Scope of the Thesis}
+\section{Thesis Contributions}
+\section{Included Studies and Author Contributions}
+\section{Thesis Outline}
+
+\chapter{Background and Related Work}
+\section{Software Architecture, Drift, and Erosion}
+\section{Architecture Recovery and Code-to-Architecture Mapping}
+\section{Architectural Evidence in Source Code}
+\section{From Hand-Crafted Fusion to Representation Learning}
+\section{Graph Representation Learning for Software Artifacts}
+\section{Evaluation, Ground Truth, and Interpretation}
+
+\chapter{Research Problem and Questions}
+\section{Unified Problem Formulation}
+\section{Research Aim}
+\section{Research Questions}
+\section{Relationship Between Questions and Studies}
+
+\chapter{Research Design}
+\section{Cumulative Research Strategy}
+\section{Representation and Signal Design Space}
+\section{Learning Settings: Recovery and Mapping}
+\section{Controlled Comparison Strategy}
+\section{Study Corpus and Benchmark Provenance}
+\section{Evaluation and Statistical Analysis}
+\section{Validity Considerations}
+
+\part{Synthesis of the Empirical Studies}
+
+\chapter{Learning Architectural Structure Without Labels}
+\section{Motivation: Can Graph Representations Support Recovery?}
+\section{Learning from Typed Dependencies and Node Attributes}
+\section{Reconstruction and Contrastive Objectives}
+\section{Limits of Dependency-Only Recovery}
+\section{The Contribution and Risk of Folder Organization}
+\section{Interim Findings}
+
+\chapter{Learning Architectural Mappings from Partial Labels}
+\section{Motivation: From Recovered Partitions to Known Architectures}
+\section{What Dependency Message Passing Adds Beyond File Features}
+\section{Relation Types, Direction, Depth, and Scale}
+\section{Structural, Lexical, and Contextual Representations}
+\section{Folders, Members, and Heterogeneous Graph Structure}
+\section{Interim Findings}
+
+\part{Discussion and Conclusions}
+
+\chapter{Cross-Study Discussion}
+\section{Answer to RQ1: Designing Graph-Based Architectural Analysis}
+\section{Answer to RQ2: Reliability of Architectural Signals}
+\section{Answer to RQ3: Complementarity, Redundancy, and Proxy Signals}
+\section{Implications for Research and Tool Design}
+\section{Limitations and Threats to Validity}
+
+\chapter{Conclusions and Future Work}
+\section{Conclusions}
+\section{Future Work}
+
+\appendix
+\chapter{Included Papers}

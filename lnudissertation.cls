@@ -269,19 +269,18 @@
 \renewcommand{\section}{%
   \@startsection{section}{1}{\z@}%
     {-3.5ex \@plus -1ex \@minus -.2ex}%
-    {2.3ex \@plus.2ex}%
+    {2ex \@plus.5ex}%
     {\normalfont\Large\bfseries\raggedright}%
 }
 
 \renewcommand{\subsubsection}{%
  \@startsection{subsubsection}{2}{\z@}%
-    {-2.5ex\@plus -1ex \@minus -.2ex}%
+    {-2.5ex\@plus -1ex \@minus -.1ex}%
     {1ex \@plus .2ex}%
     {\normalfont\large\bfseries\raggedright}%
 }
 
 \renewcommand{\paragraph}[1]{\medskip\par\noindent\textbf{#1}\quad}
-
 
 %% Setup the ToC
 \setcounter{secnumdepth}{4}

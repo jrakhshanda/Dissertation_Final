@@ -9,6 +9,17 @@
   url         = {http://c2.com/doc/oopsla92.html}
 }
 
+@article{parnas1972,
+  title={On the criteria to be used in decomposing systems into modules},
+  author={Parnas, David Lorge},
+  journal={Communications of the ACM},
+  volume={15},
+  number={12},
+  pages={1053--1058},
+  year={1972},
+  publisher={ACm New York, NY, USA}
+}
+
 @article{kruchten2012technicaldebt,
   author  = {Kruchten, Philippe and Nord, Robert L. and Ozkaya, Ipek},
   title   = {Technical Debt: From Metaphor to Theory and Practice},
@@ -46,7 +57,7 @@
   volume    = {12292},
   pages     = {202--219},
   year      = {2020},
-  doi       = {10.1007/978-3-030-58923-3_14},
+  %doi       = {10.1007/978-3-030-58923-3\_14},
   url       = {https://research.vu.nl/ws/portalfiles/portal/130115550/Verdecchia2020_Chapter_ArchitecturalTechnicalDebtAGroundedTheory.pdf}
 }
 
@@ -181,28 +192,286 @@
 % ============================================================
 % 2. SOFTWARE ARCHITECTURE RECOVERY — Related Work
 % ============================================================
-
-@inproceedings{negar,
-  title        = {{NEGAR}: network embedding guided architecture recovery for software systems},
-  author       = {Chen, Jiayi and Wang, Zhixing and Jiang, Yuchen and Pang, Jun and Zhang, Tian and Pan, Minxue and Sun, Jianwen},
-  booktitle    = {2022 29th Asia-Pacific Software Engineering Conference (APSEC)},
-  pages        = {367--376},
-  year         = {2022},
-  doi          = {10.1109/apsec57359.2022.00049},
-  organization = {IEEE}
+% -------------- Related Work: Architecture recovery ------------------
+@inproceedings{comparative_survey,
+  title={A comparative analysis of software architecture recovery techniques},
+  author={Garcia, Joshua and Ivkovic, Igor and Medvidovic, Nenad},
+  booktitle={2013 28th IEEE/ACM International Conference on Automated Software Engineering (ASE)},
+  pages={486--496},
+  year={2013},
+  doi={10.1109/ase.2013.6693106},
+  organization={IEEE}
 }
 
+% ------------ Directory Location based --------------------
+@article{file_clustering,
+  title={Recovering software architecture from the names of source files},
+  author={Anquetil, Nicolas and Lethbridge, Timothy C},
+  journal={Journal of Software Maintenance: Research and Practice},
+  volume={11},
+  number={3},
+  pages={201--221},
+  year={1999},
+  doi={10.1002/(sici)1096-908x(199905/06)11:3<201::aid-smr192>3.0.co;2-1},
+  publisher={Wiley Online Library}
+}
+% ------------  Structural Information ---------------------
+% ----------- 1. Search-based Algorithms ----------------------
+@inproceedings{bunch,
+  title={Bunch: A clustering tool for the recovery and maintenance of software system structures},
+  author={Mancoridis, Spiros and Mitchell, Brian S and Chen, Yihfarn and Gansner, Emden R},
+  booktitle={Proceedings IEEE International Conference on Software Maintenance-1999 (ICSM'99).'Software Maintenance for Business Change'(Cat. No. 99CB36360)},
+  pages={50--59},
+  year={1999},
+  doi={10.1109/icsm.1999.792498},
+  organization={IEEE}
+}
+
+@article{bunch_sahc_nahc,
+  title={On the automatic modularization of software systems using the bunch tool},
+  author={Mitchell, Brian S and Mancoridis, Spiros},
+  journal={IEEE Transactions on Software Engineering},
+  volume={32},
+  number={3},
+  pages={193--208},
+  year={2006},
+  doi={10.1109/tse.2006.31},
+  publisher={IEEE}
+}
+
+@article{dagc,
+  title={A new encoding scheme and a framework to investigate genetic clustering algorithms},
+  journal={Journal of Research and Practice in Information Technology},
+  volume={37},
+  number={1},
+  pages={127--143},
+  year={2005}
+}
+@article{mca_eca,
+  title={Software module clustering as a multi-objective search problem},
+  author={Harman, Mark and Yao, Xin},
+  journal={IEEE Transactions on Software Engineering},
+  volume={37},
+  number={2},
+  pages={264--282},
+  year={2010},
+  doi={10.1109/tse.2010.26},
+  publisher={IEEE}
+}
+% ----------- Others Structural Deps ----------------------
+@inproceedings{acdc,
+  title={ACDC: an algorithm for comprehension-driven clustering},
+  author={Tzerpos, Vassilios and Holt, Richard C},
+  booktitle={Proceedings Seventh Working Conference on Reverse Engineering},
+  pages={258--267},
+  year={2000},
+  doi={10.1109/wcre.2000.891477},
+  organization={IEEE}
+}
+@article{fca,
+  title={A fast clustering algorithm for modularization of large-scale software systems},
+  author={Teymourian, Navid and Izadkhah, Habib and Isazadeh, Ayaz},
+  journal={IEEE Transactions on Software Engineering},
+  volume={48},
+  number={4},
+  pages={1451--1462},
+  year={2020},
+  doi={10.1109/tse.2020.3022212},
+  publisher={IEEE}
+}
+@article{neighborhood_tree_2019,
+  title={A new algorithm for software clustering considering the knowledge of dependency between artifacts in the source code},
+  author={Mohammadi, Sina and Izadkhah, Habib},
+  journal={Information and Software Technology},
+  volume={105},
+  pages={252--256},
+  year={2019},
+  doi={10.1016/j.infsof.2018.09.001},
+  publisher={Elsevier}
+}
+@inproceedings{arc,
+  title={Enhancing architectural recovery using concerns},
+  author={Garcia, Joshua and Popescu, Daniel and Mattmann, Chris and Medvidovic, Nenad and Cai, Yuanfang},
+  booktitle={2011 26th IEEE/ACM International Conference on Automated Software Engineering (ASE 2011)},
+  pages={552--555},
+  year={2011},
+  doi={10.1109/ase.2011.6100123},
+  organization={IEEE}
+}
+
+@article{gma_2021,
+  title={A graph-based clustering algorithm for software systems modularization},
+  author={Pourasghar, Babak and Izadkhah, Habib and Isazadeh, Ayaz and Lotfi, Shahriar},
+  journal={Information and Software Technology},
+  volume={133},
+  pages={106469},
+  year={2021},
+  doi={10.1016/j.infsof.2020.106469},
+  publisher={Elsevier}
+}
+
+@inproceedings{limbo,
+  title={LIMBO: Scalable clustering of categorical data},
+  author={Andritsos, Periklis and Tsaparas, Panayiotis and Miller, Ren{\'e}e J and Sevcik, Kenneth C},
+  booktitle={International Conference on Extending Database Technology},
+  pages={123--146},
+  year={2004},
+  %doi={10.1007/978-3-540-24741-8_9},
+  organization={Springer}
+}
+@article{cct,
+  title={Cooperative clustering for software modularization},
+  author={Naseem, Rashid and Maqbool, Onaiza and Muhammad, Siraj},
+  journal={Journal of Systems and Software},
+  volume={86},
+  number={8},
+  pages={2045--2062},
+  year={2013},
+  doi={10.1016/j.jss.2013.03.080},
+  publisher={Elsevier}
+}
+
+@inproceedings{wca,
+  title={The weighted combined algorithm: A linkage algorithm for software clustering},
+  author={Maqbool, Onaiza and Babri, Haroon Atique},
+  booktitle={Eighth European Conference on Software Maintenance and Reengineering, 2004. CSMR 2004. Proceedings.},
+  pages={15--24},
+  year={2004},
+  doi={10.1109/csmr.2004.1281402},
+  organization={IEEE}
+}
+@article{hcc_2019,
+  title={Euclidean space based hierarchical clusterers combinations: an application to software clustering},
+  author={Naseem, Rashid and Deris, Mustafa Mat and Maqbool, Onaiza and Shahzad, Sara},
+  journal={Cluster Computing},
+  volume={22},
+  number={Suppl 3},
+  pages={7287--7311},
+  year={2019},
+  doi={10.1007/s10586-017-1408-0},
+  publisher={Springer}
+}
+
+% ------------- Semantic Approaches -----------------------
+@inproceedings{zbr,
+  title={Investigating the use of lexical information for software system clustering},
+  author={Corazza, Anna and Di Martino, Sergio and Maggio, Valerio and Scanniello, Giuseppe},
+  booktitle={2011 15th European Conference on Software Maintenance and Reengineering},
+  pages={35--44},
+  year={2011},
+  doi={10.1109/csmr.2011.8},
+  organization={IEEE}
+}
+@article{risi2012fold,
+  title={Using fold-in and fold-out in the architecture recovery of software systems},
+  author={Risi, Michele and Scanniello, Giuseppe and Tortora, Genoveffa},
+  journal={Formal Aspects of Computing},
+  volume={24},
+  number={3},
+  pages={307--330},
+  year={2012},
+  doi={10.1007/s00165-011-0199-y},
+  publisher={Springer}
+}
+
+@inproceedings{kargar2017semantic,
+  title={Semantic-based software clustering using hill climbing},
+  author={Kargar, Masoud and Isazadeh, Ayaz and Izadkhah, Habib},
+  booktitle={2017 international symposium on computer science and software engineering conference (CSSE)},
+  pages={55--60},
+  year={2017},
+  doi={10.1109/csicsse.2017.8320117},
+  organization={IEEE}
+}
+@article{evol,
+  title={Enhancing software modularization via semantic outliers filtration and label propagation},
+  author={Yang, Kaiyuan and Wang, Junfeng and Fang, Zhiyang and Wu, Peng and Song, Zihua},
+  journal={Information and Software Technology},
+  volume={145},
+  pages={106818},
+  year={2022},
+  doi={10.1016/j.infsof.2021.106818},
+  publisher={Elsevier}
+}
+% ------------ Hybrid Approaches ------------------
+@inproceedings{sc_misra,
+  title={Software clustering: Unifying syntactic and semantic features},
+  author={Misra, Janardan and Annervaz, KM and Kaulgud, Vikrant and Sengupta, Shubhashis and Titus, Gary},
+  booktitle={2012 19th Working Conference on Reverse Engineering},
+  pages={113--122},
+  year={2012},
+  doi={10.1109/wcre.2012.21},
+  organization={IEEE}
+}
+@article{nsga3,
+  title={Many-objective software remodularization using NSGA-III},
+  author={Mkaouer, Wiem and Kessentini, Marouane and Shaout, Adnan and Koligheu, Patrice and Bechikh, Slim and Deb, Kalyanmoy and Ouni, Ali},
+  journal={ACM Transactions on Software Engineering and Methodology (TOSEM)},
+  volume={24},
+  number={3},
+  pages={1--45},
+  year={2015},
+  doi={10.1145/2729974},
+  publisher={ACM New York, NY, USA}
+}
+@article{ensemble_recovery,
+  title={Ensemble clustering based approach for software architecture recovery},
+  author={Puchala, Shiva Prasad Reddy and Chhabra, Jitender Kumar and Rathee, Amit},
+  journal={International Journal of Information Technology},
+  volume={14},
+  number={4},
+  pages={2013--2019},
+  year={2022},
+  doi={10.1007/s41870-021-00846-0},
+  publisher={Springer}
+}
+@inproceedings{escrc,
+  title={Software remodularization by estimating structural and conceptual relations among classes and using hierarchical clustering},
+  author={Rathee, Amit and Chhabra, Jitender Kumar},
+  booktitle={Advanced Informatics for Computing Research: First International Conference, ICAICR 2017, Jalandhar, India, March 17--18, 2017, Revised Selected Papers},
+  pages={94--106},
+  year={2017},
+  %doi={10.1007/978-981-10-5780-9_9},
+  organization={Springer}
+}
+@inproceedings{sade,
+  title={Software clusterings with vector semantics and the call graph},
+  author={Papachristou, Marios},
+  booktitle={Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+  pages={1184--1186},
+  year={2019},
+  doi={10.1145/3338906.3342483}
+}
+@article{sadat2019multi,
+  title={Multi-objective search-based software modularization: Structural and non-structural features.},
+  author={Sadat Jalali, Nafiseh and Izadkhah, Habib and Lotfi, Shahriar},
+  journal={Soft Computing-A Fusion of Foundations, Methodologies \& Applications},
+  volume={23},
+  number={21},
+  year={2019},
+  doi={10.1007/s00500-018-3666-z}
+}
 @inproceedings{sarif,
-  title     = {Software architecture recovery with information fusion},
-  author    = {Zhang, Yiran and Xu, Zhengzi and Liu, Chengwei and Chen, Hongxu and Sun, Jianwen and Qiu, Dong and Liu, Yang},
-  booktitle = {Proceedings of the 31st ACM Joint ESEC/FSE},
-  pages     = {1535--1547},
-  year      = {2023},
-  doi       = {10.1145/3611643.3616285}
+  title={Software architecture recovery with information fusion},
+  author={Zhang, Yiran and Xu, Zhengzi and Liu, Chengwei and Chen, Hongxu and Sun, Jianwen and Qiu, Dong and Liu, Yang},
+  booktitle={Proceedings of the 31st ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+  pages={1535--1547},
+  year={2023},
+  doi={10.1145/3611643.3616285}
+}
+%--------------- Representation Learning -------------------------------
+@inproceedings{negar,
+  title={{NEGAR}: network embedding guided architecture recovery for software systems},
+  author={Chen, Jiayi and Wang, Zhixing and Jiang, Yuchen and Pang, Jun and Zhang, Tian and Pan, Minxue and Sun, Jianwen},
+  booktitle={2022 29th Asia-Pacific Software Engineering Conference (APSEC)},
+  pages={367--376},
+  year={2022},
+  doi={10.1109/apsec57359.2022.00049},
+  organization={IEEE},
+  publisher={IEEE}
 }
 
-% --- LLM-based ---
-
+% ---------- LLMs ----------------
 @inproceedings{rukmono2024deductive,
   title     = {Deductive software architecture recovery via chain-of-thought prompting},
   author    = {Rukmono, Satrio Adi and Ochoa, Lina and Chaudron, Michel},
@@ -211,7 +480,13 @@
   year      = {2024},
   doi       = {10.1145/3639476.3639776}
 }
-
+@article{sar_sem,
+  title={Software Architecture Recovery Augmented with Semantics},
+  author={Zhao, Wenting and Jin, Wuxia and Zhang, Yiran and Fan, Ming and Wang, Haijun and Li, Li and Liu, Yang and Liu, Ting},
+  journal={IEEE Transactions on Software Engineering},
+  year={2025},
+  publisher={IEEE}
+}
 % ============================================================
 % 3. C2A MAPPING — Semi-supervised & recommendation based
 % ============================================================
@@ -233,7 +508,14 @@
   year      = {2007},
   publisher = {Elsevier}
 }
-
+@inproceedings{christl2005equipping,
+  title={Equipping the reflexion method with automated clustering},
+  author={Christl, Andreas and Koschke, Rainer and Storey, M-A},
+  booktitle={12th Working Conference on Reverse Engineering (WCRE'05)},
+  pages={10--pp},
+  year={2005},
+  organization={IEEE}
+}
 @INPROCEEDINGS{bittencourt_IR,
   author    = {Bittencourt, Roberto Almeida and Santos, Gustavo Jansen de_Souza and Guerrero, Dalton Dario Serey and Murphy, Gail C.},
   booktitle = {17th Working Conference on Reverse Engineering},
@@ -321,12 +603,46 @@
   url     = {https://ssrn.com/abstract=5798927},
   note    = {Preprint, SSRN 5798927}
 }
+@article{johansson2026mapping,
+  title={Mapping source code to software architecture using embedding models: Insights from an analysis of data properties},
+  author={Johansson, Nils and Caporuscio, Mauro},
+  journal={Information and Software Technology},
+  pages={108200},
+  year={2026},
+  publisher={Elsevier}
+}
+@article{naim2017cchd,
+  title   = {Reconstructing and evolving software architectures using a coordinated clustering framework},
+  author  = {Naim, S. M. and Damevski, Kostadin and Hossain, M. Shahriar},
+  journal = {Automated Software Engineering},
+  volume  = {24},
+  number  = {3},
+  pages   = {543--572},
+  year    = {2017},
+  doi     = {10.1007/s10515-017-0211-8}
+}
 
+@article{bibi2016supervised,
+  title={Supervised learning for orphan adoption problem in software architecture recovery},
+  author={Bibi, Maryum and Maqbool, Onaiza and Kanwal, Jaweria},
+  journal={Malaysian Journal of Computer Science},
+  volume={29},
+  number={4},
+  pages={287--313},
+  year={2016}
+}
 
 % ============================================================
 % 4. GRAPH NEURAL NETWORKS & SEMI-SUPERVISED LEARNING
 % ============================================================
-
+@inproceedings{neuralMP,
+  title        = {Neural message passing for quantum chemistry},
+  author       = {Gilmer, Justin and Schoenholz, Samuel S and Riley, Patrick F and Vinyals, Oriol and Dahl, George E},
+  booktitle    = {International conference on machine learning},
+  pages        = {1263--1272},
+  year         = {2017},
+  organization = {PMLR}
+}
 @article{gcn,
   title   = {Semi-supervised classification with graph convolutional networks},
   author  = {Kipf, Thomas N and Welling, Max},
@@ -341,6 +657,14 @@
   journal = {arXiv preprint arXiv:1710.10903},
   year    = {2017},
   doi     = {10.48550/arXiv.1710.10903}
+}
+
+@inproceedings{hgt,
+  title={Heterogeneous graph transformer},
+  author={Hu, Ziniu and Dong, Yuxiao and Wang, Kuansan and Sun, Yizhou},
+  booktitle={Proceedings of the web conference 2020},
+  pages={2704--2710},
+  year={2020}
 }
 
 @article{attention,
@@ -368,48 +692,18 @@
   number={1},
   year={2018}
 }
-
-@ARTICLE{gssl_review,
-  author  = {Song, Zixing and Yang, Xiangli and Xu, Zenglin and King, Irwin},
-  journal = {IEEE Transactions on Neural Networks and Learning Systems},
-  title   = {Graph-Based Semi-Supervised Learning: A Comprehensive Review},
-  year    = {2023},
-  volume  = {34},
-  number  = {11},
-  pages   = {8174--8194},
-  doi     = {10.1109/TNNLS.2022.3155478}
+@article{gae,
+  title   = {Variational graph auto-encoders},
+  author  = {Kipf, Thomas N and Welling, Max},
+  journal = {arXiv preprint arXiv:1611.07308},
+  year    = {2016},
+  doi     = {10.48550/arXiv.1611.07308}
 }
-
-@article{ssl_review1,
-  title     = {Graph-based semi-supervised learning: A review},
-  author    = {Chong, Yanwen and Ding, Yun and Yan, Qing and Pan, Shaoming},
-  journal   = {Neurocomputing},
-  volume    = {408},
-  pages     = {216--230},
-  year      = {2020},
-  publisher = {Elsevier}
-}
-
-@article{ma2019spectral,
-  title   = {Spectral-based graph convolutional network for directed graphs},
-  author  = {Ma, Yi and Hao, Jianye and Yang, Yaodong and Li, Han and Jin, Junqi and Chen, Guangyong},
-  journal = {arXiv preprint arXiv:1907.08990},
-  year    = {2019}
-}
-
-@article{rahimi2018semi,
-  title   = {Semi-supervised user geolocation via graph convolutional networks},
-  author  = {Rahimi, Afshin and Cohn, Trevor and Baldwin, Timothy},
-  journal = {arXiv preprint arXiv:1804.08049},
-  year    = {2018}
-}
-
-@article{word2vec,
-  title   = {Distributed representations of words and phrases and their compositionality},
-  author  = {Mikolov, Tomas and Sutskever, Ilya and Chen, Kai and Corrado, Greg S and Dean, Jeff},
-  journal = {Advances in Neural Information Processing Systems},
-  volume  = {26},
-  year    = {2013}
+@article{dgi,
+  title={Deep graph infomax},
+  author={Veli{\v{c}}kovi{\'c}, Petar and Fedus, William and Hamilton, William L and Li{\`o}, Pietro and Bengio, Yoshua and Hjelm, R Devon},
+  journal={arXiv preprint arXiv:1809.10341},
+  year={2018}
 }
 
 @book{goodfellow2016deep,
@@ -419,10 +713,25 @@
   publisher = {MIT press}
 }
 
+@article{gdc,
+  title={Diffusion improves graph learning},
+  author={Gasteiger, Johannes and Wei{\ss}enberger, Stefan and G{\"u}nnemann, Stephan},
+  journal={Advances in neural information processing systems},
+  volume={32},
+  year={2019}
+}
+@article{lpe,
+  title={Benchmarking graph neural networks},
+  author={Dwivedi, Vijay Prakash and Joshi, Chaitanya K and Luu, Anh Tuan and Laurent, Thomas and Bengio, Yoshua and Bresson, Xavier},
+  journal={Journal of Machine Learning Research},
+  volume={24},
+  number={43},
+  pages={1--48},
+  year={2023}
+}
 % ============================================================
 % 5. DEPENDENCY EXTRACTION & GRAPH PROPERTIES
 % ============================================================
-
 @misc{depends,
   author       = {Hung Viet Nguyen},
   title        = {Depends: Multilingual Dependency Analysis Tool},
@@ -431,15 +740,13 @@
   note         = {Accessed: 2025-08-17}
 }
 
-@article{noisy_deps,
-  title     = {Software Architecture Mining from Source Code with Dependency Graph Clustering and Visualization},
-  author    = {Savidis, Anthony and Savaki, Crystalia},
-  booktitle = {VISIGRAPP (3: IVAPP)},
-  pages     = {179--186},
-  year      = {2022},
-  doi       = {10.5220/0010896800003124}
+@misc{tree_sitter,
+  author       = {Max Brunsfeld and {contributors}},
+  title        = {Tree-sitter: An Incremental Parsing System for Programming Tools},
+  year         = {2018},
+  howpublished = {\url{https://tree-sitter.github.io/tree-sitter/}},
+  note         = {Accessed: 2026-04-22}
 }
-
 @article{edge_weights,
   title     = {Case study on which relations to use for clustering-based software architecture recovery},
   author    = {Stavropoulou, Ioanna and Grigoriou, Marios and Kontogiannis, Kostas},
@@ -451,12 +758,9 @@
   doi       = {10.1007/s10664-016-9459-z},
   publisher = {Springer}
 }
-
-
 % ============================================================
 % 6. DATASETS & GROUND TRUTH
 % ============================================================
-
 @inproceedings{garcia2013,
   title        = {Obtaining ground-truth software architectures},
   author       = {Garcia, Joshua and Krka, Ivo and Mattmann, Chris and Medvidovic, Nenad},
@@ -466,22 +770,6 @@
   doi          = {10.1109/icse.2013.6606639},
   organization = {IEEE}
 }
-
-% deps_impact and Brunet_gt/evolutionary: keep all three keys
-% since existing \cite{} calls in the text use them
-
-@article{deps_impact,
-  title     = {Measuring the impact of code dependencies on software architecture recovery techniques},
-  author    = {Lutellier, Thibaud and Chollak, Devin and Garcia, Joshua and Tan, Lin and Rayside, Derek and Medvidovi{\'c}, Nenad and Kroeger, Robert},
-  journal   = {IEEE Transactions on Software Engineering},
-  volume    = {44},
-  number    = {2},
-  pages     = {159--181},
-  year      = {2017},
-  doi       = {10.1109/tse.2017.2671865},
-  publisher = {IEEE}
-}
-
 @inproceedings{Brunet_gt,
   title        = {On the evolutionary nature of architectural violations},
   author       = {Brunet, Joao and Bittencourt, Roberto Almeida and Serey, Dalton and Figueiredo, Jorge},
@@ -490,7 +778,6 @@
   year         = {2012},
   organization = {IEEE}
 }
-
 @inproceedings{evolutionary,
   title        = {On the evolutionary nature of architectural violations},
   author       = {Brunet, Joao and Bittencourt, Roberto Almeida and Serey, Dalton and Figueiredo, Jorge},
@@ -515,8 +802,67 @@
 % ============================================================
 % 7. EVALUATION & STATISTICS
 % ============================================================
+@inproceedings{mojofm,
+  title={An effectiveness measure for software clustering algorithms},
+  author={Wen, Zhihua and Tzerpos, Vassilios},
+  booktitle={Proceedings. 12th IEEE International Workshop on Program Comprehension, 2004.},
+  pages={194--203},
+  year={2004},
+  doi={10.1109/wpc.2004.1311061},
+  organization={IEEE}
+}
+
+@inproceedings{a2a,
+  title={An empirical study of architectural change in open-source software systems},
+  author={Le, Duc Minh and Behnamghader, Pooyan and Garcia, Joshua and Link, Daniel and Shahbazian, Arman and Medvidovic, Nenad},
+  booktitle={2015 IEEE/ACM 12th working conference on mining software repositories},
+  pages={235--245},
+  year={2015},
+  doi={10.1109/msr.2015.29},
+  organization={IEEE}
+}
+@article{turbomq,
+  title     = {Measuring the impact of code dependencies on software architecture recovery techniques},
+  author    = {Lutellier, Thibaud and Chollak, Devin and Garcia, Joshua and Tan, Lin and Rayside, Derek and Medvidovi{\'c}, Nenad and Kroeger, Robert},
+  journal   = {IEEE Transactions on Software Engineering},
+  volume    = {44},
+  number    = {2},
+  pages     = {159--181},
+  year      = {2017},
+  doi       = {10.1109/tse.2017.2671865},
+  publisher = {IEEE}
+}
+@article{c2c,
+  title={An empirical study of architectural change and decay in open-source software systems},
+  author={Garcia, Joshua and Le, Duc and Link, Daniel and Behnamghader, AS Pooyan and Ortiz, Eder Figueroa and Medvidovic, Nenad},
+  journal={USC-CSSE, Tech. Rep},
+  year={2014}
+}
+@article{ari,
+  title     = {Comparing partitions},
+  author    = {Hubert, Lawrence and Arabie, Phipps},
+  journal   = {Journal of classification},
+  volume    = {2},
+  number    = {1},
+  pages     = {193--218},
+  year      = {1985},
+  doi       = {10.1007/bf01908075},
+  publisher = {Springer}
+}
+
 
 @article{wilcoxon,
+  title     = {Individual comparisons by ranking methods},
+  author    = {Wilcoxon, Frank},
+  journal   = {Biometrics bulletin},
+  volume    = {1},
+  number    = {6},
+  pages     = {80--83},
+  year      = {1945},
+  doi       = {10.2307/3001968},
+  publisher = {JSTOR}
+}
+@article{mann,
   title     = {Wilcoxon-Mann-Whitney or t-test? On assumptions for hypothesis tests and multiple interpretations of decision rules},
   author    = {Fay, Michael P and Proschan, Michael A},
   journal   = {Statistics Surveys},
@@ -536,9 +882,51 @@
   year={1993},
   publisher={American Psychological Association}
 }
+
 % ============================================================
-% 9. MY PAPERS
+% 9. Lexical Features Representation
 % ============================================================
+@article{word2vec,
+  title   = {Distributed representations of words and phrases and their compositionality},
+  author  = {Mikolov, Tomas and Sutskever, Ilya and Chen, Kai and Corrado, Greg S and Dean, Jeff},
+  journal = {Advances in Neural Information Processing Systems},
+  volume  = {26},
+  year    = {2013}
+}
+
+@inproceedings{unixcoder,
+  author    = {Daya Guo and Shuai Lu and Nan Duan and Yanlin Wang and Ming Zhou and Jian Yin},
+  title     = {UniXcoder: Unified Cross-Modal Pre-training for Code Representation},
+  booktitle = {Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  pages     = {7212--7225},
+  year      = {2022},
+  doi       = {10.18653/v1/2022.acl-long.499}
+}
+
+@article{infonce,
+  author  = {A{\"a}ron van den Oord and Yazhe Li and Oriol Vinyals},
+  title   = {Representation Learning with Contrastive Predictive Coding},
+  journal = {arXiv preprint arXiv:1807.03748},
+  year    = {2018}
+}
+% ============================================================
+% 10. MY PAPERS
+% ============================================================
+@article{jabeen2023towards,
+  title={Towards Better Product Quality: Identifying Legitimate Quality Issues through NLP \& Machine Learning Techniques},
+  author={Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas},
+  journal={Swedish Artificial Intelligence Society},
+  pages={85--93},
+  year={2023}
+}
+@inproceedings{jabeen2025graph,
+  title={Graph convolutional networks for mapping source code entities to architectural modules},
+  author={Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  booktitle={2025 IEEE 22nd International Conference on Software Architecture Companion (ICSA-C)},
+  pages={472--481},
+  year={2025},
+  organization={IEEE}
+}
 @article{gaer,
   author       = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
   title        = {{GAER}: Graph Auto-Encoders for Unsupervised Software Architecture Recovery},
@@ -552,6 +940,14 @@
   doi          = {10.1145/3808187},
   publisher    = {Association for Computing Machinery},
   address      = {New York, NY, USA}
+}
+@software{gear_artifact,
+  author={Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  title        = {Reproduction package for {GAER}: Graph Auto-Encoders for Unsupervised Software Architecture Recovery},
+  version = {1.1.0},
+  year         = {2026},
+  howpublished = {Zenodo},
+  doi          = {10.5281/zenodo.19534384},
 }
 
 @article{structsar,
@@ -567,4 +963,71 @@
   author={Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
   booktitle={ESANN},
   year={2026}
+}
+
+@misc{structsar_artifact,
+  author       = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  title        = {Replication package for {StructSAR}: Graph Embeddings for Software Architecture Recovery},
+  howpublished = {GitHub},
+  url          = {https://github.com/sse-lnu/StructSAR},
+  year         = {2026},
+  note         = {Accessed: 2026-09-03}
+}
+
+@misc{c2a_mapping_artifact,
+  author       = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  title        = {Replication package for Code-to-Architecture Mapping with Graph Neural Networks},
+  howpublished = {GitHub},
+  url          = {https://github.com/sse-lnu/GCN-SAEroCon25},
+  year         = {2026},
+  note         = {Accessed: 2026-09-03}
+}
+
+@misc{hetmap_artifact,
+  author       = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  title        = {Replication package for {HetMap}: What Carries Architectural Signal? A Code-to-Architecture Mapping Study},
+  howpublished = {GitHub},
+  url          = {https://github.com/sse-lnu/hetmap},
+  year         = {2026},
+  note         = {Accessed: 2026-09-03}
+}
+
+% ________ extended abstracts _______
+@inproceedings{gaer_abstract,
+author = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+title = {Representation Learning for Software Architecture Recovery},
+year = {2026},
+isbn = {9798400726361},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3803437.3807406},
+doi = {10.1145/3803437.3807406},
+booktitle = {Proceedings of the 34th ACM International Conference on the Foundations of Software Engineering},
+pages = {1428–1429},
+numpages = {2},
+keywords = {software architecture, graph auto-encoder},
+location = {Concordia University, Montreal, QC, Canada},
+series = {FSE Companion '26}
+}
+% ________ Under-progress ____________
+@unpublished{c2a_mapping,
+  author = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  title  = {Structure vs. Semantics in Code-to-Architecture Mapping: The Role of the Dependency Graph},
+  note   = {Manuscript in preparation},
+  year   = {2026}
+}
+
+@unpublished{hetmap,
+  author = {Jabeen, Rakhshanda and Ericsson, Morgan and Nordqvist, Jonas and Wingkvist, Anna},
+  title  = {What Carries Architectural Signal? A Code-to-Architecture Mapping Study},
+  note   = {Manuscript in preparation},
+  year   = {2026}
+}
+@phdthesis{jabeen2026_phdthesis,
+  author = {Jabeen, Rakhshanda},
+  title  = {TODO: Dissertation Title},
+  school = {Linnaeus University},
+  year   = {2026},
+  series = {Linnaeus University Dissertations},
+  note   = {Forthcoming}
 }

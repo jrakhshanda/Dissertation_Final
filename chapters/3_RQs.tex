@@ -1,0 +1,42 @@
+\chapter{Research Problem and Questions}
+\chaptertoc
+
+\section{Problem Formulation}
+\label{sec:problem_formulation}
+This thesis considers two related software architecture analysis problems: software architecture recovery (SAR) and source code-to-architecture (C2A) mapping. Both involve assigning source code files to architectural modules. We represent a software system as a graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$, where nodes represent software artifacts and edges represent relations between them. In its simplest form, $\mathcal{G}$ contains only file-level nodes connected by static dependencies, forming a software dependency graph (SDG). Depending on the available system information, $\mathcal{G}$ may instead contain additional node and edge types that capture organizational structure or finer-grained implementation detail. Given $\mathcal{G}$, the common objective is to learn representations that support the assignment of each source code file to an architectural module. Both tasks are studied at file-level granularity because source code files are the primary implementation unit considered in this thesis.
+
+Architecture recovery and mapping tasks differ in the information available about the target decomposition. In SAR, no reliable architectural decomposition is assumed to be available. The objective is to infer a partition of files into modules directly from implementation artifacts. SAR is therefore formulated as an unsupervised representation-learning problem and applies when architectural documentation is unavailable or cannot be trusted. In C2A mapping, the reference architecture is known, and a subset of files is labeled with its intended module. The task is to assign the remaining files to one of these known modules, making C2A mapping a semi-supervised representation-learning problem. It applies when an intended architecture exists, and new, modified, or previously unclassified files must be aligned with it.
+
+Despite this difference in supervision, both problems are shaped by the same design choices: the information represented in $\mathcal{G}$, the features used to initialize node representations, and the encoder used to learn from the graph. This shared design space enables SAR and C2A mapping to be studied within a common graph-based framework.
+
+\section{Research objectives}
+\label{sec:research_objectives}
+
+This thesis is guided by a single overarching research question.
+
+\begin{GrayBox}{}
+\emph{How can graph-based representation learning be effectively designed and adapted to support software architecture recovery and source code-to-architecture mapping, and what governs the effectiveness of different graph representations and input signals across these two tasks?}
+\end{GrayBox}
+
+Three sub-questions break down this overarching question. RQ1 examines the design of graph-based representation learning, including graph representation, relation modeling, encoder architecture, and learning objective. RQ2 examines the architectural information carried by different input signals and the system properties that condition their usefulness. RQ3 examines how the contribution of these signals changes when they are combined within richer graph representations. The comparison across recovery and mapping is not fully symmetric. Both settings examine file-level dependency graphs, multi-relational representations, random-walk and neural message-passing approaches, and GCN/GAT-based encoders. The mapping studies extend this design space to a heterogeneous graph containing folders, files, and member-level artifacts, processed by an HGT-based encoder. The sub-questions are therefore addressed across complementary studies rather than through one common experimental design applied identically to both tasks.
+
+\begin{GrayBox}{RQ1: Graph-based representation learning design.}
+How should graph-based representation learning methods be designed to support software architecture recovery and source code-to-architecture mapping, and which choices of graph granularity, relation modeling, encoder, and learning objective are justified by measurable benefit?
+\end{GrayBox}
+
+RQ1 examines how graph construction and representation-learning choices affect architectural analysis. In recovery, the methods learn file representations through self-supervised reconstruction or contrastive objectives and cluster them into modules. In mapping, they use semi-supervised classification from an initial set of file-to-module assignments. Across both settings, the question assesses whether different graph representations, encoders, and learning objectives provide a measurable benefit over simpler alternatives.
+
+\begin{GrayBox}{RQ2: Architectural information in input signals.}
+What architectural information is carried by dependency structure, project organization, code identifiers, and under which system properties is each source reliable for recovery and mapping tasks?
+\end{GrayBox}
+
+This question combines studies that examine dependency-only and organization-augmented graphs, lexical and structural representations, and member-level interaction information. It considers the conditions under which each source supports architectural analysis, including dependency cohesion, graph connectivity, structural reach, and the degree to which organizational structure aligns with the reference architecture.
+
+
+\begin{GrayBox}{RQ3: Interaction between signal representation and graph design.}
+How does the usefulness of structural, lexical, and contextual file representations change when they are combined with progressively extended heterogeneous graph structures, and under which system properties do these sources provide complementary rather than redundant architectural evidence?
+\end{GrayBox}
+
+This question is addressed through a controlled heterogeneous-graph study that varies file representations and graph structure independently while holding the learning setting fixed. It tests whether conclusions drawn in RQ1 and RQ2 about the usefulness of particular representations and architectural signals continue to hold once these sources are available within the same heterogeneous model. The analysis distinguishes gains that reflect complementary architectural evidence from cases in which the value of one signal saturates, or where high performance is driven largely by a source such as folder organization already aligning closely with the reference decomposition.
+
+The three RQs are addressed across the two parts of this thesis. Part~I studies unsupervised recovery and contributes to RQ1 through encoder and objective comparisons on multi-relational and heterogeneous software graphs, and to RQ2 through a controlled comparison of dependency-only and folder-augmented representations. Part~II studies semi-supervised mapping and extends the RQ1 evidence to relation-specific encoders and a graph-free neural baseline under identical training, and to a heterogeneous graph transformer over folders, files, and members. RQ3 is addressed principally in the capstone study of Part~II, which isolates the contribution of each signal within a single heterogeneous model and traces how these contributions change as graph structure is progressively enriched.
