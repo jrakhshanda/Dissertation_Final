@@ -23,7 +23,7 @@ Formally, for recovery, we learn an encoder $f_{\theta}$ in a self-supervised ma
 f_{\theta}: \mathcal{G}\;\longrightarrow\;\mathbf{Z}\in\mathbb{R}^{|\mathcal{V}_{\texttt{file}}|\times d},
 \label{eq:sar}
 \end{equation}
-that maps each source code file $i \in \mathcal{V}_{\texttt{file}}$ to a $d$-dimensional embedding $\mathbf{z}_i \in \mathbb{R}^{d}$, where $\theta$ denotes the learnable parameters. The resulting file embeddings are clustered to a recovered architectural decomposition $\hat{\mathcal{C}}$, which partitions the source code files into $m$ disjoint modules:
+that maps each source code file $i \in \mathcal{V}_{\texttt{file}}$ to a $d$-dimensional embedding $\mathbf{z}_i \in \mathbb{R}^{d}$, where $\theta$ denotes the learnable parameters. The resulting file embeddings are clustered into a recovered architectural decomposition $\hat{\mathcal{C}}$, which partitions the source code files into $m$ disjoint modules:
 \begin{equation}
 \hat{\mathcal{C}} = \{C_1, \dots, C_m\},
 \label{eq:sar-partition}
