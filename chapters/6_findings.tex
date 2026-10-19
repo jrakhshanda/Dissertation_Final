@@ -11,7 +11,7 @@ This section reports four cross-study evaluations in architecture recovery and C
 
 The two recovery evaluations cover all fourteen benchmark systems. The first compares the contrastive approach of Paper~I with the reconstruction-based approach of Paper~II using GAT and common node features. It also includes GAT-E, the edge-attribute variant of Paper~I. The approaches retain their respective training settings, so the comparison does not isolate the learning objective alone.
 
-The second compares the attributed-graph GCN and GAT of Paper~II with the structure-only methods of Paper~IV. These comprise GAT, GAT-DC, and N2V on the file-level dependency graph, and M2V and HGAT on the folder-augmented graph.
+The second compares the attributed-graph GCN and GAT of Paper~II with the structure-only methods of Paper~IV. These comprise GAT, GAT-DC, and Node2Vec on the file-level dependency graph, and MetaPath2Vec and HGAT on the folder-augmented graph.
 
 MoJoFM, ARI, and \cc{} measure agreement with the reference decomposition, while \tmq{} measures dependency cohesion independently of that reference. Figure~\ref{fig:overview-recovery} presents the results using MoJoFM and \tmq{}. The comparisons use a common clustering procedure, as described in Section~\ref{sec:cross_study_eval}.
 
@@ -35,19 +35,19 @@ MoJoFM, ARI, and \cc{} measure agreement with the reference decomposition, while
     \label{fig:overview-recovery}
 \end{figure}
 
-\paragraph{Agreement with the reference decomposition.} In Figure~\ref{fig:overview-recovery}(a), the contrastive and reconstruction variants have similar median MoJoFM values, but the contrastive variants show a wider spread toward lower scores. System-wise comparisons significantly favor the reconstruction-based GAT over the contrastive GAT on both MoJoFM and ARI for nine of the fourteen systems. Effects are large for AS4, Bash, Chromium, Libxml, and OODT, and small to medium for C.Img, HDF, SH-3D, and TeamMates. Differences are not significant for ArgoUML, HDC, JabRef, or Lucene, while contrastive learning performs better only on Hadoop.
+\paragraph{Agreement with the reference decomposition.} In Figure~\ref{fig:overview-recovery}(a), the contrastive and reconstruction variants have similar median MoJoFM values, but the contrastive variants show a wider spread toward lower scores. System-wise comparisons significantly favor the reconstruction-based GAT over the contrastive GAT on both MoJoFM and ARI for nine of the fourteen systems. Effects are large for ArchStudio4, Bash, Chromium, Libxml, and OODT, and small to medium for Commons-Imaging, HDF, SweetHome-3D, and TeamMates. Differences are not significant for ArgoUML, HDC, JabRef, or Lucene, while contrastive learning performs better only on Hadoop.
 
 Adding edge attributes within the contrastive setup provides no consistent advantage. Mann--Whitney $U$ tests find a significant difference between GAT and GAT-E only for MoJoFM on OODT, with a small effect favoring GAT.
 
-Comparing graph inputs, attributed GCN and GAT achieve a higher median MoJoFM than all structure-only methods. ARI and \cc{} give broadly similar rankings to MoJoFM when methods are ordered by their median scores across systems. The exceptions are that GCN ranks above the contrastive GAT variants under ARI, while GAT-DC and N2V exchange places under \cc{}.
+Comparing graph inputs, attributed GCN and GAT achieve a higher median MoJoFM than all structure-only methods. ARI and \cc{} give broadly similar rankings to MoJoFM when methods are ordered by their median scores across systems. The exceptions are that GCN ranks above the contrastive GAT variants under ARI, while GAT-DC and Node2Vec exchange places under \cc{}.
 
-\paragraph{Dependency cohesion.} Figure~\ref{fig:overview-recovery}(b) shows a different ordering from reference agreement. The file-level structure-only methods achieve higher median \tmq{} than the attributed methods, with N2V attaining the highest value. Among the attributed methods, reconstruction-based GAT scores above the contrastive variants, while GCN has the lowest median of all methods. Reconstruction-based GAT also scores above the folder-augmented HGAT and M2V.
+\paragraph{Dependency cohesion.} Figure~\ref{fig:overview-recovery}(b) shows a different ordering from reference agreement. The file-level structure-only methods achieve higher median \tmq{} than the attributed methods, with Node2Vec attaining the highest value. Among the attributed methods, reconstruction-based GAT scores above the contrastive variants, while GCN has the lowest median of all methods. Reconstruction-based GAT also scores above the folder-augmented HGAT and MetaPath2Vec.
 
-Because \tmq{} varies widely across systems, we also compare each method with the reference architecture of the same system. Table~\ref{tab:gt_cohesion} reports how many systems have significantly lower or higher scores, using one-sample Wilcoxon signed-rank tests. GCN falls below the reference on eleven of fourteen systems. The contrastive and folder-augmented methods fall below it on seven or eight systems, whereas the remaining methods do so on five or fewer. N2V exceeds the reference on thirteen systems and falls below it only on Libxml.
+Because \tmq{} varies widely across systems, we also compare each method with the reference architecture of the same system. Table~\ref{tab:gt_cohesion} reports how many systems have significantly lower or higher scores, using one-sample Wilcoxon signed-rank tests. GCN falls below the reference on eleven of fourteen systems. The contrastive and folder-augmented methods fall below it on seven or eight systems, whereas the remaining methods do so on five or fewer. Node2Vec exceeds the reference on thirteen systems and falls below it only on Libxml.
 
 Together, these comparisons show that agreement with the reference decomposition and dependency cohesion favor different methods. The attributed methods achieve higher reference agreement, while the file-level structure-only methods produce more dependency-cohesive partitions.
 
-The common clustering procedure changes N2V's results relative to its original k-means configuration. Using Ward linkage lowers the median ARI across systems from 0.293 to 0.266 and MoJoFM from 68.9 to 63.5, while increasing normalized TurboMQ from 63.9 to 66.1. Changes in reference agreement vary in direction across systems, whereas normalized TurboMQ increases on thirteen of the fourteen systems.
+The common clustering procedure changes Node2Vec's results relative to its original k-means configuration. Using Ward linkage lowers the median ARI across systems from 0.293 to 0.266 and MoJoFM from 68.9 to 63.5, while increasing normalized TurboMQ from 63.9 to 66.1. Changes in reference agreement vary in direction across systems, whereas normalized TurboMQ increases on thirteen of the fourteen systems.
 
 \begin{table}[htb]
 \centering
@@ -87,7 +87,7 @@ System-wise comparisons significantly favor GAT over HGT on nine of ten systems 
 
 HGT also generally performs worse than MLP and GCN. Compared with MLP, it scores significantly lower on seven systems for each metric, with small-to-large effects, and higher on Chromium and JabRef for both. Compared with GCN, it scores significantly lower on six systems for macro-F1 and five for micro-F1, and higher on two and four systems, respectively.
 
-\paragraph{Effects of dependency type modeling.} Table~\ref{tab:gat_typed_summary} compares typed and merged GAT using Word2Vec, Node2Vec, and zero-shot (\zs{}) and fine-tuned (\ft{}) UniXcoder representations. Both variants use the GAT architecture of Paper~III with source-to-target aggregation. None of the input representations includes folder information.
+\paragraph{Effects of dependency type modeling.} Table~\ref{tab:gat_typed_summary} compares typed and merged GAT using Word2Vec, Node2Vec, and zero-shot and fine-tuned UniXcoder representations. Both variants use the GAT architecture of Paper~III with source-to-target aggregation. None of the input representations includes folder information.
 
 Preserving dependency types yields positive median F1 differences across systems for all four representations. The largest median gain is for Word2Vec in macro-F1, at 5.8 points, and for fine-tuned UniXcoder in micro-F1, at 2.8 points. System-wise tests show significant gains on seven of ten systems for Word2Vec under both metrics, and on seven systems for fine-tuned UniXcoder in macro-F1 and nine in micro-F1.
 
@@ -95,11 +95,10 @@ The benefit is not uniform. Every representation also shows significant losses o
 
 \begin{table}[!htb]
 \centering
-\caption[Typed versus merged GAT across file representations.]{Typed minus merged GAT across ten systems. $\Delta$: median F1 difference (points); $+$ve: positive differences; $\uparrow$/$\downarrow$: significant gains/losses (paired Wilcoxon, Holm-corrected, $\alpha=0.05$). N/S/M/L: system counts by Cliff's $\delta$ magnitude (negligible/small/medium/large), regardless of direction or significance.}
-
+\caption[Typed versus merged GAT across file representations.]{Typed minus merged GAT across the ten systems, by input vector and metric. $\Delta$: median F1 difference in points. $+$ve: number of systems with a positive difference. $\uparrow$/$\downarrow$: number of systems with a significant gain/loss (paired Wilcoxon signed-rank test, Holm-corrected across the ten systems for each vector and metric, $\alpha=0.05$). N/S/M/L: number of systems with negligible, small, medium, or large Cliff's $\delta$ between the typed and merged scores.}
 \label{tab:gat_typed_summary}
 \begin{adjustbox}{max width=\linewidth}
-\renewcommand{\arraystretch}{1.2}
+\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{l rcccc rcccc}
 \toprule
 & \multicolumn{5}{c}{Macro-F1}
@@ -128,7 +127,7 @@ This section combines the findings of the five studies with the cross-study resu
 
 Objective~1 examines how graph-based representation learning supports architecture recovery and C2A mapping. The findings address the combination of implementation signals (RQ1.1), the treatment of dependency types (RQ1.2), and the effects of learning objective, encoder architecture, and depth (RQ1.3).
 
-\paragraph{RQ1.1: Combining implementation signals.} Papers~I--III combine dependencies, code identifiers, and folder organization to learn representations for recovery and mapping. These methods improve on their respective baselines in reference agreement for recovery and F1 for mapping. The results support the combined representations, but do not establish how much each signal contributes.
+\paragraph{RQ1.1: Joint representation of implementation signals.} Papers~I--III combine dependencies, code identifiers, and folder organization to learn representations for recovery and mapping. These methods improve on their respective baselines in reference agreement for recovery and F1 for mapping. The results support the combined representations, but do not establish how much each signal contributes.
 
 In Paper~III, a graph-free MLP using the same file features also outperforms the Naive Bayes baseline on every system under both F1 metrics. Improvement over that baseline therefore does not, by itself, demonstrate a benefit from dependency-based message passing.
 
@@ -142,12 +141,12 @@ Overall, separate dependency relations benefit mapping more consistently than re
 
 \paragraph{RQ1.3: Learning objective, encoder architecture, and depth.} The studies examine how these three choices affect recovery and mapping.
 
-\begin{itemize}[leftmargin=1em, topsep=3pt, itemsep=1pt]
-\item \emph{Learning objective:} The cross-study evaluation in Section~\ref{sec:cont_recon} compares the contrastive approach of Paper~I with the reconstruction-based approach of Paper~II using common node features and a GAT encoder. Reconstruction generally achieves better agreement with the reference decomposition, although the advantage is not universal. Because the approaches retain different training settings, the comparison supports the reconstruction-based approach without isolating the learning objective alone.
+\begin{itemize}[leftmargin=1.1em, topsep=3pt] % topsep=3pt, itemsep=1pt
+\item \parg{Learning objective:} The cross-study evaluation in Section~\ref{sec:cont_recon} compares the contrastive approach of Paper~I with the reconstruction-based approach of Paper~II using common node features and a GAT encoder. Reconstruction generally achieves better agreement with the reference decomposition, although the advantage is not universal. Because the approaches retain different training settings, the comparison supports the reconstruction-based approach without isolating the learning objective alone.
 
-\item \emph{Encoder architecture:} GAT generally outperforms GCN across recovery and mapping (Papers~II and~III), and HGT in the cross-study mapping comparison. GCN uses degree-normalized aggregation, whereas GAT learns weights for neighboring representations. However, the models also differ in parameterization, so these results cannot be attributed to attention alone. In mapping, GAT usually outperforms the graph-free MLP, while GCN frequently underperforms it. Access to dependencies therefore does not guarantee better predictions.
+\item \parg{Encoder architecture:} GAT generally outperforms GCN across recovery and mapping (Papers~II and~III), and HGT in the cross-study mapping comparison. GCN uses degree-normalized aggregation, whereas GAT learns weights for neighboring representations. However, the models also differ in parameterization, so these results cannot be attributed to attention alone. In mapping, GAT usually outperforms the graph-free MLP, while GCN frequently underperforms it. Access to dependencies therefore does not guarantee better predictions.
 
-\item \emph{Encoder depth:} Paper~III finds no consistent benefit from increasing message-passing depth. A second layer improves performance on some systems and reduces it on others.
+\item \parg{Encoder depth:} Paper~III finds no consistent benefit from increasing message-passing depth. A second layer improves performance on some systems and reduces it on others.
 \end{itemize}
 
 \begin{GrayBox}{Summary of Objective~1}
@@ -159,13 +158,13 @@ Combining dependency, lexical, and folder signals improves on the evaluated base
 
 Objective~2 (Sec.~\ref{sec:obj_2}) examines the architectural information carried by individual implementation signals. The findings address recovery from dependency structure alone (RQ2.1), dependency-guided adaptation of contextual code representations (RQ2.2), and the comparison of structural, lexical, and contextual file representations (RQ2.3).
 
-\paragraph{RQ2.1: Recovery from dependency structure.} Paper~IV shows that dependency structure alone supports recovery. N2V and GAT-DC outperform the classical recovery baselines, while plain GAT is generally weaker than both.
+\paragraph{RQ2.1: Recovery from dependency structure.} Paper~IV shows that dependency structure alone supports recovery. Node2Vec and GAT-DC outperform the classical recovery baselines, while plain GAT is generally weaker than both.
 
-Structural reach helps explain this difference. N2V and GAT-DC achieve better reference agreement than the two-layer GAT on most systems. Applying diffusion to the GAT input graph closes much of the gap to N2V, suggesting that access to a wider dependency neighborhood contributes to recovery performance.
+Structural reach helps explain this difference. Node2Vec and GAT-DC achieve better reference agreement than the two-layer GAT on most systems. Applying diffusion to the GAT input graph closes much of the gap to Node2Vec, suggesting that access to a wider dependency neighborhood contributes to recovery performance.
 
 Performance also depends on how closely dependency structure follows the reference decomposition. Recovery is strongest when dependencies are concentrated within reference modules and remains difficult when within-module and cross-module dependencies are similarly dense, as on Hadoop and TeamMates.
 
-The evaluation criterion matters as well (Section~\ref{sec:recovery_cross_study}). N2V produces the most dependency-cohesive partitions, while GAT-DC improves reference agreement over plain GAT on most systems without a corresponding advantage in dependency cohesion.
+The evaluation criterion matters as well (Section~\ref{sec:recovery_cross_study}). Node2Vec produces the most dependency-cohesive partitions, while GAT-DC improves reference agreement over plain GAT on most systems without a corresponding advantage in dependency cohesion.
 
 \paragraph{RQ2.2: Dependency-guided adaptation of code representations.} Paper~V finds that dependency-guided fine-tuning of UniXcoder improves mapping performance over its zero-shot form on nearly all systems. Both representations are held fixed during classifier training and evaluated using the same graph-free MLP and labeled sets, without folder information or additional message passing.
 
@@ -173,14 +172,14 @@ Fine-tuning uses a contrastive objective with positive pairs drawn mainly from t
 
 However, the comparison does not isolate the contribution of dependency-based pair selection, since it includes no fine-tuning alternative using pairs selected without dependency information.
 
-\paragraph{RQ2.3: Comparing file representations.} Paper~V compares structural, lexical, and contextual file representations using the same graph-free MLP and labeled sets, without folder information or additional message passing. Representations that encode dependency information generally perform better. N2V captures dependencies through random walks, while \ft{} incorporates them through dependency-guided adaptation. Both generally outperform Word2Vec and \zs{}, although there are exceptions, including JabRef, where Word2Vec is among the strongest. Word2Vec and \zs{} show no consistent ordering, with each significantly outperforming the other on several systems.
+\paragraph{RQ2.3: Comparing file representations.} Paper~V compares structural, lexical, and contextual file representations using the same graph-free MLP and labeled sets, without folder information or additional message passing. Representations that encode dependency information generally perform better. Node2Vec captures dependencies through random walks, while fine-tuned UniXcoder incorporates them through dependency-guided adaptation. Both generally outperform Word2Vec and zero-shot UniXcoder, although there are exceptions, including JabRef, where Word2Vec is among the strongest. Word2Vec and zero-shot UniXcoder show no consistent ordering, with each significantly outperforming the other on several systems.
 
-Neither N2V nor \ft{} is uniformly best. N2V performs significantly better on six systems under both F1 metrics, while \ft{} performs significantly better on three systems under both metrics and additionally on HDC under macro-F1.
+Neither Node2Vec nor fine-tuned UniXcoder is uniformly best. Node2Vec performs significantly better on six systems under both F1 metrics, while fine-tuned UniXcoder performs significantly better on three systems under both metrics and additionally on HDC under macro-F1.
 
-Together with the improvement from \zs{} to \ft{} (RQ2.2), these findings suggest that dependency information contributes to the stronger representations. However, the representations also differ in content and training procedure, so the contribution of dependency information alone cannot be isolated.
+Together with the improvement from zero-shot to fine-tuned UniXcoder (RQ2.2), these findings suggest that dependency information contributes to the stronger representations. However, the representations also differ in content and training procedure, so the contribution of dependency information alone cannot be isolated.
 
 \begin{GrayBox}{Summary of Objective~2}
-Dependency structure alone supports recovery, with performance depending on structural reach and how closely dependencies follow the reference modules. Reference agreement and dependency cohesion favor different methods (RQ2.1). Dependency-guided fine-tuning improves UniXcoder over its zero-shot form on nearly all systems, although the contribution of dependency-based pair selection is not isolated (RQ2.2). N2V and \ft{} generally outperform Word2Vec and \zs{} in mapping without folder information or additional message passing, but neither is uniformly best. Differences in content and training prevent the advantage from being attributed solely to dependency information (RQ2.3).
+Dependency structure alone supports recovery, with performance depending on structural reach and how closely dependencies follow the reference modules. Reference agreement and dependency cohesion favor different methods (RQ2.1). Dependency-guided fine-tuning improves UniXcoder over its zero-shot form on nearly all systems, although the contribution of dependency-based pair selection is not isolated (RQ2.2). Node2Vec and fine-tuned UniXcoder generally outperform Word2Vec and zero-shot UniXcoder in mapping without folder information or additional message passing, but neither is uniformly best. Differences in content and training prevent the advantage from being attributed solely to dependency information (RQ2.3).
 \end{GrayBox}
 
 % % _________ Objective~3 __________________
@@ -190,7 +189,7 @@ Objective~3 (Section~\ref{sec:obj_3}) examines how graph structure contributes b
 
 \paragraph{RQ3.1: Dependency neighbors and aggregation direction.} Paper~V examines the contribution of dependency neighbors by enabling and disabling aggregation within HGT, GAT, and a neighbor MLP while holding file representations fixed. The neighbor MLP appends the mean of neighboring files' vectors to each file's own vector. These comparisons assess neighbor access within each predictor, avoiding the change in predictor architecture involved in comparing a GNN with a graph-free MLP.
 
-Dependency neighbors improve mapping beyond the information already present in the file representations, but the gains vary across predictors and inputs. Gains are larger for Word2Vec and \zs{}, which do not encode dependencies, than for N2V. GAT is generally the strongest predictor, while HGT gains the least from neighbor access. With neighbors, \ft{} gains more than N2V, narrowing the gap observed without aggregation (RQ2.3).
+Dependency neighbors improve mapping beyond the information already present in the file representations, but the gains vary across predictors and inputs. Gains are larger for Word2Vec and zero-shot UniXcoder, which do not encode dependencies, than for Node2Vec. However, fine-tuned UniXcoder benefits more than Node2Vec. GAT is generally the strongest predictor, while HGT gains the least from neighbor access. With GAT, fine-tuned UniXcoder scores higher than Node2Vec in micro-F1 on seven of the ten systems with either aggregation direction, up from three without aggregation (RQ2.3), whereas in macro-F1 the count rises only from four to five.
 
 Aggregation direction also affects performance. Source-to-target aggregation updates a file using information from files that depend on it, while undirected aggregation permits information to flow in both directions. The preferred direction varies across systems rather than across predictors or input representations. However, making the graph undirected also adds reverse edges, so the comparison does not separate direction from neighborhood size.
 
@@ -200,7 +199,7 @@ These comparisons isolate neighbor access in mapping. The dependency-only recove
 
 \paragraph{RQ3.2: Folder organization.} The studies represent folder organization either through directory tokens in file features (Papers~I--III) or through folder nodes and containment relations (Papers~IV and~V). In recovery, methods that include organizational information achieve better agreement with the reference decomposition, particularly where dependencies provide weak evidence of module boundaries. Dependency-only methods instead produce more dependency-cohesive partitions (Section~\ref{sec:recovery_cross_study}).
 
-In mapping, Paper~V finds that adding folder nodes produces the largest and most consistent gains across the evaluated additions to the graph, with Word2Vec benefiting most. Across these configurations, folder nodes use the same folder-token features. With \ft{}, the folder-aware model approaches the mapping performance of a rule based on directory hierarchy and the initial labeled set on most systems, exceeding it only on Lucene.
+In mapping, Paper~V finds that adding folder nodes produces the largest and most consistent gains across the evaluated additions to the graph, with Word2Vec benefiting most. Across these configurations, folder nodes use the same folder-token features. With fine-tuned UniXcoder, the folder-aware model approaches the mapping performance of a rule based on directory hierarchy and the initial labeled set on most systems, exceeding it only on Lucene.
 
 The overall gains do not establish a consistent benefit for files whose directories are misleading. Among files misclassified by the directory-based rule, adding folder nodes and enabling message passing through them produces more corrections than regressions on some systems, but the reverse on others. Folder location is therefore informative for the reference mappings, while the model's ability to correct misleading directory assignments remains system-dependent. These mapping findings apply to HGT with source-to-target dependency aggregation.
 
@@ -211,7 +210,5 @@ In Paper~V, adding member nodes to the file-only graph lowers the median F1 for 
 Paper~I reports small gains from edge attributes on some systems. However, the cross-study evaluation finds no significant improvement over the same model without these attributes (Section~\ref{sec:recovery_cross_study}). Paper~I attributes the limited benefit on TeamMates to edge attributes amplifying noisy cross-module interactions, suggesting that additional interaction detail may be less useful where dependencies poorly reflect module boundaries.
 
 \begin{GrayBox}{Summary of Objective~3}
-Dependency-neighbor aggregation improves mapping beyond the initial file representations, most reliably for GAT and the neighbor MLP. Gains vary across predictors and inputs, while the preferred aggregation direction varies across systems (RQ3.1). Folder organization provides the strongest additional signal in the evaluated mapping configurations, but does not consistently help correct files misclassified by the directory-based rule. In recovery, greater reference agreement can coincide with weaker dependency cohesion (RQ3.2). Adding finer-grained structure does not extend these benefits consistently. Member-level nodes give no consistent improvement in mapping, and edge-level attributes give no significant gain in the cross-study recovery evaluation (RQ3.3).
+Dependency-neighbor aggregation improves mapping beyond the initial file representations, most reliably for GAT and the neighbor MLP. The magnitude of improvement depends on both the predictor and the input representation, with fine-tuned UniXcoder gaining more than Node2Vec, while the preferred aggregation direction varies across systems (RQ3.1). Folder organization provides the strongest additional signal in the evaluated mapping configurations, but does not consistently help correct files misclassified by the directory-based rule. In recovery, higher agreement with the reference architecture can coincide with weaker dependency cohesion (RQ3.2). Adding finer-grained structure does not extend these benefits consistently. Member-level nodes give no consistent improvement in mapping, and edge-level attributes give no significant gain in the cross-study recovery evaluation (RQ3.3).
 \end{GrayBox}
-
-% Gains vary across predictors and inputs and narrow some of the differences between representations seen without aggregation, while the preferred aggregation direction varies across systems (RQ3.1).

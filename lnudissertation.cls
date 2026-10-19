@@ -63,10 +63,10 @@
     \DeclareGraphicsRule{*}{mps}{*}{}%
   }
 \else
-  \RequirePackage[dvips]{graphicx,xcolor}
+  % XeLaTeX (Overleaf): the dvips driver broke pdfpages and made PDF figures render wrongly
+  \RequirePackage[xetex]{graphicx,xcolor}
   \AtBeginDocument{%
-    \DeclareGraphicsExtensions{.mps,.eps}%
-    \DeclareGraphicsRule{*}{eps}{*}{}%
+    \DeclareGraphicsExtensions{.pdf,.jpg,.png,.eps}%
   }
 \fi
 
