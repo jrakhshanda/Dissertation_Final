@@ -38,7 +38,7 @@ The study evaluates ten benchmark systems against eight established dependency-b
 \subsection*{Paper~III. When Does the Dependency Graph Help C2A Mapping?}
 \label{sec:overview-c2a}
 
-The third study~\cite{c2a_mapping} shifts from unsupervised architecture recovery to C2A mapping, in which the target modules are known and a limited set of files is initially labeled. It reuses the graph construction and node features of Paper~II, expanding the labeled set into a full mapping via iterative self-training. The study compares GCN and GAT models with a graph-free MLP that uses the same file features, classifier, and self-training procedure. It further examines the effect of preserving dependency types, message-passing depth, and aggregation direction.
+The third study~\cite{c2a_mapping} is an extended version of our previous mapping paper~\cite{jabeen2025graph}. It shifts from unsupervised architecture recovery to C2A mapping, in which the target modules are known, and a limited set of files is initially labeled. It reuses the graph construction and node features of Paper~II, expanding the labeled set into a full mapping via iterative self-training. The study compares GCN and GAT models with a graph-free MLP that uses the same file features, classifier, and self-training procedure. It further examines the effect of preserving dependency types, message-passing depth, and aggregation direction.
 
 Across ten benchmark systems, all learned approaches outperform the Naive Bayes mapping baseline~\cite{olsson2022automatically}.
 
