@@ -21,7 +21,7 @@ The compared methods differ in graph construction, input information, and learni
 % -----------------------------------------
 \subsection{System Properties and Recovery Performance}
 
-We examine associations between recovery performance and benchmark-system properties. For each method in the cross-study recovery evaluation, we correlate per-system median scores with dependency homophily and average module size using Kendall's $\tau$ across the 14 systems (Figure~\ref{fig:recovery-correlations}). Given the small sample and multiple tests, these correlations are treated as exploratory associations rather than independent effects.
+We examine associations between recovery performance and benchmark-system properties. For each method in the cross-study recovery evaluation, we correlate per-system median scores with dependency homophily and average module size using Kendall's $\tau$ across the fourteen systems (Figure~\ref{fig:recovery-correlations}). Given the small sample and multiple tests, these correlations are treated as exploratory associations rather than independent effects.
 
 \begin{figure}[!htb]
     \centering
@@ -34,7 +34,7 @@ The N2V results are consistent with its reliance on dependency structure alone, 
 
 Associations involving \tmq{} need a separate reading. Homophily describes dependency concentration within reference modules, whereas \tmq{} rewards dependency concentration within recovered clusters and is normalized by the number of clusters, so its associations with homophily and module size are partly built into the metric. They describe the structural quality that \tmq{} measures and do not independently support an effect on recovery accuracy.
 
-Average module size is positively associated with MoJoFM for three of the five methods, but with ARI for none. This pattern is difficult to interpret independently of other system properties: OODT and Libxml have both the smallest modules and the lowest homophily, while larger modules tend to occur in larger systems. With 14 systems, these associations cannot be separated, so no independent effect of module size is inferred.
+Average module size is positively associated with MoJoFM for three of the five methods, but with ARI for none. This pattern is difficult to interpret independently of other system properties: OODT and Libxml have both the smallest modules and the lowest homophily, while larger modules tend to occur in larger systems. With fourteen systems, these associations cannot be separated, so no independent effect of module size is inferred.
 
 \subsection{Structural Reach and Neighborhood Aggregation\label{sec:structural-reach}}
 We use structural reach to describe the extent of the dependency neighborhood from which a file's representation can incorporate information through message passing, diffusion, or random walks. The studies vary these mechanisms rather than measuring reach directly.
@@ -60,7 +60,7 @@ The conclusions are limited by the systems, architectural representations, and m
 \paragraph{Benchmark scope and external validity.}
 The studies evaluate overlapping subsets of open-source Java, C, and C++ systems with published reference decompositions. The findings may not generalize to other programming languages, application domains, build environments, or architectural styles. Although the methods may be applied without a reference decomposition, agreement with an intended architecture cannot be assessed without a comparable reference. Chromium is the only large-scale system evaluated, so evidence of scalability is limited to a single system. Each system is evaluated at a particular version; the studies therefore do not establish robustness to refactoring or changes in dependency structure across releases.
 
-The exploratory analysis across 14 systems does not establish whether dependency homophily affects recovery independently of system size, module granularity, or other system properties.
+The exploratory analysis across fourteen systems does not establish whether dependency homophily affects recovery independently of system size, module granularity, or other system properties.
 
 \paragraph{Static dependencies.}
 Static dependencies are extracted automatically with the Depends~\cite{depends} tool. The resulting graphs may omit runtime dependencies or dependencies the tool cannot resolve, and may include edges not realized at runtime. Recovery and mapping results therefore depend on the extracted graph's accuracy and coverage. Within this thesis, this limitation may affect dependency-derived signals, including dependency-guided fine-tuning of contextual embeddings. Folder and containment relations, lexical embeddings, and zero-shot contextual embeddings do not depend on this extraction. The studies neither independently validate extraction accuracy nor assess sensitivity to extraction errors.
