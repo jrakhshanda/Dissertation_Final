@@ -1,0 +1,362 @@
+\chapter{Research Method \label{ch:methodology}}
+\chaptertoc
+
+This chapter presents the research method used to investigate architecture recovery and C2A mapping. It defines the research design and the graph-based representation-learning design space, then describes the input signals, learning settings, and controlled-comparison logic used across the studies. It also presents the benchmark systems and evaluation protocol, including the sampling of labeled files and statistical analysis. Finally, it describes the additional cross-study evaluation design.
+
+\section{Research Design \label{sec:research_design}}
+
+This thesis combines method development with empirical evaluation. Each study develops and evaluates a graph-based representation learning method for architecture recovery or C2A mapping. The studies investigate what architectural information is carried by implementation signals, including dependency structure, project organization, and code content, and the system conditions under which these signals support architectural analysis. Comparisons with established baselines assess whether the resulting methods are competitive, whereas controlled comparisons between graph configurations, input representations, and learning mechanisms examine the contribution of each.
+
+\subsection{Design Space\label{sec:design_space}}
+
+Architecture recovery and mapping are studied through a common graph-based representation-learning framework. The choices investigated across the thesis define a design space with four dimensions: graph topology, relation modeling, input representation, and learning mechanism, summarized in Figure~\ref{fig:design_space}. These dimensions are analytically distinct but not always experimentally independent: adding a node type usually requires a new relation type to connect it to the rest of the graph.
+
+Graph topology determines which software artifacts are represented as nodes. The simplest configuration contains only file nodes. Richer variants add folder nodes, one per directory, member nodes that aggregate the program elements contained in each file, or include both folder and member nodes together. Relation modeling determines how these nodes are connected. Static dependencies may be merged into a single relation or preserved as typed relations such as \emph{call}, \emph{import}, and \emph{inheritance}. Graphs containing additional artifact types also include organizational and containment meta-relations, such as folder-to-folder, folder-to-file, and file-to-member relations.
+
+Input representation determines what information is available to the nodes before message passing. Nodes may start with learnable identity embeddings or with features derived from dependency structure, folder organization, or code content. These features range from token-based representations and structural encodings to pretrained contextual code embeddings.
+
+The learning mechanism determines how these inputs and graph relations are used to learn file representations. The studies compare random-walk methods and graph neural networks, with learning objectives suited to recovery or mapping.
+
+\begin{figure}[!thb]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/design_space.pdf}
+    \caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input signal, and learning mechanism. \label{fig:design_space}}
+\end{figure}
+
+\subsection{Research Trajectory \label{sec:research_trajectory}}
+
+The studies progressively examine how dependency structure, project organization, and code content contribute to recovery and mapping. Each study addresses a question left open by earlier work and informs the choices investigated in the next. Together, they cover an expanding range of graph configurations, input representations, and learning mechanisms.
+
+The prior approach, NEGAR~\cite{negar}, evaluates dependency types through separate pipelines and uses neither folder organization nor lexical information, leaving open whether typed dependencies can be modeled jointly and whether organizational and lexical signals provide complementary evidence for recovery. Papers~I and II take a first step on this question with a multi-relational file-level graph. Both fuse folder-path and code-identifier tokens as node features, so the contribution of each source cannot yet be separated from the others.
+
+Paper~III holds the graph and feature construction of Paper~II fixed and moves to a semi-supervised setting, formulating mapping as node classification. It introduces a graph-free multi-layer perceptron (MLP) baseline, trained under the same features and self-training procedure, to compare GNN-based prediction against feature-only prediction.
+
+Paper~IV, a further recovery study, returns to dependency structure and project organization, without lexical features. Removing the lexical features allows the contribution of project organization to be assessed without the fused signal of the earlier studies. It compares dependency-only file graphs against folder-augmented heterogeneous graphs under matched conditions, using both random-walk and graph-attention learners, and evaluates ways to extend the effective reach of message passing.
+
+Paper~V extends the mapping design by introducing a dependency-guided contextual code representation and by expanding the graph to include folder and member nodes. It compares structural, lexical, and contextual representations with and without message passing, and across graph variants that add or remove folder and member nodes, under one matched supervised mapping setting.
+
+% ____________ Signal Taxonomy ____________________
+\section{Input Signal Taxonomy}
+\label{sec:graph_signal_representation}
+
+The design space defines the representational choices in the abstract. This section instantiates them concretely, showing which graph each study constructs and which signals it places on that graph's nodes and edges. Table~\ref{tab:graph_signal} summarizes these choices across the five studies.
+
+\subsection{Graph Construction}\label{sec:graph_construction}
+Across the five studies, graph topology evolves from file-level dependency graphs to representations that additionally include folder and member nodes. Files remain the targets of recovery or mapping, whereas folder and member nodes provide contextual information through message passing. Figure~\ref{fig:graph_configs} illustrates the node-set configurations used in the thesis.
+\begin{figure}[!thb]
+    \centering
+    \hspace*{-0.5cm}\adjustbox{max width=\linewidth, center}{\input{figures/graph_config.tex}}
+    \caption[Node-set configurations used across the thesis.]{\small Node-set configurations used across the thesis, mapped to the studies that report results on each: file only (Papers~I--V), file with folders (Papers~IV and V), file with members, and file with folders and members (Paper~V). Files are the prediction targets in all configurations. Solid \emph{depends\_on} edges are static software dependencies, such as \emph{call}, \emph{import}, and \emph{inheritance}. Dashed edges are contextual meta-relations: folder--folder \emph{parent\_of}, folder--file \emph{contains}, and member--file \emph{belongs\_to}.\label{fig:graph_configs}}
+\end{figure}
+
+Papers I, II, and III use the file-only configuration, with static dependencies kept as separate typed relations. Paper III further tests a merged-relation variant to determine whether relation-specific message passing contributes to mapping.
+
+Papers IV and V add context through folder nodes, and Paper~V also through member nodes. Both merge dependencies into a single relation type. Paper IV compares the file-only graph with a folder-augmented configuration to isolate the contribution of project organization, with a typed-dependency variant as an ablation within the folder-augmented graph. Paper~V adds summarized member nodes, each representing the program elements contained in one file, and evaluates four graph variants: file only, file with folders, file with members, and the complete file--folder--member graph. In the complete graph, dependencies keep their file- or member-level endpoints; when member nodes are removed, member endpoints are projected onto their containing files. In Paper V, GAT uses the file-only dependency graph. The baseline MLP uses file features alone, while the neighbor MLP additionally incorporates the mean of neighboring files’ features.
+
+\subsection{Node Feature Initialization}
+\label{sec:node_feature_initialization}
+
+Node-feature initialization operationalizes the input-representation dimension of the design space. Papers II and III initialize each file node by concatenating a binary BoW representation of its folder path with the $\ell_2$-normalized mean of Word2Vec embeddings for its code identifiers. Paper I uses the same sources but represents both folder path and identifier tokens as $\ell_2$-normalized binary BoW vectors. Organizational and lexical information therefore enter these models as a fixed input.
+
+
+Paper IV uses no external lexical or organizational features. Instead, each node type receives a learnable identity embedding trained jointly with the model; file nodes additionally receive LPE, which supplies structural position in the dependency graph. Its N2V and M2V baselines use no input feature vectors, since they learn representations directly from random-walk co-occurrence.
+
+Paper V treats node initialization as the object of study rather than a fixed choice. File and member nodes use lexical Word2Vec embeddings over identifiers, structural N2V embeddings from the dependency graph, or contextual UniXcoder embeddings from code text extracted from source files, evaluated in zero-shot and dependency-guided fine-tuned forms. Where folder nodes are included, they are consistently initialized using binary BoW vectors derived from folder-path tokens. Paper~V therefore varies the representation of file- and member-level information while holding folder-node initialization constant.
+
+Input text is extracted using Tree-sitter~\cite{tree_sitter} with the Java, C, or C++ grammar matching each file. The syntax tree guides fragment selection but is not itself passed to the encoder. A file-level view contains type declarations, fields or global variables, and constructor signatures with short body excerpts where applicable. A member-level view contains method and function declarations and definitions. Each file receives one vector per view. The file-level view is encoded as a single input, while the member-level vector is obtained by mean-pooling representations of overlapping text chunks.
+
+In zero-shot use, UniXcoder encodes these views without further training. We also fine-tune it separately for each system on file-level views using a contrastive objective~\cite{infonce} to incorporate dependency structure. Positive pairs are drawn from each file's two-hop dependency neighborhood, falling back to a direct neighbor when no two-hop candidate exists. Other files in the batch serve as negatives, except directly connected files, which are masked unless selected as the positive pair. Module labels are not used in this loss. The resulting model encodes both views, although fine-tuning uses only file-level text.
+
+\subsection{Edge Attributes}
+Edge attributes form a narrower axis of the design space and are used beyond relation type in only Papers I and IV. In the remaining studies, edges are defined only by their relation type. Paper I evaluates a variant that augments file-level dependency edges with attributes describing the member-level interactions that produce them: an $\ell_2$-normalized binary encoding of interaction type and a log-normalized interaction frequency. This tests whether the origin and frequency of a dependency provide information beyond its typed presence.
+
+Paper IV uses edge attributes differently in its diffusion variant. GDC rewires the file graph using PPR and assigns each rewired edge a scalar diffusion weight, which biases attention towards diffusion-close neighbors. Unlike the attributes of Paper~I, these weights are derived from graph topology rather than from additional implementation information. They therefore extend the effective reach of message passing rather than introduce a separate input signal.
+
+\begin{table}[!htb]
+\caption[Graph construction and signal representation across thesis.]{Graph construction and signal representation across the five papers (P). Numbers in parentheses give vector dimensions, and ID denotes identifiers. \label{tab:graph_signal}}
+\renewcommand{\arraystretch}{1.15}
+\begin{adjustbox}{max width=\textwidth}
+\begin{threeparttable}
+\begin{tabular}{@{} c l l l l @{}}
+\toprule
+\textbf{P} & \textbf{Nodes} & \textbf{Edges} & \textbf{Node features} & \textbf{Edge features} \\
+\midrule
+I & File & typed & [BoW(\emph{path}) $\Vert$ BoW(ID)] & type \& frequency$^\dagger$ \\
+II & File & typed & [BoW(\emph{path}) $\Vert$ W2V(ID) (100)] & -- \\
+III & File & typed / merged$^\dagger$ & [BoW(\emph{path}) $\Vert$ W2V(ID) (128)] & -- \\
+\midrule
+
+IV & \makecell{File / $+$Folder$^\dagger$} & merged / typed$^\dagger$
+& \makecell[l]{Folder: Learnable (128) \\ File: Learnable (128) ($+$LPE (16))$^\dagger$}
+& \makecell[l]{PPR Rewired edges \\ \& diffusion weights$^\dagger$} \\
+\addlinespace[0.2cm]
+V & \makecell{File / $+$Folder/\\ $+$Member} & merged
+& \makecell[l]{Folder: BoW(\emph{path})\\ W2V (128) / N2V (128) / UniXcoder (768)} & -- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\item $\dagger$ denotes an ablation against the other value, not the fixed design of the study.
+\end{tablenotes}
+\end{threeparttable}
+\end{adjustbox}
+\end{table}
+
+% ____________ Representataion Learning ___________________
+\section{Learning Settings}
+\label{sec:learning_settings}
+
+Once the graph and node features are constructed, the studies differ in how they learn file representations and how these representations are used to obtain module assignments. This difference follows the two tasks: recovery methods learn embeddings and cluster them into modules, whereas mapping methods predict assignments to a predefined module set. Table~\ref{tab:learning_settings} summarizes the encoder, learning objective, and training configuration used in each study.
+
+For multi-relational graphs, GCN and GAT use separate layers for each dependency type and aggregate their outputs. HGT instead incorporates node and relation types directly in its attention mechanism, processing the relation types jointly within each layer.
+
+In the recovery studies (Papers I, II, and IV), no module labels are available during training. Paper I learns file embeddings using a GAT with a contrastive objective, while Paper II compares GCN and GAT encoders trained through graph reconstruction. Paper IV compares random-walk methods with GAT-based encoders trained within a variational graph autoencoder. Its graph-attention variants examine diffusion, folder context, and typed dependencies.
+
+The learned file embeddings are then clustered into modules. Most configurations use agglomerative hierarchical clustering with Ward linkage. The N2V embeddings in Papers II and IV instead use k-means, following NEGAR~\cite{negar}. Papers I and IV select the number of clusters using the silhouette score, whereas Paper II uses the elbow criterion. Recovery therefore infers both the file assignments and the number of modules.
+
+In the mapping studies (Papers~III and~V), the target modules are known, and a small set of files is labeled with their ground-truth assignments. Paper~III compares GCN, GAT, and MLP models under the same feature representation and training procedure, and uses iterative self-training to expand the labeled set. Paper~V compares MLP, GAT, and HGT. The baseline MLP uses file features alone, GAT uses the file-only graph, and HGT is evaluated on all four graph variants. Additional comparisons examine dependency-neighbor aggregation, including an MLP supplied with aggregated neighbor features. Paper~V trains each model on the labeled files for 200 epochs without self-training. It uses the same loss function, optimizer, and learning rate as Paper~III, with encoder configurations given in Table~\ref{tab:learning_settings}. Mapping therefore predicts file assignments to a predefined module set.
+
+\begin{table}[!htb]
+\centering
+\caption[Encoder configurations and training settings across the five studies.]{\small Encoder configurations and training settings across the five studies, grouped by architecture recovery and C2A mapping. Where a study evaluates multiple encoders, each encoder is listed separately. Dim. denotes the encoder embedding dimension; LR denotes learning rate. Dataset-specific settings for the largest systems are omitted and reported in the individual papers. \label{tab:learning_settings}}
+\renewcommand{\arraystretch}{1.1}
+\begin{adjustbox}{max width=\textwidth}
+\begin{threeparttable}
+\begin{tabular}{l l l l c c c l l}
+\toprule
+& \textbf{P} & \textbf{Encoder} & \textbf{Objective} & \textbf{Dim.} & \textbf{Layers} & \textbf{Heads} & \textbf{\makecell[l]{Optimizer\\ LR}} & \textbf{Epochs} \\
+\midrule
+\multirow{9}{*}{\rotatebox[origin=c]{90}{Architecture recovery}}
+& I & GAT & Contrastive & 128 & 1 & 1 & \makecell[l]{Adam~\cite{adam}\\ $10^{-3}$} & 50 \\
+\addlinespace[0.25cm]
+& \multirow{2}{*}{II} & GCN & \multirow{2}{*}{Reconstruction} & 128 & 1 & -- & \multirow{2}{*}{\makecell[l]{Adam\\ $10^{-4}$ ($10^{-3}$)$^{\ddagger}$}} & \multirow{2}{*}{30 (50)$^{\ddagger}$} \\
+&  & GAT &  & 128 & 1 & 1 &  &  \\
+\addlinespace[0.25cm]
+& \multirow{6}{*}{IV} & N2V & \multirow{2}{*}{Skip-gram} & 128 & -- & -- & \makecell[l]{SGD~\cite{goodfellow2016deep}\\ $0.025$} & 5 \\
+&  & M2V &  & 64 & -- & -- & \makecell[l]{\small{SparseAdam}\\ $0.05$} & 20 \\
+&  & GAT & \multirow{4}{*}{\makecell[l]{Reconstruction\\ + KL}} & 256 & 2 & 2 & \multirow{4}{*}{\makecell[l]{Adam\\ $10^{-3}$}} & \multirow{4}{*}{100} \\
+&  & GAT-DC &  & 256 & 1 or 2$^{\dagger}$ & 2 &  &  \\
+&  & HGAT &  & 256 & 1 & 2 &  &  \\
+&  & HGAT-TD &  & 256 & 1 & 2 &  &  \\
+\midrule
+\multirow{6}{*}{\rotatebox[origin=c]{90}{C2A Mapping}}
+& \multirow{3}{*}{III} & GCN & \multirow{6}{*}{CCE} & 256 & 2 & -- & \multirow{6}{*}{\makecell[l]{Adam\\ $10^{-3}$}} & \multirow{3}{*}{\makecell[l]{100 \footnotesize{warm-up}\\ $+$ $\leq 4 \times 30$}} \\
+&  & GAT &  & 256 & 2 & 4$\times$64 &  &  \\
+&  & MLP &  & 256 & 2 & -- &  &  \\
+\addlinespace[0.25cm]
+& \multirow{3}{*}{V} & HGT &  & 256 & 1 & 4$\times$64 &  & \multirow{3}{*}{200} \\
+&  & GAT &  & 256 & 1 & 4$\times$64 &  &  \\
+&  & MLP &  & 256 & 2 & -- &  &  \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\normalsize
+\item GAT-DC: GAT on a graph rewired by GDC. HGAT: heterogeneous GAT over file and folder nodes with merged dependency types. HGAT-TD: HGAT with a separate GAT layer for each dependency type.
+\item SGD: stochastic gradient descent
+\item $\dagger$ GAT-DC: one layer for more than 500 files and more than 10 modules, two otherwise.
+\item $\ddagger$ Very small systems (fewer than 100 entities).
+\item Paper~III epochs: warm-up plus at most the stated rounds of 30 epochs each, with pseudo-labels requiring confidence $> 0.95$.
+\end{tablenotes}
+\end{threeparttable}
+\end{adjustbox}
+\end{table}
+
+\subsection{Controlled-Comparison Logic \label{sec:controlled_comparison}}
+The studies examine selected choices within the design space through controlled comparisons. Some choices are coupled, since adding folder or member nodes also introduces relations and changes the paths available for message passing. A full factorial evaluation of all combinations would be computationally prohibitive. Each comparison therefore varies one or two choices while keeping the remaining conditions fixed where possible, allowing differences in outcome to be related to the choices under investigation.
+
+The mapping studies compare graph-based encoders with a graph-free MLP using the same input features and training procedure. These comparisons test whether access to dependency-neighborhood information improves mapping beyond the file representations alone. Paper~IV compares a dependency-only graph with the same graph augmented by folder nodes while keeping the learning setting fixed, testing the contribution of organizational structure in the absence of lexical features. Paper~V extends this logic by varying feature initialization and, with HGT, graph structure across file-only, folder-augmented, member-augmented, and combined graph variants. This makes it possible to examine the effects of input features and structural additions separately and, where combinations are included, their interaction.
+
+\section{Benchmark Systems}
+\label{sec:data}
+
+The studies evaluate open-source systems from published architecture recovery and C2A mapping benchmarks. Reusing expert-validated reference decompositions supports comparison with prior work and avoids introducing new architectural judgments, which require substantial domain knowledge and manual effort~\cite{garcia2013}. Table~\ref{table:dataset_details} lists the fourteen systems used across the thesis; each study evaluates the subset appropriate to its setting.
+
+\begin{table}[!htb]
+\centering
+\caption[Properties and versions of the benchmark systems.]{Properties and versions of the benchmark systems. $\mathcal{M}$: number of modules in the ground-truth architecture; $|\text{SD}|$: static dependencies between files.\label{table:dataset_details}}
+\renewcommand{\arraystretch}{1.1}
+\begin{adjustbox}{max width=\textwidth}
+\begin{threeparttable}
+\begin{tabular}{@{} c l l r r r l @{}}
+\toprule
+& System
+& Version
+& $\mathcal{M}$
+& $|\text{Files}|$
+& $|\text{SD}|$
+& Domain \\
+\midrule
+\multirow{9}{*}{\rotatebox[origin=c]{90}{Java}}
+& \href{https://github.com/isr-uci-edu/ArchStudio4}{ArchStudio4} & 4 & 57 & 583 & 5\,418 & Architecture modeling \\
+& \href{http://argouml.tigris.org/}{ArgoUML} & 0.24 & 14 & 766 & 9\,491 & UML modeling \\
+& \href{https://commons.apache.org/proper/commons-imaging/}{Commons-Imaging} & v1.0a2 & 21 & 329 & 4\,561 & Image I/O library \\
+& \href{https://github.com/apache/hadoop}{Hadoop} & 0.19.0 & 67 & 591 & 10\,510 & Distributed processing \\
+& \href{https://jabref.org/}{JabRef} & v3.7 & 6 & 1\,013 & 16\,394 & Reference management \\
+& \href{https://lucene.apache.org/}{Lucene} & r1075001 & 7 & 1\,054 & 18\,595 & Search engine \\
+& \href{https://oodt.apache.org/}{OODT} & 0.2 & 216 & 876 & 8\,811 & Data management \\
+& \href{https://www.sweethome3d.com/}{SweetHome-3D} & r002382 & 9 & 167 & 3\,912 & Interior design \\
+& \href{https://TeamMatesv4.appspot.com/web/front/home}{TeamMates} & v5.11 & 15 & 778 & 17\,818 & Peer feedback system \\
+\midrule
+\multirow{3}{*}{\rotatebox[origin=c]{90}{C}}
+& \href{https://www.gnu.org/software/bash/}{Bash} & 4.2 & 14 & 292 & 1\,222 & Shell \\
+& \href{https://gitee.com/openharmony/drivers_framework}{HDF} & 0e196f & 9 & 153 & 1\,239 & Driver subsystem \\
+& \href{https://gitlab.gnome.org/GNOME/Libxml}{Libxml} & 2.4.22 & 17 & 82 & 986 & XML parser \\
+\midrule
+\multirow{2}{*}{\rotatebox[origin=c]{90}{C++}}
+& \href{https://www.chromium.org/}{Chromium} & svn-171054 & 69 & 18\,343 & 284\,435 & Web browser \\
+& \href{https://gitee.com/openharmony/distributed_camera}{HDC} & 46ff87 & 11 & 207 & 1\,117 & Camera interface \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item HDF: Hardware Driver Foundation; \ HDC: Distributed Camera.
+\item Versions and counts refer to the benchmark instances used in the cross-study evaluation. They may differ from those reported in individual papers.
+\end{tablenotes}
+\end{threeparttable}
+\end{adjustbox}
+\end{table}
+
+ArgoUML, Commons-Imaging, JabRef, Lucene, SweetHome-3D, and TeamMates are drawn from the benchmark assembled by Olsson et al.~\cite{olsson2022automatically} and distributed through the s4rdm3x repository~\cite{olsson2021s4rdm3x}. The mappings for JabRef and TeamMates were produced by system experts during the SAEroCon workshops in 2016 and 2017. The ArgoUML and Lucene mappings were studied by Brunet et al.~\cite{Brunet_gt} and Lenhard et al.~\cite{lenhard2019exploring}, respectively, whereas the Commons-Imaging mapping was contributed as a s4rdm3x test case.
+
+For ArchStudio4, Hadoop, Bash, OODT, and Chromium, the thesis uses the reference decompositions curated by Garcia et al.~\cite{garcia2013,turbomq}. These decompositions were developed through a certification process that recovered an initial view from documentation and source code and refined it with system experts. The HDF, HDC, and Libxml mappings were developed with industry partners and are included in the SARIF benchmark studied by Zhang et al.~\cite{sarif}.
+
+\section{Evaluation Protocol \label{sec:eval-protocol}}
+
+Every controlled comparison in the thesis follows the same evaluation protocol. Model initialization and training, and, in the mapping studies, selection of the labeled set, involve randomness, so a single run cannot distinguish a systematic difference between configurations from ordinary run-to-run variation. Each stochastic method--configuration pair is therefore run 100 times. Results are summarized by the median across runs rather than the mean, because the median is robust to occasional outlying runs.
+
+\subsection{Labeled Sets}
+
+In the mapping studies, each labeled set begins with a uniform random sample of 5\% of a system's files, bounded between 30 and 200 files. One file is then added from each module not represented in that sample. The floor and cap therefore apply to the random sample before these module-coverage additions, and the final labeled set can exceed the bounded sample size. Papers III and V use the same labeled sets, which self-training expands only in Paper III.
+
+The 30-file floor applies to Commons-Imaging, SweetHome-3D, Bash, HDF, and HDC, corresponding to approximately 9--20\% of their files before module-coverage additions. The 200-file cap applies only to Chromium, corresponding to approximately 1\% of its files. For ArgoUML, JabRef, Lucene, and TeamMates, the random sample follows the nominal 5\% rule. The experiments therefore use a bounded labeling budget rather than a constant labeled proportion: smaller systems receive a larger labeled share, while Chromium receives a smaller share. Comparisons within each system use the same labeled sets, but cross-system performance differences must be interpreted in light of these different labeled proportions.
+
+The mapping studies therefore use ten of the fourteen systems. ArchStudio4, Hadoop, and OODT are excluded because representing every module would require labeling approximately 10--25\% of their files, and Libxml because the 30-file floor alone would label approximately 37\% of its files.
+
+\subsection{Statistical Analysis}
+
+To assess the statistical significance of observed differences between methods or configurations, nonparametric tests are used because metric values across repeated runs are not necessarily normally distributed. The recovery studies compare independent distributions of one hundred runs per configuration and use the Mann--Whitney $U$ test~\cite{mann}. In the mapping studies, the compared configurations use the same labeled set in each run, producing paired observations. These comparisons use the Wilcoxon signed-rank test~\cite{wilcoxon}. Where a recovered partition is compared with the ground-truth architecture, the 100 runs of a method are tested against the single ground-truth value of the normalized TurboMQ using the one-sample Wilcoxon signed-rank test.
+
+Statistical tests use a significance threshold of $\alpha = 0.05$. For the cross-study comparison of typed and merged GAT across input representations, the resulting $p$-values are adjusted using Holm’s procedure to account for multiple comparisons.
+
+% ME: We should also specify which tests are grouped together for the correction—for example, whether it is applied across systems separately for each representation, or across all system–representation combinations. Chapter 6’s caption does not establish that, so we need to check the analysis before adding that detail.
+
+A significant result indicates that the observed difference would be unlikely if the two methods or configurations produced equivalent results, but it does not indicate the magnitude of the difference. With 100 runs per configuration, even a small difference can reach statistical significance. Differences are therefore also quantified with Cliff's delta as an effect size~\cite{cliff}, classified as negligible ($|\delta| < 0.147$), small ($< 0.33$), medium ($< 0.474$), or large~\cite{romano2006}. Against the ground-truth value, which is a constant, delta is the proportion of runs above that value minus the proportion below it. A difference that is significant but negligible is reported but not interpreted as an improvement.
+
+Results are reported per system rather than averaged across systems, since averaging can conceal effects that differ across systems with different graph properties. The definitions and interpretation of the recovery and mapping metrics are given in Section~\ref{sec:bg-eval}.
+
+\section{Cross-Study Evaluation Design\label{sec:cross_study_eval}}
+
+The five studies were conducted on separately scoped benchmarks and, in part, with different input features and pipelines, so their reported results cannot be compared directly. For this thesis, we therefore conducted four evaluations in addition to the published work, followed by a correlation analysis with system properties. Their results are reported together with those of the studies in Chapter~\ref{ch:findings}. Unless stated otherwise, the models, input features, training settings, and evaluation metrics are those described in Section~\ref{sec:learning_settings}.
+
+The first two evaluations revisit recovery methods from Papers~I, II, and~IV on all systems in Table~\ref{table:dataset_details}. Both use Ward-linkage agglomerative clustering of the learned file embeddings, with the number of clusters set to the number of modules in the ground-truth architecture. Each method is run 100 times per system. Holding the clustering procedure fixed removes differences in clustering algorithms and cluster-count selection from the comparison.
+
+The first evaluation compares the contrastive approach of Paper~I with the reconstruction-based approach of Paper~II using the GAT encoder. Paper~I is extended to use the input features of Paper~II while retaining its own training pipeline. The comparison therefore uses shared input features, although differences in training settings remain.
+
+The second evaluation compares the attributed dependency graph of Paper~II, using GCN and GAT, with the structure-only file-level and folder-augmented representations of Paper~IV. It also compares the dependency cohesion of the recovered partitions with that of the ground-truth architectures.
+
+The remaining two evaluations concern C2A mapping on the ten-system mapping benchmark. Within each comparison, the underlying file-level dependency graph, input features, 100 labeled sets per system, and training procedure are held fixed.
+
+The third evaluation adds HGT to the comparison of Paper~III to examine its performance with typed dependencies. It uses that study's file-level graph and input features, with two message-passing layers and messages aggregated from source to target, matching the depth and direction of its main configuration.
+
+The fourth evaluation examines whether the contribution of dependency types varies with the input representation. It compares typed GAT, with one channel per relation type, against merged GAT, which collapses all types into a single relation, using the four input representations from Paper~V: Word2Vec, N2V, zero-shot UniXcoder, and fine-tuned UniXcoder. Both variants aggregate messages from source to target. None of these representations includes folder-path features, so this evaluation examines dependency types without organizational information in the node features.
+\subsection{Cross-study correlation with system properties}
+
+We also examine whether recovery performance varies systematically with system properties. Each system contributes one observation per method and configuration: its median metric value across the 100 runs, and these values are correlated with the system properties using Kendall's $\tau$, a nonparametric rank correlation that accommodates tied ranks~\cite{kendall}. The sample size is therefore the number of systems, fourteen, and not the number of runs.
+
+The properties are homophily $\mathcal{H}$, the proportion of static dependencies whose source and target files belong to the same ground-truth module~\cite{gnn_homophily}, and average module size $\langle \mathcal{M} \rangle$, the mean number of files per ground-truth module, which characterizes the granularity of the target decomposition. Table~\ref{table:system_properties} reports both properties and the normalized TurboMQ of the ground-truth decomposition.
+
+\begin{table}[htb]
+\centering
+\small
+\caption[Properties of the benchmark systems.]{Properties of the benchmark systems, with the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph.\label{table:system_properties}}
+\renewcommand{\arraystretch}{1.0}
+\begin{threeparttable}
+\setlength{\tabcolsep}{11pt}
+\begin{tabular}{l S[table-format=2.2] S[table-format=1.2] S[table-format=3.2]}
+\toprule
+{System} & {\makecell{Normalized TurboMQ\\ \tmq{}}} & {\makecell{Homophily\\$\mathcal{H}$}} & {\makecell{Avg. module size\\$\langle \mathcal{M} \rangle$}} \\
+\midrule
+ArchStudio4 & 40.77 & 0.67 & 10.23 \\
+ArgoUML & 59.27 & 0.55 & 54.71 \\
+Commons-Imaging & 50.93 & 0.61 & 15.67 \\
+Hadoop & 18.58 & 0.34 & 8.82 \\
+JabRef & 31.78 & 0.56 & 168.83 \\
+Lucene & 73.90 & \best{0.68} & 150.57 \\
+OODT & 16.92 & 0.27 & 4.06 \\
+SweetHome-3D & 13.60 & 0.36 & 18.56 \\
+TeamMates & 9.17 & 0.34 & 51.87 \\
+\midrule
+Bash & 45.29 & 0.58 & 20.86 \\
+Chromium & 53.76 & 0.58 & \best{265.84} \\
+HDC & \best{77.82} & 0.63 & 18.82 \\
+HDF & 48.02 & 0.35 & 17.00 \\
+Libxml & 35.08 & 0.21 & 4.82 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item Papers~II and~IV reported \tmq{} without aggregating the multiplicity of member-level dependencies into a single file-pair edge weight, so the values here are not directly comparable.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+% \subsection{Cross-study correlation with system properties}
+
+% The thesis also examines whether performance varies systematically with system properties across the benchmark. For each method--configuration pair, each system contributes one observation: its median metric value across the \(100\) runs. These median values are correlated with system-level properties, so the sample size is the number of systems in the relevant benchmark rather than the number of experimental runs. Kendall's $\tau$ is used because it is a nonparametric rank-correlation coefficient that accommodates tied ranks, which occur when two or more systems have the same value for a property~\cite{kendall}.
+
+% The examined properties of systems are defined as follows:
+
+% \parg{Homophily:} the proportion of static dependencies whose source and target files belong to the same ground-truth module,
+% \begin{equation}
+% \mathcal{H} = \frac{|\{(u,v) \in \text{SD} : \text{module}(u) = \text{module}(v)\}|}{|\text{SD}|},
+% \end{equation}
+% where $\mathcal{H}=0$ indicates that all dependencies cross module boundaries and $\mathcal{H}=1$ indicates that all dependencies remain within a module~\cite{gnn_homophily}. Following the edge homophily ratio, systems with $\mathcal{H} \geq 0.5$ are classified as homophilic and those with $\mathcal{H} < 0.5$ as heterophilic~\cite{heterophilic}.
+
+% % \parg{Average node degree:} the mean number of outgoing static dependencies per file and characterizes the connectivity of the dependency graph.
+% % \begin{equation}
+% % \langle k \rangle = \frac{|\text{SD}|}{|\text{Files}|}
+% % \end{equation}
+
+% % \parg{Average module size:} the mean number of files per ground-truth module and characterizes the granularity of the target decomposition.
+% % \begin{equation}
+% % \langle \mathcal{M} \rangle = \frac{|\text{Files}|}{\mathcal{M}}
+% % \end{equation}
+
+% \noindent Table~\ref{table:system_properties} reports all three properties for the fourteen benchmark systems.
+
+% \begin{table}[htb]
+% \small
+% \centering
+% \caption[Structural properties of the benchmark systems.]{Structural properties of the fourteen benchmark systems, including the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph.\label{table:system_properties}}
+% \renewcommand{\arraystretch}{1.1}
+% \Large
+% \begin{adjustbox}{max width=\textwidth}
+% \begin{threeparttable}
+% \begin{tabular}{l S[table-format=2.2] S[table-format=1.2] S[table-format=2.2] S[table-format=3.2]}
+% \toprule
+% {System} & {\makecell{Normalized TurboMQ\\ \tmq{}}} & {\makecell{Homophily\\$\mathcal{H}$}} & {\makecell{Avg. node degree\\$\langle k \rangle$}} & {\makecell{Avg. module size\\$\langle \mathcal{M} \rangle$}} \\
+% \midrule
+% AS4 & 40.77 & 0.67 & 9.29 & 10.23 \\
+% ArgoUML & 59.27 & 0.55 & 12.39 & 54.71 \\
+% C.Img & 50.93 & 0.61 & 13.86 & 15.67 \\
+% Hadoop & 18.58 & 0.34 & 17.78 & 8.82 \\
+% JabRef & 31.29 & 0.56 & 14.88 & 196.67 \\
+% Lucene & 73.90 & \best{0.68} & 17.64 & 150.57 \\
+% OODT & 16.92 & 0.27 & 10.06 & 4.06 \\
+% SH-3D & 13.60 & 0.36 & \best{23.43} & 18.56 \\
+% TeamMates & 9.17 & 0.34 & 22.90 & 51.87 \\
+% \midrule
+% Bash & 45.29 & 0.58 & 4.18 & 20.86 \\
+% Chrome & 53.76 & 0.58 & 15.51 & \best{265.84} \\
+% HDC & \best{77.82} & 0.63 & 5.40 & 18.82 \\
+% HDF & 48.02 & 0.35 & 8.10 & 17.00 \\
+% Libxml & 35.08 & 0.21 & 12.02 & 4.82 \\
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}[flushleft]
+% \large
+% \item Papers~II~\cite{gaer} and~IV~\cite{structsar} reported \tmq{} without aggregating the multiplicity of member-level dependencies into a single file-pair edge weight; the values reported here are computed on the dependency-count-weighted graph and are not directly comparable.
+% \end{tablenotes}
+% \end{threeparttable}
+% \end{adjustbox}
+% \end{table}

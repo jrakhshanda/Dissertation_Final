@@ -1,1 +1,87 @@
-ARL-E further tested whether file-level dependency representations could benefit from edge attributes derived from member-level interactions and dependency frequency. The additional gains were small and inconsistent across systems. This result does not establish that member-level information lacks architectural value; rather, it shows that the particular edge-attribute encoding and contrastive-learning configuration used in ARL-E did not consistently improve recovery beyond the base representation.
+ \chapter{Discussion \label{ch:discussion}}
+ \chaptertoc
+
+This chapter interprets the findings across the five studies and presents an exploratory analysis of how system properties relate to recovery performance. It examines differences between recovery-method rankings under reference agreement and dependency cohesion, the relationship between dependency homophily and recovery performance, and the role of structural reach in recovery and mapping. It concludes with the limitations of the work. Unless directly tested, the proposed explanations remain interpretations of the observed patterns.
+
+\section{Interpretation of the Findings}
+
+The findings raise three questions for interpretation: why evaluation criteria favor different methods, how system properties relate to recovery performance, and how the available dependency context affects recovery and mapping. The following subsections examine these questions across the studies.
+
+\subsection{Reference Alignment and Dependency Cohesion}
+
+In the cross-study recovery comparison (Section~\ref{sec:recovery_cross_study}), attributed GCN and GAT show the strongest agreement with the reference decomposition, whereas file-level structure-only methods produce more dependency-cohesive partitions. Node2Vec has the highest median normalized TurboMQ. Several factors may explain these different rankings.
+
+TurboMQ rewards dependency concentration within clusters, while file-level structure-only methods learn exclusively from the dependency graph. Although their objectives do not explicitly optimize cohesion or coupling, learning from dependency proximity may favor partitions that score well on this measure.
+
+Attributed representations also include folder paths and identifiers, which reflect how developers organize and describe responsibilities. These signals may support agreement with the reference decomposition without increasing dependency cohesion.
+
+The reference decomposition itself need not maximize dependency modularity. Utility or cross-cutting code may receive dependencies from several modules, so matching its reference assignment need not produce the most dependency-cohesive partition.
+
+The compared methods differ in graph construction, input information, and learning configuration. These explanations are therefore plausible interpretations of the observed rankings, but the comparisons do not isolate their individual contributions.
+% -----------------------------------------
+\subsection{System Properties and Recovery Performance}
+
+We examine associations between recovery performance and benchmark-system properties. For each method in the cross-study recovery evaluation, we correlate per-system median scores with dependency homophily and average module size using Kendall's $\tau$ across the 14 systems (Figure~\ref{fig:recovery-correlations}). Given the small sample and multiple tests, these correlations are treated as exploratory associations rather than independent effects.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/correlations_recovery.pdf}
+    \caption[Correlation between architecture recovery metrics and system properties.]{\small Kendall's $\tau$ correlation between recovery outcomes (MoJoFM, ARI, \tmq{}) and two system properties, homophily $\mathcal{H}$ and average module size $\langle \mathcal{M}\rangle$, per method. GAT, GAT-DC, and N2V (structure-only) operate on the homogeneous dependency graph alone; GCN and GAT (attributed graph) operate on the multi-relational dependency graph with node features derived from file location and code identifiers. \label{fig:recovery-correlations}}
+\end{figure}
+Dependency homophily shows the clearest association with performance, particularly for structure-only methods. The structure-only GAT, GAT-DC, and N2V all show significant positive associations with homophily for MoJoFM and \tmq{}, while only the GAT does so for ARI. The attributed GCN and GAT show weaker and less consistent associations. Lexical and file-location attributes may provide complementary evidence when dependencies cross module boundaries, but these comparisons do not isolate their contribution from other methodological differences.
+
+The N2V results are consistent with its reliance on dependency structure alone, so its sensitivity to homophily may be a property of the method and not only of the benchmark. Random walks define the contexts from which file representations are learned, without module labels to distinguish within-module from cross-module dependencies. When dependencies frequently cross module boundaries, files from different modules may therefore appear in similar walk contexts. The positive associations with MoJoFM and \tmq{} are consistent with this interpretation but do not establish the mechanism. Because homophily is computed from the reference decomposition, it provides a retrospective explanation and cannot guide the choice of a representation in advance.
+
+Associations involving \tmq{} need a separate reading. Homophily describes dependency concentration within reference modules, whereas \tmq{} rewards dependency concentration within recovered clusters and is normalized by the number of clusters, so its associations with homophily and module size are partly built into the metric. They describe the structural quality that \tmq{} measures and do not independently support an effect on recovery accuracy.
+
+Average module size is positively associated with MoJoFM for three of the five methods, but with ARI for none. This pattern is difficult to interpret independently of other system properties: OODT and Libxml have both the smallest modules and the lowest homophily, while larger modules tend to occur in larger systems. With 14 systems, these associations cannot be separated, so no independent effect of module size is inferred.
+
+\subsection{Structural Reach and Neighborhood Aggregation\label{sec:structural-reach}}
+We use structural reach to describe the extent of the dependency neighborhood from which a file's representation can incorporate information through message passing, diffusion, or random walks. The studies vary these mechanisms rather than measuring reach directly.
+
+In dependency-only recovery, Paper~IV finds that GAT-DC and N2V outperform plain GAT overall. GAT-DC makes diffusion-close nodes directly accessible to the encoder, while N2V learns from contexts formed by random walks. These results suggest that the two-hop neighborhood available to plain GAT provides insufficient context on some systems.
+
+However, GAT-DC also uses system-specific settings for depth and the number of retained diffusion neighbors. Paper~IV examines sensitivity to the retained-neighbor count, but the comparison with plain GAT does not isolate the contribution of structural reach under matched settings.
+
+Increasing depth offers another way to access more distant nodes, but it is not necessarily equivalent to diffusion or random walks. Additional layers repeatedly aggregate information over the same graph, diffusion changes which nodes are directly connected, and random walks define the contexts used to learn representations. Paper~III finds mixed effects from adding layers in mapping, with neither connectivity nor homophily alone explaining when greater depth helps. These mechanisms were not compared under matched conditions across tasks.
+
+Where dependencies cross module boundaries, additional layers may mix information from different modules. Repeated aggregation may also make node representations less distinguishable through over-smoothing~\cite{gnn_oversmoothing}. Neither mechanism was measured directly in these studies, so both remain possible explanations for the mixed effects of depth.
+
+In mapping, Paper~V shows that encoding dependency context in the input representation does not remove the potential benefit of neighbor aggregation during prediction. With file vectors held fixed, enabling aggregation produces different gains across predictors and directions, including when the input vectors already encode dependencies through Node2Vec. The usefulness of additional context therefore depends on how it is combined with the existing representation.
+
+Aggregation direction also varies in usefulness across settings. Papers~III and~V favor different directions on several systems, but also differ in dependency typing, features, depth, and training. These differences were not individually tested as explanations. Moreover, undirected aggregation adds reverse edges, so its comparison with source-to-target aggregation does not separate direction from neighborhood size.
+
+Taken together, the studies suggest that both the available dependency context and the mechanism used to incorporate it matter. Wider reach can support recovery and mapping, but its benefit depends on the initial representation, the predictor, and how closely dependencies follow module boundaries.
+
+\section{Limitations \label{sec:limitations}}
+
+The conclusions are limited by the systems, architectural representations, and methodological choices examined. Some limitations apply across all five studies, while others concern particular graph constructions, model configurations, or evaluation protocols.
+
+\paragraph{Benchmark scope and external validity.}
+The studies evaluate overlapping subsets of open-source Java, C, and C++ systems with published reference decompositions. The findings may not generalize to other programming languages, application domains, build environments, or architectural styles. Although the methods may be applied without a reference decomposition, agreement with an intended architecture cannot be assessed without a comparable reference. Chromium is the only large-scale system evaluated, so evidence of scalability is limited to a single system. Each system is evaluated at a particular version; the studies therefore do not establish robustness to refactoring or changes in dependency structure across releases.
+
+The exploratory analysis across 14 systems does not establish whether dependency homophily affects recovery independently of system size, module granularity, or other system properties.
+
+\paragraph{Static dependencies.}
+Static dependencies are extracted automatically with the Depends~\cite{depends} tool. The resulting graphs may omit runtime dependencies or dependencies the tool cannot resolve, and may include edges not realized at runtime. Recovery and mapping results therefore depend on the extracted graph's accuracy and coverage. Within this thesis, this limitation may affect dependency-derived signals, including dependency-guided fine-tuning of contextual embeddings. Folder and containment relations, lexical embeddings, and zero-shot contextual embeddings do not depend on this extraction. The studies neither independently validate extraction accuracy nor assess sensitivity to extraction errors.
+
+\paragraph{Reference architectures and architectural representation.}
+The reference decompositions were produced by system experts, industry partners, or researchers reconstructing architecture from documentation, and only one reference is available per system. They are not uniquely determined ground truths: reasonable disagreement may arise when module boundaries are unclear, files implement several concerns, or the intended architecture differs from the implementation. Source revisions and reference mappings are not always aligned, and build configuration determines which files are analyzed, so assignments may be outdated or missing. In the mapping studies, labels are sampled from the same reference used for evaluation, so an incorrect assignment can misdirect training and penalize a plausible prediction.
+
+Reference granularity is a modeling choice: the same system can be represented by a few large modules or by more, smaller submodules. JabRef, for example, has six modules of very uneven size, whereas TeamMates has 15 that could plausibly be grouped into fewer, higher-level modules. Merging modules keeps existing internal dependencies within modules and may make dependencies between modules internal as well, so homophily can only increase or stay unchanged; splitting has the opposite effect. Even with the same dependency graph, the chosen granularity can therefore change homophily, the reference partition's TurboMQ, and potentially the recovery and mapping scores.
+
+More generally, both tasks represent architecture as a flat, exclusive partition of files into modules. Files implementing multiple concerns must be assigned to a single module; overlapping responsibilities, cross-cutting infrastructure, and hierarchical decompositions are not evaluated. The reported scores therefore measure agreement with one file-level architectural view, not whether the recovered or predicted architecture fully represents the system.
+
+\paragraph{Mapping protocol.} The random labeled sample comprises 5\% of files, bounded between 30 and 200, with five systems at the 30-file minimum, so label count and proportion vary with system size and were not varied independently. The mapping models are also transductive, since all system files are available during training.
+
+\paragraph{Organizational signals and shared provenance.} Folder organization is the strongest additional signal identified under Objective~3, but it introduces a validity concern. Folder hierarchies and reference decompositions may reflect shared design decisions: developers may organize folders around intended module boundaries, and researchers may use folder structure when constructing reference decompositions. A directory-based baseline in the mapping study agrees closely with the reference mappings, but the extent of this overlap was not otherwise quantified. Folder paths also inform file-node features in Papers~I--III and initialize folder nodes in Paper~V. The gains from folder information may therefore partly reflect shared provenance between inputs and reference labels rather than independent architectural evidence. Systems with reorganized, flattened, or architecture-inconsistent directory structures were not evaluated.
+
+\paragraph{Representation, objective, and comparison choices.} The studies use graph abstractions that encode different notions of structural relevance. Several models use binary file-level adjacency, which omits dependency frequency. Paper~I includes member-level interaction counts and types as edge attributes, whereas Paper~IV uses PPR weights to represent topology-derived proximity. These represent different notions of edge strength and were not compared across encoders and tasks. Aggregation direction was varied only in mapping, so its effect on recovery remains untested. Member-level information was evaluated only as an aggregate node per file and with one encoder, HGT, so the results do not show that it is uninformative under other designs or encoders.
+
+Recovery objectives optimize proxies rather than agreement with the intended architecture, and results also depend on the clustering method and, in the recovery studies, on the number of clusters, which was searched over a range. The cross-study evaluations fix the cluster count to the reference count, which improves comparability but supplies information generally unavailable in practice.
+
+Between-method comparisons involve differences in graph construction, inputs, training, depth, and parameter count, which limit attribution of performance differences to individual choices. Hyperparameter selection on the evaluation systems using reference-based metrics may also favor more extensively tuned methods.
+
+\paragraph{Stochasticity and reproducibility.} Results are summarized by medians over 100 runs per configuration in all five studies. Input representations were computed once and reused, except for Node2Vec in recovery, which was recomputed for each run. Reported variation therefore excludes the stochasticity of the fixed representations. With 100 runs, even small differences can reach statistical significance without being practically meaningful. Effect sizes are therefore reported alongside $p$-values, and interpretation should consider effect magnitude rather than significance alone.
+
+In the mapping studies, each run pairs a labeled set with a training seed, so their contributions to variation are not separated in the main evaluation. When Paper~III varied the training seed with the labeled set held fixed, the ranking of a few configurations changed across seeds, whereas some advantages were robust. These results indicate seed sensitivity, but the limited comparisons do not characterize it fully. Close rankings should therefore be interpreted cautiously.

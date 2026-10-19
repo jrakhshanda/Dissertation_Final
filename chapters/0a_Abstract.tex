@@ -1,19 +1,26 @@
 \begin{abstract}
 {\small
-Software systems evolve continuously, and their architecture documentation is often missing, incomplete, or outdated. This may intensify as AI coding assistants raise code volume without matching documentation. Recovering a medium-sized system's architecture manually is labor-intensive and can take hundreds of expert hours, motivating automated SAR, which infers a system's modular decomposition from its implementation.
+Software architecture documentation is often missing, incomplete, or outdated, making it unclear which source files implement which architectural modules. Software architecture recovery infers a modular decomposition from the implementation, while code-to-architecture mapping assigns files to known modules using a partial mapping. Both tasks can use dependencies, folder structure, and source code, but existing methods often rely on individual sources or predefined combinations. It remains unclear what each source contributes and when propagating information between connected files helps rather than mixes evidence from different modules.
 
-Software systems are relational: files are linked by typed static dependencies, organized in folder hierarchies, and carry semantic cues in code identifiers, so SAR suits AI methods that learn from heterogeneous evidence. Many traditional SAR methods rely on hand-crafted heuristics or fixed fusion rules rather than integrating these signals in a data-driven way. Earlier representation-learning work used node2vec over dependency graphs, capturing structure but not code semantics or hierarchy. Recent work applies large language models, but this can be costly at industrial scale, and evaluation on public benchmarks makes it hard to separate genuine reasoning from pretraining exposure.
+The research uses open-source Java, C, and C++ systems with published reference decompositions. Recovery studies examine learning objectives, graph construction, and information sources, while mapping studies investigate representations, graph-based propagation, and iterative self-training.
 
-We study how GNN-based representation learning can improve SAR through three linked questions. First, can learned dependency representations outperform fixed heuristic fusion? Architecture Representation Learning (ARL) trains a heterogeneous graph-attention encoder with a contrastive objective over typed dependencies and adds edge attributes for member-level interactions. Second, does replacing the contrastive objective with reconstruction, while combining all signals, change what the encoder learns? Graph Auto-Encoders for Architecture Recovery (GAER) addresses this with a graph auto-encoder integrating folder hierarchy and code semantics as node features, and compares GCN and GAT encoders. Third, how much does folder organization add beyond dependencies alone, and can diffusion-based rewiring recover similar gains? A controlled variational-GAE study fixes the encoder and varies only the input graph across dependency-only, diffusion-rewired, and folder-augmented variants to isolate each signal.
+For architecture recovery, learned representations achieve agreement with reference architectures comparable to or better than the evaluated baselines. In the evaluated configurations, reconstruction generally outperforms contrastive learning, while random walks and diffusion capture structural information beyond direct dependencies. However, combining structural, lexical, and folder information can improve agreement with reference architectures while producing modules with weaker dependency cohesion than those obtained from dependency-based random-walk embeddings.
 
-On open-source Java, C, and C++ systems, ARL and GAER significantly improve over heuristic fusion and node2vec-style baselines, with ARL's largest gains on more homophilic systems, only marginal gains from its edge attributes, and GAT consistently outperforming GCN in GAER. The controlled study shows that recovery from dependencies alone is bounded more by the structural context reaching the encoder than by the encoder itself. Folder structure helps mainly where dependency cohesion is weak, trading dependency-based modularity for closer alignment with the reference decomposition. The results suggest that GNN-based SAR succeeds not merely through a stronger encoder, but by learning to expose and combine complementary forms of architectural evidence. All methods scale to industry-sized systems, finishing in under five minutes on Chromium at roughly 18,000 files.
+For code-to-architecture mapping, neural classifiers outperform a Naive Bayes baseline. A graph attention network outperforms a graph-free classifier on most systems, although gains vary by system and configuration. Folder information produces the largest and most consistent improvements, but higher accuracy can coincide with misclassifications of files that a simple directory rule assigns correctly. Representations that encode dependencies generally outperform lexical ones, and dependency-guided fine-tuning improves contextual representations. 
+
+However, strong graph-model performance does not by itself demonstrate a benefit from additional message passing. Controlled experiments show that propagating dependency information can reduce performance for some predictors compared with matched models without cross-file messages. Changes to graph construction, propagation methods, or learning settings can reduce these losses or lead to improvements.
+
+Together, these findings show that the usefulness of architectural information depends not only on what is available, but also on how it is represented, combined, and used.
+
 }
 
 \bigskip
 \vfill
 \noindent
 \textbf{Keywords:}
-Software Architecture, Software Architecture Recovery, Reflexion Modeling, Graph Neural Networks, Graph Autoencoders
+Software Architecture, Software Architecture Recovery, Representation Learning, Graph Neural Networks, Graph Autoencoders
 
 \end{abstract}
 \cleardoublepage
+
+

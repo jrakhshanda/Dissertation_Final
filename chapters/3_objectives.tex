@@ -1,0 +1,85 @@
+\chapter{Problem Formulation and Research Objectives \label{ch:research_objective}}
+\chaptertoc
+
+This chapter formalizes the research problem addressed in this thesis and defines the objectives for investigating it. It first presents software architecture recovery and C2A mapping as related file-to-module assignment problems within a common graph-based representation-learning framework. It then states the research objectives and associated research questions.
+
+\section{Problem Formulation}
+\label{sec:problem-formulation}
+Architecture recovery and C2A mapping both assign source-code files to architectural modules, but differ in the architectural information available. This thesis approaches recovery by learning file representations without module labels and clustering them into modules. In C2A mapping, the target modules and a subset of file assignments are known, and the task is to predict the remaining assignments. Both tasks are formulated here using a common graph representation.
+
+Despite this difference in supervision, both tasks draw on dependencies, project organization, and source-code content as discussed in Section~\ref{sec:intro-motivation}. This thesis uses graph-based representation learning to combine these signals as evidence of module membership.
+
+Accordingly, a software system is represented as a graph:
+\begin{equation}
+\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{A}, \mathcal{R}, \mathbf{X}),
+\label{eq:software_graph}
+\end{equation}
+where $\mathcal{V}$ and $\mathcal{E}$ are the node and edge sets, $\mathcal{A}$ and $\mathcal{R}$ are the node and relation types, and $\mathbf{X}$ denotes node attributes. The maps $\tau: \mathcal{V} \rightarrow \mathcal{A}$ and $\phi: \mathcal{E} \rightarrow \mathcal{R}$ assign types to nodes and edges. Structure-only settings use no lexical or folder attributes. File nodes form the subset $\mathcal{V}_{\texttt{file}} \subseteq \mathcal{V}$.
+
+The graph is homogeneous when $|\mathcal{A}| = |\mathcal{R}| = 1$, and heterogeneous otherwise. Its simplest form is a software dependency graph (SDG), containing only file nodes and a single dependency relation type. Preserving dependency types increases $|\mathcal{R}|$, while adding folder and member nodes increases both $|\mathcal{A}|$ and $|\mathcal{R}|$. Folder and member nodes provide context for learning file representations; only file nodes are assigned to architectural modules.
+
+Formally, for recovery, we learn an encoder $f_{\theta}$ in a self-supervised manner:
+\begin{equation}
+f_{\theta}: \mathcal{G}\;\longrightarrow\;\mathbf{Z}\in\mathbb{R}^{|\mathcal{V}_{\texttt{file}}|\times d},
+\label{eq:sar}
+\end{equation}
+that maps each source code file $i \in \mathcal{V}_{\texttt{file}}$ to a $d$-dimensional embedding $\mathbf{z}_i \in \mathbb{R}^{d}$, where $\theta$ denotes the learnable parameters. The resulting file embeddings are clustered to a recovered architectural decomposition $\hat{\mathcal{C}}$, which partitions the source code files into $m$ disjoint modules:
+\begin{equation}
+\hat{\mathcal{C}} = \{C_1, \dots, C_m\},
+\label{eq:sar-partition}
+\end{equation}
+
+In C2A mapping, a set of target modules $\mathcal{C} = \{C_1, \dots, C_m\}$ is known, together with a labeled subset of files $\mathcal{L} \subseteq \mathcal{V}_{\texttt{file}}$ and their module assignments $Y_{\mathcal{L}}$. The task is to learn:
+%
+\begin{equation}
+f_{\theta}: (\mathcal{G},\;\mathcal{L},\;Y_{\mathcal{L}})\;\longrightarrow\;\hat{Y}_{\mathcal{U}},
+\label{eq:c2a}
+\end{equation}
+for the unlabeled files $\mathcal{U} = \mathcal{V}_{\texttt{file}} \setminus \mathcal{L}$. The model is trained on the labeled files, and the supervision is limited to this subset. Training may additionally use the model's confident predictions on unlabeled files as pseudo-labels. The setting is transductive: all files, labeled and unlabeled, are part of $\mathcal{G}$ during training.
+
+The two problems use the same implementation signals, but differ in how representations are learned and how their contribution can be assessed. In recovery, module labels are unavailable, so representations are shaped by the graph construction, the input representations, and a self-supervised objective. The final decomposition also depends on the clustering procedure and granularity. In C2A mapping, known file-to-module assignments provide task-specific supervision, allowing matched configurations to be compared using per-file classification metrics. Mapping thus provides a complementary setting for examining whether individual signals help predict an existing decomposition. However, its results depend on the number of initially labeled files, their coverage and distribution across modules, and the training procedure. A signal's usefulness or ranking in one task therefore does not necessarily carry over to the other.
+
+\section{Research Objectives}
+\label{sec:research-objectives}
+
+The research aim is operationalized through three objectives that progress from joint representation learning to examining individual signals and file representations, and then to their interaction within richer graphs. Objective 1 designs, compares, and benchmarks graph-based methods for recovery and mapping by combining dependency, organizational, and lexical signals. This examines their joint usefulness, but not their individual contributions. Objective 2 therefore examines the architectural information these signals and representations carry, including how source-code content should be represented. Objective 3 investigates how their usefulness changes as structural context is added and whether findings from Objectives 1 and 2 remain valid.
+
+\subsection[Representation Learning for Recovery and C2A Mapping]{Representation Learning for Architecture Recovery and C2A Mapping}
+\label{sec:obj_1}
+
+\begin{GrayBox}{Objective~1}
+To design, compare, and benchmark graph-based representation learning methods for architecture recovery and code-to-architecture mapping.
+\end{GrayBox}
+\begin{enumerate}[label=RQ1.\arabic*, leftmargin=3em, itemsep=0.1pt]
+    \item How can implementation-level signals be combined into a joint representation for architecture recovery and mapping?
+    \item How does modeling dependency types as separate relations compare with merging them into a single relation?
+    \item How sensitive is the learned representation to encoder architecture, learning objective, and model depth?
+\end{enumerate}
+This objective is addressed through comparisons across recovery and mapping studies on file-level graphs. Most comparisons jointly encode folder, lexical, and dependency signals within one encoder. The comparisons cover GCN, GAT, and HGT encoders and merged versus relation-specific dependencies. Recovery experiments compare contrastive and reconstruction objectives using the same encoder, inputs, and benchmark systems. Mapping studies also vary model depth; one study and its cross-study extension use inputs without folder signals.
+% _______________________
+\subsection{Architectural Information in Implementation Signals}
+\label{sec:obj_2}
+
+\begin{GrayBox}{Objective~2}
+To determine what architectural information dependency structure and individual file representations provide, and how source-code content should be represented.
+\end{GrayBox}
+\begin{enumerate}[label=RQ2.\arabic*, leftmargin=3em, itemsep=-0.05pt]
+    \item How far can dependency structure alone support architecture recovery, in agreement with the reference and in dependency cohesion?
+    \item How does dependency-guided adaptation of a contextual code representation affect the architectural signal it carries?
+    \item How do structural, lexical, and contextual file representations compare in mapping without message passing?
+\end{enumerate}
+This objective examines the architectural information carried by individual implementation signals. In recovery, it uses dependency structure alone on the homogeneous SDG, without lexical or folder information, and examines how much structural context is needed across systems. In mapping, it compares file representations without adding folder organization, member-level detail, or SDG-based message passing. These representations include Word2Vec, zero-shot UniXcoder, Node2Vec, and UniXcoder fine-tuned through SDG-guided contrastive learning without module labels. The latter two incorporate dependency information during representation learning. A graph-free MLP classifier uses each file's representation independently, so it can access dependency information only if that information is already encoded in the representation.
+% ______________________
+\subsection{Interaction Between Input Signals and Graph Structure}
+\label{sec:obj_3}
+
+\begin{GrayBox}{Objective~3}
+To determine how the contribution of file representations changes with dependency-based message passing, folder organization, and member-level graph detail, and whether findings from Objectives~1 and~2 remain valid.
+\end{GrayBox}
+
+\begin{enumerate}[label=RQ3.\arabic*, leftmargin=3em, itemsep=-0.05pt]
+    \item How does the usefulness of message passing over dependency neighbors vary across predictors, aggregation directions, and file representations?
+    \item How does adding folder organization to the graph change what the file representations contribute to recovery and mapping?
+    \item How does performance differ with and without member-level nodes and edge-level interaction details?
+\end{enumerate}
+This objective examines how additional graph structure changes the contribution of file representations. In recovery, folder nodes and containment meta-relations are added to the SDG and evaluated through message passing or random walks; edge attributes describing the member-level interactions behind each dependency, including their type and frequency, are examined separately. In mapping, graph-free and graph-based neural predictors are compared, and dependency neighbors are enabled or disabled within each predictor while holding file representations fixed. Aggregation direction is also varied. Folder and member nodes are evaluated with Word2Vec, Node2Vec, and fine-tuned UniXcoder. Member nodes also change how lexical and contextual content enters the model, and a rule based on the directory hierarchy and initial labels provides a reference.

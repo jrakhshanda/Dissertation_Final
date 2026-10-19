@@ -273,14 +273,36 @@
     {\normalfont\Large\bfseries\raggedright}%
 }
 
-\renewcommand{\subsubsection}{%
- \@startsection{subsubsection}{2}{\z@}%
-    {-2.5ex\@plus -1ex \@minus -.1ex}%
-    {1ex \@plus .2ex}%
-    {\normalfont\large\bfseries\raggedright}%
+
+\renewcommand{\subsection}{%
+  \@startsection{subsection}{2}{\z@}%
+    {-3ex \@plus -1ex \@minus -.1ex}%
+    {1.5ex \@plus .2ex}%
+    {\normalfont\fontsize{11.5}{13.5}\selectfont\bfseries\raggedright}%
 }
 
-\renewcommand{\paragraph}[1]{\medskip\par\noindent\textbf{#1}\quad}
+\renewcommand{\subsubsection}{%
+ \@startsection{subsubsection}{3}{\z@}%
+    {-2.5ex\@plus -1ex \@minus -.1ex}%
+    {1ex \@plus .2ex}%
+    {\normalfont\fontsize{11}{13.5}\selectfont\bfseries\raggedright}%
+}
+
+% \renewcommand{\subsection}{%
+%   \@startsection{subsection}{2}{\z@}%
+%     {-3ex \@plus -1ex \@minus -.1ex}%
+%     {1.5ex \@plus .2ex}%
+%     {\normalfont\large\bfseries\raggedright}%
+% }
+
+% \renewcommand{\subsubsection}{%
+%  \@startsection{subsubsection}{3}{\z@}%
+%     {-2.5ex\@plus -1ex \@minus -.1ex}%
+%     {1ex \@plus .2ex}%
+%     {\normalfont\normalsize\bfseries\itshape\raggedright}%
+% }
+
+\renewcommand{\paragraph}[1]{\bigskip\par\noindent\textbf{#1}\quad}
 
 %% Setup the ToC
 \setcounter{secnumdepth}{4}
@@ -310,6 +332,14 @@
 \endgroup%
 }
 
+%% Absolute-position overlay box, e.g. for KTH-style appended-paper letter tabs
+\newcommand{\placetextbox}[3]{% \placetextbox{<horizontal pos 0-1>}{<vertical pos 0-1>}{<content>}
+  \setbox0=\hbox{#3}%
+  \AddToShipoutPictureFG*{%
+    \put(\LenToUnit{#1\paperwidth},\LenToUnit{#2\paperheight}){\vtop{{\null}\makebox[0pt][c]{#3}}}%
+  }%
+}%
+
 % Fix the line breaks for long URLs in footnotes
 \g@addto@macro{\UrlBreaks}{\do\/\do\-}
 
@@ -320,7 +350,3 @@
 \interfootnotelinepenalty=10000
 
 \setlength{\parindent}{.5cm}
-
-
-%%
-%% End of file `lnudissertation.cls'.

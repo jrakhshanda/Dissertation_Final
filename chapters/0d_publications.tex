@@ -1,99 +1,14 @@
-% ============================================================
-% List of Publications
-% Front matter, modeled on the structure used in Hönel's kappa
-% (canonical self-citation -> refereed publications -> software
-% artifacts/replication packages -> related/unrelated publications)
-% ============================================================
-
-\newcommand{\printpublication}[1]{\AtNextCite{\defcounter{maxnames}{99}}\fullcite{#1}}
-\newcommand{\myfullcite}[1]{\printpublication{#1}~\cite{#1}. {\footnotesize\textsc{In Appendix:}}~\ref{app:publ-#1}. Materials appear in Chapter}
-\newcommand{\myfullcitedata}[1]{\printpublication{#1}~\cite{#1}. Materials used or appear in Chapter}
-\newcommand{\myfullcitenoapp}[1]{\printpublication{#1}~\cite{#1}.}
-
-
+\cleardoublepage
 \chapter*{List of Publications}
 \addcontentsline{toc}{chapter}{List of Publications}
 \markboth{List of Publications}{List of Publications}
 
+\noindent This dissertation is based on the following publications. I contributed to all stages of the work as lead author.
 
-\noindent\textbf{Canonical reference to this dissertation}
-(the digital object identifier always points to the most recent master copy that receives corrections to errata found after print):
-
-\begin{enumerate}[leftmargin=*]
-    \item[]\printpublication{jabeen2026_phdthesis}~\cite{jabeen2026_phdthesis}.
-    % TODO: this bib entry does not exist yet -- create it once the
-    % dissertation has its own title/year/publisher/DOI.
+\begin{enumerate}[leftmargin=*,label=\Roman*.,itemsep=1.2em,topsep=0pt]
+    \item\myfullcite{arl_2026}~(page~\pageref{app:publ-arl_2026}).
+    \item\myfullcite{gaer}~(page~\pageref{app:publ-gaer}).
+    \item\myfullcite{c2a_mapping}~(page~\pageref{app:publ-c2a_mapping}).
+    \item\myfullcite{structsar}~(page~\pageref{app:publ-structsar}).
+    \item\myfullcite{hetmap}~(page~\pageref{app:publ-hetmap}).
 \end{enumerate}
-
-
-\bigskip
-\bigskip
-\noindent\textbf{This dissertation is based on the following refereed publications}
-(I have contributed to all stages of work in the role of a lead author and have
-implemented all tools):
-
-\begin{enumerate}[leftmargin=*]
-    \item\myfullcite{gaer}~\ref{ch:recovery}.
-    \item\myfullcite{arl_2026}~\ref{ch:recovery}.
-    % TODO: confirm ESANN acceptance status -- if still pending, this
-    % should move out of "refereed publications" until accepted.
-    \item\myfullcite{structsar}~\ref{ch:structsar}.
-    \item\myfullcite{c2a_mapping}~\ref{ch:mapping}.
-    % TODO: unresolved title mismatch -- confirm this key is meant to be
-    % the finished extended paper ("Structure vs. Semantics in
-    % Code-to-Architecture Mapping"), not the earlier jabeen2025graph
-    % paper the extended paper itself cites as prior work. If it's the
-    % extended paper, the title field in the .bib entry needs correcting.
-    \item\myfullcite{hetmap}~\ref{ch:hetmap}.
-    % Not yet published -- consider \myfullcitedata or an explicit
-    % "manuscript in preparation" note instead of listing alongside
-    % the refereed, published works above.
-\end{enumerate}
-
-
-\bigskip
-\bigskip
-\noindent\textbf{This dissertation is based on and produced the following replication packages, software artifacts, and extended abstracts}
-(I have contributed to these either exclusively or in the role of a lead author):
-
-\begin{enumerate}[leftmargin=*]
-    \item\myfullcitedata{gear_artifact}~\ref{ch:recovery}.
-    % FSE-reviewed, Zenodo-archived (DOI 10.5281/zenodo.19534384).
-    % Includes the NEGAR reproduction; this is the canonical copy,
-    % not the secondary one bundled inside the StructSAR repo.
-    % Bib key still needs standardizing -- StructSAR.tex currently
-    % cites this same artifact as \cite{gaer_artifact}, and an earlier
-    % message used \texttt{gearart}. Pick one spelling for all three.
-    \item\myfullcitedata{structsar_artifact}~\ref{ch:structsar}.
-    \item\myfullcitedata{c2a_mapping_artifact}~\ref{ch:mapping}.
-    \item\myfullcitedata{hetmap_artifact}~\ref{ch:hetmap}.
-    % These three are plain GitHub repos, not artifact-evaluated or
-    % Zenodo-archived like the GAER package -- see bib stubs from
-    % the earlier message.
-    \item\myfullcitedata{gaer_abstract}~\ref{ch:recovery}.
-    % FSE Companion '26 extended abstract, peer-reviewed,
-    % distinct DOI from the main GAER paper.
-\end{enumerate}
-
-
-\bigskip
-\bigskip
-\noindent\textbf{The following related publication is not directly incorporated into this dissertation}
-(cited as prior work motivating the study presented in Chapter~\ref{ch:mapping}):
-
-\begin{enumerate}[leftmargin=*]
-    \item\myfullcitenoapp{jabeen2025graph}
-\end{enumerate}
-
-
-\bigskip
-\bigskip
-\noindent\textbf{Further publications not related to this dissertation}
-(I have contributed to all or some stages of work in conceptualization, implementation, writing, or implementation of related tools):
-
-\begin{enumerate}[leftmargin=*]
-    \item\myfullcitenoapp{jabeen2023towards}
-\end{enumerate}
-
-
-\cleardoublepage

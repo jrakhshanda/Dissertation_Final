@@ -1,12 +1,14 @@
 \documentclass[]{lnudissertation}
 \sloppy
-
 % ============================================================
 % 1. ENCODING, LANGUAGE, BIBLIOGRAPHY
 % ============================================================
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\usepackage{fontspec}
+\newfontfamily\arabicfont[Script=Arabic]{Amiri}
+\TeXXeTstate=1
+\RequirePackage{eso-pic}
 \usepackage[swedish,english]{babel}
+\usepackage{csquotes}
 \usepackage[
   backend=biber,
   style=numeric,
@@ -15,56 +17,68 @@
 ]{biblatex}
 \addbibresource{refs.bib}
 
-%% 1. ACM (Association for Computing Machinery)
-\RequirePackage{libertine}
-\RequirePackage[libertine]{newtxmath}
+% ============================================================
+% 2. FONTS
+% ============================================================
+% % --- OPTION A: ACM-inspired ---
+\usepackage{libertine}
+\usepackage[libertine]{newtxmath}
 
-%% 2. IEEE (Institute of Electrical and Electronics Engineers)
-%% Style: Times New Roman clone (Standard, space-efficient engineering look)
-% \RequirePackage{newtxtext}
-% \RequirePackage[varg]{newtxmath}  % varg gives an italic 'g' preferred by IEEE
+% --- OPTION B: IEEE ---
+% \usepackage{newtxtext}
+% \usepackage[varg]{newtxmath}
 
-%% 3. JSS (Journal of Statistical Software) / AMS / SIAM
-%% Style: Latin Modern (The definitive high-quality classical LaTeX layout)
-% \RequirePackage{lmodern}
-
-
+% --- OPTION C:  lmodern Sans Serif ---
+% \usepackage{lmodern} 
+% \renewcommand*\familydefault{\sfdefault}
 % ============================================================
 % 3. TEXT FORMATTING AND TYPOGRAPHY
 % ============================================================
+\usepackage{tikz}
 \usepackage{enumerate}
 \usepackage{enumitem}
 \usepackage{csquotes}
-\usepackage{setspace}
-\setstretch{1.03}
-% \spaceskip=1 \fontdimen2\font plus 1 \fontdimen2\font minus 1\fontdimen2\font
-% \DeclareUnicodeCharacter{0302}{\^{}}
-
+\usepackage{anyfontsize}
+% \usepackage{setspace}
+% \setstretch{1.01}
 % ============================================================
 % 4. FIGURES, TABLES, LAYOUT
 % ============================================================
 \usepackage{graphicx}
-\usepackage{caption}
+% The lnudissertation class already loads caption with labelfont=bf.
 \usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{makecell}
 \usepackage{siunitx}
 \usepackage{adjustbox}
 \usepackage{array}
 \usepackage{multirow}
 \usepackage[most]{tcolorbox}
 \usepackage{tabularx}
+\usepackage{longtable}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \usepackage{threeparttable}
+% \usepackage{xcolor}
+\usepackage{calc}
+\usepackage{pdfpages}
+\usepackage{xstring}
+\usepackage{xparse}
+\usepackage{pgf}
+\usepackage[table]{xcolor}
+\usepackage{lettrine}
 % ============================================================
 % 5. DOCUMENT STRUCTURE / NAVIGATION
 % ============================================================
-\usepackage{verbatim}   % multi-line comments
+\usepackage{verbatim}
 \usepackage{appendix}
 \renewcommand{\appendixtocname}{Appended Publications}
-\usepackage[framemethod=TikZ]{mdframed} % required: GrayBox ("Answer to RQx") boxes used throughout all paper chapters
+\usepackage[framemethod=TikZ]{mdframed}
 
 % ============================================================
 % 6. STAMPS, OVERLAYS, POSITIONING
 % ============================================================
-\usepackage[absolute,overlay]{textpos} % required by \draftstamp / \overlaypagenote
+\usepackage[absolute,overlay]{textpos}
+
 % ============================================================
 % 7. HYPERLINKS AND URLS
 % ============================================================
@@ -72,119 +86,152 @@
 \urlstyle{acsstyle}
 \usepackage{xurl}
 
-\makeatother
-
 \hypersetup{
-    hidelinks, % no boxes around hyperlinks
-    pdfinfo={
-        Title={[Graph Representation Learning for Software Architecture Recovery]},
-        Author={Rakhshanda Jabeen},
-        Subject={PhD Dissertation},
-        Keywords={Software Architecture Recovery; Code-to-Architecture Mapping; Graph Neural Networks; Representation Learning; Software Engineering},
-    }
+  hidelinks,
+  pdftitle={Graph Representation Learning for Software Architecture Recovery},
+  pdfauthor={Rakhshanda Jabeen},
+  pdfsubject={PhD Dissertation},
+  pdfkeywords={Software Architecture Recovery; Code-to-Architecture Mapping;
+    Graph Neural Networks; Representation Learning; Software Engineering}
 }
 % ============================================================
 % 8. CUSTOM COMMANDS -- GENERAL HELPERS
 % ============================================================
+\definecolor{BestBlue}{RGB}{0,50,120} 
+\newcommand{\best}[1]{\cellcolor{gray!20}{#1}}
+\newcommand{\second}[1]{\cellcolor{gray!10}{#1}}
+
 \newtcolorbox{GrayBox}[2][]{%
   enhanced,
-  width=\textwidth,
-  colback=gray!5,
-  colframe=black!60,
-  % coltitle=black,
-  arc=0.5mm,
-  boxrule=0.7pt,
-  left=0.5ex,
-  right=0.5ex,
+  % fuzzy shadow = {0pt}{-3pt}{-0.5pt}{0.5pt}{black!35},
+  rounded corners,
+  arc = 3pt,
+  width=\dimexpr\linewidth-0mm\relax,
+  center,
+  % width=\linewidth,
+  colback=gray!0,
+  colframe=black!70,
+  boxrule=0.5pt,
+  left=1ex,
+  right=1ex,
   top=1ex,
   bottom=1ex,
-  before skip=3ex,
+  before skip=2ex,
   after skip=3ex,
-  title=#2,
+  title=#2\unskip, %\unskip
   #1
 }
 
-% ============================================================
-% 9. CUSTOM COMMANDS -- THESIS-SPECIFIC (paper cross-referencing)
-% ============================================================
+% \newtcolorbox{GrayBox}[2][]{%
+%   enhanced,
+%   float,
+%   floatplacement=htbp,
+%   rounded corners,
+%   arc=3pt,
+%   width=\linewidth,
+%   center,
+%   colback=gray!0,
+%   colframe=black!70,
+%   boxrule=0.5pt,
+%   left=1ex,
+%   right=1ex,
+%   top=1ex,
+%   bottom=1ex,
+%   title=#2\unskip,
+%   #1
+% }
+
+\newcommand{\parg}[1]{%
+  \par\medskip \noindent\textbf{\textit{#1}} %\quad%
+}
+\newcommand{\abbr}[1]{{\small #1}}
+\newcommand{\zs}{UXC\textsubscript{ZS}}
+\newcommand{\ft}{UXC\textsubscript{FT}}
 \newcommand{\citepaper}[1]{Paper~\ref{app:publ-#1}}
 \newcommand{\citepaperp}[1]{(\citepaper{#1})}
 \newcommand{\citearticle}[1]{Article~\ref{app:publ-#1}}
 \newcommand{\citearticlep}[1]{(\citearticle{#1})}
-
 % ============================================================
 % 10. CUSTOM COMMANDS -- RECURRING METRIC / TERM SHORTHANDS
 % ============================================================
 \newcommand{\cc}{C2C\textsubscript{cvg}}
 \newcommand{\tmq}{TMQ\textsubscript{norm}}
-%----------------------------------------------------------------------------------------------------
-%------------------------HERE STARTS THE PRINTING --------------------------------
-%----------------------------------------------------------------------------------------------------
+
+\newcommand{\printpublication}[1]{\AtNextCite{\defcounter{maxnames}{99}}\fullcite{#1}}
+\newcommand{\myfullcite}[1]{\printpublication{#1}.}
+\newcommand{\myfullciteur}[1]{\printpublication{#1}. \textit{Under review.}}
+% ============================================================
+% DOCUMENT
+% ============================================================
 \begin{document}
+
 \frontmatter
 \input{chapters/00_front-matter-lud}
-\input{chapters/0c_Dedication}
 \input{chapters/0a_Abstract}
-\input{chapters/0b_Acknowledgments}
-\renewcommand\contentsname{Table of Contents}
+\input{chapters/0b_Dedication}
+\input{chapters/0c_Acknowledgments}
+
+\renewcommand{\contentsname}{Table of Contents}
 \setcounter{tocdepth}{1}
 \phantomsection
-\addcontentsline{toc}{chapter}{\contentsname{}}
+\addcontentsline{toc}{chapter}{\contentsname}
 \tableofcontents
+
 \cleardoublepage
 \phantomsection
-\addcontentsline{toc}{chapter}{\listfigurename{}}
+\addcontentsline{toc}{chapter}{\listfigurename}
 \listoffigures
+
 \cleardoublepage
 \phantomsection
-\addcontentsline{toc}{chapter}{\listtablename{}}
+\addcontentsline{toc}{chapter}{\listtablename}
 \listoftables
+
 \cleardoublepage
 \input{chapters/0e_abbreviations}
 
-%% The list of listings is not tested!!
-%% Add the listings package in case it is needed, too
-%\lstlistoflistings
-%% Add the list of publications
+% \lstlistoflistings
+
 \input{chapters/0d_publications}
 \cleardoublepage
-%------------------------------------------------------------------------
-%---------------------HERE STARTS THE THESIS CONTENT---------------------
-%------------------------------------------------------------------------
+
+% ============================================================
+% MAIN THESIS CONTENT
+% ============================================================
 \mainmatter
 \input{chapters/1_Introduction}
-% \cleardoublepage
+\cleardoublepage
 
 \input{chapters/2_background}
-% \cleardoublepage
-
-\input{chapters/3_RQs}
-% \cleardoublepage
-
-\input{chapters/4_Method}
 \cleardoublepage
 
-% \input{chapters/5_synthesis}
-% \cleardoublepage
+\input{chapters/3_objectives}
+\cleardoublepage
 
+\input{chapters/4_paper_summary}
+\cleardoublepage
 
+\input{chapters/5_method}
+\cleardoublepage
 
-%------------------------------------------------------------------
-%---------------------Refrences & Appendix ------------------------
-%------------------------------------------------------------------
+\input{chapters/6_findings}
+\cleardoublepage
+
+\input{chapters/7_discussion}
+\cleardoublepage
+
+\input{chapters/8_Conclusions}
+\cleardoublepage
+% ============================================================
+% BIBLIOGRAPHY AND APPENDICES
+% ============================================================
+\backmatter
 \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
-
-\renewcommand*{\bibfont}{\small}
+\renewcommand*{\bibfont}{\footnotesize}
 \printbibliography
 
-\input{chapters/90_Appendix}
-\cleardoublepage
-
-% \input{chapters/95_MIT}
-% \cleardoublepage
-
-\backmatter
+\input{chapters/9_Appendix}
 \cleardoublepage
 
 \end{document}

@@ -1,0 +1,295 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% {\footnotesize
+% \renewcommand{\arraystretch}{1.2}
+% \def\band#1{\addlinespace[3pt]\rowcolor{gray!22}\multicolumn{3}{l}{\normalsize\textbf{#1}} \\}
+% \def\fa#1{\multicolumn{3}{l}{\small\textbf{\emph{#1}}} \\[3pt]}
+% \begin{longtable}{@{} p{0.16\textwidth} p{0.37\textwidth} p{0.37\textwidth} @{}}
+% \caption[Taxonomy of prior approaches and the studies in this thesis.]{Taxonomy of approaches that assign source files to architectural modules, and of the studies in this thesis, along three dimensions: task scope (SAR, C2A, this thesis), learning or aggregation paradigm, and primary limitation. Input signals are stated in the paradigm column where the group does not imply them. Limitations are taken from the original publications and from independent comparisons~\cite{turbomq,sarif,negar}; where none is documented for a method, the limitation of its group is stated. For the studies in this thesis, the limitation is the residual limitation reported in Chapter~\ref{ch:discussion}. $^\dagger$ also uses change history, which is not studied in this thesis. \label{tab:taxonomy}}\\
+% \toprule
+% \textbf{Approach} & \textbf{Paradigm} & \textbf{Primary limitation} \\
+% \midrule
+% \endfirsthead
+% \multicolumn{3}{l}{\textit{Table~\thetable{} continued from previous page}} \\
+% \toprule
+% \textbf{Approach} & \textbf{Paradigm} & \textbf{Primary limitation} \\
+% \midrule
+% \endhead
+% \bottomrule
+% \endlastfoot
+ 
+% \band{Software architecture recovery}
+% \addlinespace[3pt]
+% \fa{Dependency graph-based methods}
+% \addlinespace[3pt]
+% \makecell[tl]{Bunch~\cite{bunch_sahc_nahc}\\ DAGC~\cite{dagc}\\ MCA/ECA~\cite{mca_eca}} & Local, global, and multi-objective search-based optimization of MQ, by hill climbing and genetic algorithms & MQ objective poorly matches expert decompositions; slow on large systems (Bunch) \\
+% ACDC~\cite{acdc} & Pattern-driven clustering: subsystem skeleton and orphan adoption & Over-fragments: many more, smaller clusters than the reference \\
+% FCA~\cite{fca} & Deterministic clustering on the neighborhood degree matrix & Greedy and local; weights all dependencies equally; over-fragments \\
+% \makecell[tl]{LIMBO~\cite{limbo}\\ WCA~\cite{wca}} & Hierarchical clustering by information bottleneck or by weighted feature-vector similarity & Preset cluster count; low component-level accuracy; LIMBO does not scale to large systems \\
+% % UNVERIFIED limitation
+% CCT~\cite{cct} & \yes & \no & \no & Cooperative hierarchical clustering with multiple similarity measures & Sensitive to graph construction and dependency weighting \\
+
+
+% \midrule
+% \fa{Directory- and semantic-based methods}
+% \addlinespace[3pt]
+% Anquetil et al.~\cite{file_clustering} & Clustering on file names and directory paths ($n$-gram similarity) & Relies only on paths and consistent file naming; weak with short or cryptic names \\
+% ARC~\cite{arc} & LDA topic modeling on source code & Requires cluster counts; shared vocabulary misleads; slow at scale \\
+
+% % UNVERIFIED limitation
+% ZBR~\cite{zbr} & TF-IDF lexical zones with weights learned by expectation maximization; hierarchical clustering & Noisy in isolation: reused terminology blur module boundaries \\
+% \midrule
+% \fa{Hybrid multi-signal recovery}
+% \makecell[tl]{SADE~\cite{sade}\\ SARIF~\cite{sarif}} & Community detection on a dependency graph weighted by semantic similarity, or folder structure & Predefined, manually tuned weights, not learned from the signals \\
+% % UNVERIFIED limitation
+% \makecell[tl]{Misra et al.~\cite{sc_misra}\\ NSGA-III$^\dagger$~\cite{nsga3}} & Multi-objective optimization of weighted structural and semantic signals, the second also using change history & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% Puhala et al.~\cite{ensemble_recovery} & Evidence-accumulation consensus of clusterings generated per signal (dependencies, text, directory structure) & Hand-tuned weights; gains depend on directory-hierarchy quality; Java-only evaluation \\
+% Naim et al.~\cite{naim2017cchd} & Coordinated co-clustering of structural and lexical data without per-signal weights & Requires iterative developer feedback for acceptable recovery \\
+% \midrule
+% \fa{Representation learning and LLM-based recovery}
+% NEGAR~\cite{negar} & Random-walk embeddings (node2vec, Skip-gram); $k$-means & One pipeline per dependency type; no non-structural signal \\
+% SemArc~\cite{sar_sem} & Generative LLM prompting against canonical architectural patterns, using explicit and implicit dependencies; anchor-based clustering & LLM context and cost limit scalability; public benchmark systems may overlap with pretraining data \\
+ 
+% \band{Code-to-architecture (C2A) mapping}
+% \fa{Rule-based mapping}
+% Tzerpos and Holt~\cite{tzerpos1997orphan} & Orphan adoption by naming, structure, and style criteria & Hard-coded patterns; module styles limited to two \\
+% Christl et al.~\cite{christl2007automated} & Attraction functions over lexical and dependency evidence; semi-automatic recommendation to the architect & Combination of lexical and dependency evidence fixed by manually specified rules \\
+% Bittencourt et al.~\cite{bittencourt_IR} & Attraction functions derived from information retrieval & No dependency signal \\
+% \midrule
+% \fa{Learned and interactive mapping}
+% Olsson et al.~\cite{olsson2022automatically} & Semi-supervised Naive Bayes on textual and dependency features & Dependencies enter as per-entity features, not graph structure \\
+% \makecell[tl]{Florean et al.~\cite{florean2021textclassifierscomparison}\\ InMap~\cite{InMap}} & Text classifiers compared across text representations; interactive ranking from natural-language module descriptions & No dependency signal \\
+% Jabeen et al.~\cite{jabeen2025graph} & GCN message passing on homogeneous and dependency-type-aware dependency graphs; self-training & Single relation type at a time; no non-structural signal \\
+% \midrule
+% \fa{Pretrained-model and LLM-based mapping}
+% Johansson et al.~\cite{johansson2024mapping} & Embeddings from pretrained language models, TF-IDF, and GloVe, with classifiers & Typed dependencies stay implicit in the input \\
+% Rukmono et al.~\cite{rukmono2024deductive} & Generative LLM (GPT-4), chain-of-thought prompting to a predefined architecture & Scalability concerns; public benchmark systems may overlap with pretraining data \\
+ 
+% \band{Studies in this thesis}
+% \rowcolor{gray!8} Paper~I (SAR)~\cite{arl_2026} & GNN message passing (relation-specific GAT) over dependencies, folder structure, and identifiers; contrastive objective & Gains depend on dependency homophily; evaluated on four systems \\
+% \rowcolor{gray!8} Paper~II (SAR)~\cite{gaer} & GNN message passing (GCN, GAT) over dependencies, folder structure, and lexical features; graph autoencoder & Result depends on the chosen number of clusters; folder and lexical signals fused in one input \\
+% \rowcolor{gray!8} Paper~III (C2A)~\cite{c2a_mapping} & GNN message passing (GCN, GAT) over dependencies, folder structure, and identifiers; self-training & Graph-free MLP competitive on weakly connected or low-homophily systems \\
+% \rowcolor{gray!8} Paper~IV (SAR)~\cite{structsar} & Random-walk embeddings and GNN message passing over dependencies and folder structure; variational graph autoencoder & No lexical signal; lower agreement with the reference than attributed models \\
+% \rowcolor{gray!8} Paper~V (C2A)~\cite{hetmap} & Pretrained code encoder (UniXcoder) on code text, with dependency-guided contrastive fine-tuning; heterogeneous graph transformer over dependencies and folder structure; self-training & Folder signal may share provenance with the reference; weaker on the sparsest system \\
+% \end{longtable}
+% }
+% % ==========================================================
+% % Taxonomy of prior approaches and the studies in this thesis (full version)
+% % Plain longtable (breakable). Local mark macros (no pifont needed).
+% % Needs: booktabs, longtable, xcolor[table] (already loaded).
+% % Place AFTER the \section heading and its introductory sentence.
+% % Rows marked "% UNVERIFIED" carry a family-level limitation, not one found for that method.
+% % ==========================================================
+% {\footnotesize
+% % \setlength{\tabcolsep}{2.5pt}
+% \renewcommand{\arraystretch}{1.3}
+% \def\band#1{\addlinespace[3pt]\rowcolor{gray!22}\multicolumn{3}{l}{\normalsize\textbf{#1}} \\}
+% \def\fa#1{\multicolumn{3}{l}{\small\textbf{\emph{#1}}} \\[3pt]}
+% \begin{longtable}{@{} p{0.16\textwidth} p{0.37\textwidth} p{0.37\textwidth} @{}}
+
+% \caption[Taxonomy of prior approaches and the studies in this thesis.]{Taxonomy of approaches that assign source files to architectural modules, and of the studies in this thesis, along three dimensions: task scope (SAR, C2A, this thesis), learning or aggregation paradigm, and primary limitation. Input signals are stated in the paradigm column where the group does not imply them. Limitations are taken from the original publications and from independent comparisons~\cite{comparative_survey,deps_impact_icse,deps_impact,sarif,negar}; where none is documented for a method, the limitation of its group is stated. For the studies in this thesis, the limitation is the residual limitation reported in Chapter~\ref{ch:discussion}. $^\dagger$ also uses change history, which is not studied in this thesis. \label{tab:taxonomy}}\\
+% \toprule
+% \textbf{Approach} & \textbf{Paradigm} & \textbf{Primary limitation} \\
+% \midrule
+% \endfirsthead
+% \multicolumn{3}{l}{\textit{Table~\thetable{} continued from previous page}} \\
+% \toprule
+% \textbf{Approach} & \textbf{Paradigm} & \textbf{Primary limitation} \\
+% \midrule
+% \endhead
+% \bottomrule
+% \endlastfoot
+
+% \band{Software architecture recovery}
+% \addlinespace[3pt]
+% \fa{Dependency graph-based methods}
+% \addlinespace[3pt]
+% % Bunch~\cite{bunch_sahc_nahc} & Local-search graph partitioning (hill-climbing variants); optimizes MQ & Non-deterministic; slow on large systems; modularity objective poorly matches expert decompositions \\
+% % % UNVERIFIED limitation
+% % DAGC~\cite{dagc}\newline MCA/ECA~\cite{mca_eca} & Genetic algorithm search; optimizes MQ & Modularity-based objective, which need not coincide with expert decompositions \\
+
+% \makecell[tl]{Bunch~\cite{bunch_sahc_nahc}\\ DAGC~\cite{dagc}\\ MCA/ECA~\cite{mca_eca}}
+% & Local, global, and multi-objective search-based optimization of MQ, by hill climbing and genetic algorithms
+% & MQ objective poorly matches expert decompositions; slow on large systems (Bunch) \\
+
+% ACDC~\cite{acdc} & Pattern-driven clustering: subsystem skeleton and orphan adoption & Over-fragments: splits systems into many clusters \\
+
+% FCA~\cite{fca} & Deterministic clustering on the neighborhood degree matrix & Greedy and local; weights all dependencies equally; over-fragments\\
+
+% \makecell[tl]{LIMBO~\cite{limbo}\\ WCA~\cite{wca}} & Hierarchical clustering by information bottleneck or by weighted feature-vector similarity 
+% & Require preset cluster count; low component-level accuracy in benchmarks; LIMBO does not scale to large systems \\
+% % UNVERIFIED limitation
+% \makecell[tl]{CCT~\cite{cct}\\ HCC~\cite{hcc_2019}} & Hierarchical clustering with cooperative use of multiple similarity measures or consensus of several dendrograms
+% & Quality sensitive to graph construction and dependency weighting \\
+
+% % UNVERIFIED limitation
+% GMA~\cite{gma_2021} & Graph-similarity clustering with $k$-medoids (iterative refinement) & Quality sensitive to graph construction and dependency weighting \\
+% % UNVERIFIED limitation
+% % Mohammadi et al.~\cite{neighborhood_tree_2019} & Graph-guided heuristic clustering on neighborhood structure & Quality sensitive to graph construction and dependency weighting \\
+
+% \midrule
+% \fa{Directory- and semantic-based methods}
+% \addlinespace[3pt]
+
+% Anquetil et al.~\cite{file_clustering} & Clustering on file names and directory paths ($n$-gram similarity) & Relies only on paths and consistent file naming; weak with short or cryptic names \\
+% ARC~\cite{arc} & Topic-model (LDA) clustering of code and comments & Needs cluster and topic counts; shared vocabulary misleads; slow at scale \\
+% % UNVERIFIED limitation
+% ZBR~\cite{zbr} & TF-IDF lexical zones with weights learned by expectation maximization; hierarchical clustering & Noisy in isolation: reused terminology mixes entities from several modules \\
+% % UNVERIFIED limitation
+% Risi et al.~\cite{risi2012fold} & Latent semantic indexing with $k$-means; fold-in and fold-out updates & Noisy in isolation: reused terminology mixes entities from several modules \\
+% % UNVERIFIED limitation
+% Kargar et al.~\cite{kargar2017semantic} & Semantic dependency graph from lexical cues; hill-climbing search to optimize MQ & Noisy in isolation: reused terminology mixes entities from several modules \\
+% \midrule
+
+% \fa{Hybrid multi-signal recovery}
+% SADE~\cite{sade} & Semantic (textual) weighting of the call graph; community detection & Accuracy varies widely across systems \\
+% % UNVERIFIED limitation
+% Misra et al.~\cite{sc_misra} & Automated weighting of structural and lexical features; weighted graph partitioning with a multi-objective criterion & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% NSGA-III$^\dagger$~\cite{nsga3} & Multi-objective optimization over structure, semantics, and change history & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% EoD, CGH, CGoH~\cite{sadat2019multi} & Multi-objective fitness function combining structural and semantic signals, various search strategies & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% ESCRC~\cite{escrc} & Structural coupling combined with conceptual text similarity; hierarchical clustering & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% EVOL~\cite{evol} & Semantic outlier filtering, clustering skeleton, label propagation on the dependency graph & Fusion fixed by rule, not learned from the signals \\
+% SARIF~\cite{sarif} & Heuristic fusion of dependencies, folder structure, and semantics into a weighted graph; Louvain community detection & Manually tuned weights, including dependency-type weights \\
+% Puhala et al.~\cite{ensemble_recovery} & Evidence-accumulation consensus of clusterings generated per signal (dependencies, text, directory structure) & Hand-tuned weights; gains depend on directory-hierarchy quality; Java-only evaluation \\
+% Naim et al.~\cite{naim2017cchd} & Coordinated co-clustering of structural and lexical data without per-signal weights & Requires iterative developer feedback for acceptable recovery \\
+% \midrule
+% \fa{Representation learning and LLM-based recovery}
+% NEGAR~\cite{negar} & Random-walk embeddings (node2vec, Skip-gram); $k$-means & One pipeline per dependency type; no non-structural signal \\
+% SemArc~\cite{sar_sem} & Generative LLM prompting against canonical architectural patterns, using explicit and implicit dependencies; anchor-based clustering & LLM context and cost limit scalability; public benchmark systems may overlap with pretraining data \\
+
+% \band{Code-to-architecture (C2A) mapping}
+% \fa{Rule-based mapping}
+% Tzerpos and Holt~\cite{tzerpos1997orphan} & Orphan adoption by naming, structure, and style criteria & Hard-coded patterns; module styles limited to two \\
+% Christl et al.~\cite{christl2007automated} & Attraction functions over lexical and dependency evidence; semi-automatic recommendation to the architect & Combination of lexical and dependency evidence fixed by manually specified rules \\
+% Bittencourt et al.~\cite{bittencourt_IR} & Attraction functions derived from information retrieval & No dependency signal \\
+% \midrule
+% \fa{Learned and interactive mapping}
+% Olsson et al.~\cite{olsson2022automatically} & Semi-supervised Naive Bayes on textual and dependency features & Requires 15--20\% of entities mapped beforehand; dependencies enter as per-entity features, not graph structure \\
+% Florean et al.~\cite{florean2021textclassifierscomparison} & Text classifiers compared across text representations & No dependency signal \\
+% InMap~\cite{InMap} & Interactive ranking from natural-language module descriptions & No dependency signal \\
+% % VERIFY marks, strategy and limitation of this row
+% Jabeen et al.~\cite{jabeen2025graph} & GCN message passing on homogeneous and dependency-type-aware dependency graphs; self-training & ? \\
+% \midrule
+% \fa{Pretrained-model and LLM-based mapping}
+% Johansson et al.~\cite{johansson2024mapping} & Embeddings from pretrained language models, TF-IDF, and GloVe, with classifiers & Typed dependencies stay implicit in the input \\
+% Rukmono et al.~\cite{rukmono2024deductive} & Generative LLM (GPT-4), chain-of-thought prompting to a predefined architecture & Requires an available architectural model; scalability concerns; public benchmark systems may overlap with pretraining data \\
+
+% \band{Studies in this thesis}
+% \rowcolor{gray!8} Paper~I (SAR)~\cite{arl_2026} & GNN message passing (relation-specific GAT) over dependencies, folder structure, and identifiers; contrastive objective & Gains depend on dependency homophily; evaluated on four systems \\
+% \rowcolor{gray!8} Paper~II (SAR)~\cite{gaer} & GNN message passing (GCN, GAT) over dependencies, folder structure, and lexical features; graph autoencoder & Result depends on the chosen number of clusters; folder and lexical signals fused in one input \\
+% \rowcolor{gray!8} Paper~III (C2A)~\cite{c2a_mapping} & GNN message passing (GCN, GAT) over dependencies, folder structure, and identifiers; self-training & Graph-free MLP competitive on weakly connected or low-homophily systems \\
+% \rowcolor{gray!8} Paper~IV (SAR)~\cite{structsar} & Random-walk embeddings and GNN message passing over dependencies and folder structure; variational graph autoencoder & No lexical signal; lower agreement with the reference than attributed models \\
+% \rowcolor{gray!8} Paper~V (C2A)~\cite{hetmap} & Pretrained code encoder (UniXcoder) on code text, with dependency-guided contrastive fine-tuning; heterogeneous graph transformer over dependencies and folder structure; self-training & Folder signal may share provenance with the reference; weaker on the sparsest system \\
+% \end{longtable}
+% }
+% % ==========================================================
+% % Taxonomy of prior approaches and the studies in this thesis (full version)
+% % Plain longtable (breakable). Local mark macros (no pifont needed).
+% % Needs: booktabs, longtable, xcolor[table] (already loaded), \checkmark (amssymb).
+% % Place AFTER the \section heading and its introductory sentence.
+% % Rows marked "% UNVERIFIED" carry a family-level limitation, not one found for that method.
+% % ==========================================================
+% {\footnotesize
+% \setlength{\tabcolsep}{2.5pt}
+% \renewcommand{\arraystretch}{1.2}
+% \newcommand{\yes}{\ensuremath{\checkmark}}
+% \newcommand{\no}{\ensuremath{\times}}
+% \newcommand{\band}[1]{\addlinespace[3pt]\rowcolor{gray!22}\multicolumn{6}{l}{\textbf{#1}} \\}
+% \newcommand{\fa}[1]{\multicolumn{6}{l}{\scriptsize\textbf{#1}} \\}
+% \begin{longtable}{@{} p{0.19\textwidth} c c c p{0.27\textwidth} p{0.31\textwidth} @{}}
+% \caption[Taxonomy of prior approaches and the studies in this thesis.]{Taxonomy of approaches that assign source files to architectural modules, and of the studies in this thesis, along four dimensions: task scope (SAR, C2A, this thesis), input signals, learning or aggregation paradigm, and primary limitation. Dep: static dependencies; Fold: folder hierarchy or file paths; Ident: code identifiers, comments, or other textual code content. Limitations are taken from the original publications and from independent comparisons~\cite{comparative_survey,deps_impact_icse,deps_impact,sarif,negar}; where none is documented for a method, the limitation of its group is stated. For the studies in this thesis, the limitation is the residual limitation reported in Chapter~\ref{ch:discussion}. $^\dagger$ also uses change history, which is not studied in this thesis. \label{tab:taxonomy}}\\
+% \toprule
+% \textbf{Approach} & \textbf{Dep} & \textbf{Fold} & \textbf{Ident} & \textbf{Paradigm} & \textbf{Primary limitation} \\
+% \midrule
+% \endfirsthead
+% \multicolumn{6}{l}{\textit{Table~\thetable{} continued from previous page}} \\
+% \toprule
+% \textbf{Approach} & \textbf{Dep} & \textbf{Fold} & \textbf{Ident} & \textbf{Paradigm} & \textbf{Primary limitation} \\
+% \midrule
+% \endhead
+% \bottomrule
+% \endlastfoot
+
+% \band{\normalsize Software architecture recovery (SAR)}
+% \fa{\small Dependency-based recovery}
+% % Bunch~\cite{bunch_sahc_nahc} & \yes & \no & \no & Local-search graph partitioning (hill-climbing variants); optimizes MQ & Non-deterministic; slow on large systems; modularity objective poorly matches expert decompositions \\
+% % % UNVERIFIED limitation
+% % DAGC~\cite{dagc}\newline MCA/ECA~\cite{mca_eca} & \yes & \no & \no & Genetic algorithm search; optimizes MQ & Modularity-based objective, which need not coincide with expert decompositions \\
+
+% Bunch~\cite{bunch_sahc_nahc}\newline DAGC~\cite{dagc}\newline MCA/ECA~\cite{mca_eca} 
+% & \yes & \no & \no 
+% & Local, global, or multi-objective search-based optimization of MQ & MQ objective poorly matches expert decompositions; Slow on large systems \\
+
+% ACDC~\cite{acdc} & \yes & \no & \no & Pattern-driven clustering: subsystem skeleton and orphan adoption & Over-fragments: more than 2,000 clusters on Chromium, against 67 in the reference \\
+% LIMBO~\cite{limbo} & \yes & \no & \no & Information-bottleneck hierarchical clustering & Needs a preset cluster count; lowest accuracy among benchmarked tools; very slow on Chromium \\
+% WCA~\cite{wca} & \yes & \no & \no & Weighted hierarchical clustering on feature-vector similarity; optimizes MQ & Needs a preset cluster count; low component-level coverage on large systems \\
+% FCA~\cite{fca} & \yes & \no & \no & Deterministic clustering on the neighborhood degree matrix, designed for scalability & Greedy and local; weights all dependencies equally; splits systems into many clusters \\
+% % UNVERIFIED limitation
+
+% CCT~\cite{cct} & \yes & \no & \no & Cooperative hierarchical clustering with multiple similarity measures & Quality sensitive to graph construction and dependency weighting \\
+% % UNVERIFIED limitation
+% HCC~\cite{hcc_2019} & \yes & \no & \no & Ensemble hierarchical clustering; consensus of several dendrograms & Quality sensitive to graph construction and dependency weighting \\
+% % UNVERIFIED limitation
+% GMA~\cite{gma_2021} & \yes & \no & \no & Graph-similarity clustering with $k$-medoids (iterative refinement) & Quality sensitive to graph construction and dependency weighting \\
+% % UNVERIFIED limitation
+% Mohammadi et al.~\cite{neighborhood_tree_2019} & \yes & \no & \no & Graph-guided heuristic clustering on neighborhood structure & Quality sensitive to graph construction and dependency weighting \\
+% \midrule
+
+% \fa{Directory- and semantic-based recovery}
+% Anquetil et al.~\cite{file_clustering} & \no & \yes & \no & Clustering on file names and directory paths (substring and $n$-gram similarity) & Relies on consistent file naming; weak with short or cryptic names \\
+% ARC~\cite{arc} & \no & \no & \yes & Topic-model (LDA) clustering of code and comments & Needs cluster and topic counts; shared vocabulary misleads; slow at scale \\
+% % UNVERIFIED limitation
+% ZBR~\cite{zbr} & \no & \no & \yes & TF-IDF lexical zones with weights learned by expectation maximization; hierarchical clustering & Noisy in isolation: reused terminology mixes entities from several modules \\
+% % UNVERIFIED limitation
+% Risi et al.~\cite{risi2012fold} & \no & \no & \yes & Latent semantic indexing with $k$-means; fold-in and fold-out updates & Noisy in isolation: reused terminology mixes entities from several modules \\
+% % UNVERIFIED limitation
+% Kargar et al.~\cite{kargar2017semantic} & \no & \no & \yes & Semantic dependency graph from lexical cues; hill-climbing search to optimize MQ & Noisy in isolation: reused terminology mixes entities from several modules \\
+% \midrule
+% \fa{Hybrid multi-signal recovery}
+% SADE~\cite{sade} & \yes & \no & \yes & Semantic weighting of the call graph; community detection & Accuracy varies widely across systems \\
+% % UNVERIFIED limitation
+% Misra et al.~\cite{sc_misra} & \yes & \no & \yes & Automated feature weighting; weighted graph partitioning with a multi-objective criterion & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% NSGA-III$^\dagger$~\cite{nsga3} & \yes & \no & \yes & Multi-objective optimization over structure, semantics, and change history & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% EoD, CGH, CGoH~\cite{sadat2019multi} & \yes & \no & \yes & Multi-objective fitness function combining several signals, various search strategies & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% ESCRC~\cite{escrc} & \yes & \no & \yes & Structural coupling combined with conceptual text similarity; hierarchical clustering & Fusion fixed by predefined weights or objectives, not learned from the signals \\
+% % UNVERIFIED limitation
+% EVOL~\cite{evol} & \yes & \no & \yes & Semantic outlier filtering, clustering skeleton, label propagation on the dependency graph & Fusion fixed by rule, not learned from the signals \\
+% SARIF~\cite{sarif} & \yes & \yes & \yes & Heuristic fusion into a weighted graph; Louvain community detection & Manually tuned weights, including dependency-type weights \\
+% Puhala et al.~\cite{ensemble_recovery} & \yes & \yes & \yes & Evidence-accumulation consensus of clusterings generated per signal & Hand-tuned weights; gains depend on directory-hierarchy quality; Java-only evaluation \\
+% Naim et al.~\cite{naim2017cchd} & \yes & \no & \yes & Coordinated co-clustering of structural and lexical data without per-signal weights & Requires iterative developer feedback for acceptable recovery \\
+% \midrule
+% \fa{Representation learning and LLM-based recovery}
+% NEGAR~\cite{negar} & \yes & \no & \no & Random-walk embeddings (node2vec, Skip-gram); $k$-means & One pipeline per dependency type; no non-structural signal \\
+% SemArc~\cite{sar_sem} & \yes & \no & \yes & Generative LLM prompting against canonical architectural patterns; anchor-based clustering & LLM context and cost limit scalability; public benchmark systems may overlap with pretraining data \\
+
+% \band{Code-to-architecture (C2A) mapping}
+% \fa{Rule-based mapping}
+% Tzerpos and Holt~\cite{tzerpos1997orphan} & \yes & \no & \yes & Orphan adoption by naming, structure, and style criteria & Hard-coded patterns; module styles limited to two \\
+% Christl et al.~\cite{christl2007automated} & \yes & \no & \yes & Attraction functions; semi-automatic recommendation to the architect & Combination of lexical and dependency evidence fixed by manually specified rules \\
+% Bittencourt et al.~\cite{bittencourt_IR} & \no & \no & \yes & Attraction functions derived from information retrieval & No dependency signal \\
+% \midrule
+% \fa{Learned and interactive mapping}
+% Olsson et al.~\cite{olsson2022automatically} & \yes & \no & \yes & Semi-supervised Naive Bayes & Requires 15--20\% of entities mapped beforehand; dependencies enter as per-entity features, not graph structure \\
+% Florean et al.~\cite{florean2021textclassifierscomparison} & \no & \no & \yes & Text classifiers compared across text representations & No dependency signal \\
+% InMap~\cite{InMap} & \no & \no & \yes & Interactive ranking from natural-language module descriptions & No dependency signal \\
+% % VERIFY marks, strategy and limitation of this row
+% Jabeen et al.~\cite{jabeen2025graph} & \yes & ? & ? & GCN message passing on homogeneous and dependency-type-aware graphs; self-training & ? \\
+% \midrule
+% \fa{Pretrained-model and LLM-based mapping}
+% Johansson et al.~\cite{johansson2024mapping} & \no & \no & \yes & Embeddings from pretrained language models, TF-IDF, and GloVe, with classifiers & Typed dependencies stay implicit in the input \\
+% Rukmono et al.~\cite{rukmono2024deductive} & \no & \no & \yes & Generative LLM (GPT-4), chain-of-thought prompting to a predefined architecture & Requires an available architectural model; scalability concerns; public benchmark systems may overlap with pretraining data \\
+
+% \band{Studies in this thesis}
+% \rowcolor{gray!8} Paper~I (SAR)~\cite{arl_2026} & \yes & \yes & \yes & GNN message passing (relation-specific GAT), contrastive objective & Gains depend on dependency homophily; evaluated on four systems \\
+% \rowcolor{gray!8} Paper~II (SAR)~\cite{gaer} & \yes & \yes & \yes & GNN message passing (GCN, GAT), graph autoencoder & Result depends on the chosen number of clusters; folder and lexical signals fused in one input \\
+% \rowcolor{gray!8} Paper~III (C2A)~\cite{c2a_mapping} & \yes & \yes & \yes & GNN message passing (GCN, GAT), self-training & Graph-free MLP competitive on weakly connected or low-homophily systems \\
+% \rowcolor{gray!8} Paper~IV (SAR)~\cite{structsar} & \yes & \yes & \no & Random-walk embeddings and GNN message passing, variational graph autoencoder & No lexical signal; lower agreement with the reference than attributed models \\
+% \rowcolor{gray!8} Paper~V (C2A)~\cite{hetmap} & \yes & \yes & \yes & Pretrained code encoder (UniXcoder) with dependency-guided contrastive fine-tuning; heterogeneous graph transformer; self-training & Folder signal may share provenance with the reference; weaker on the sparsest system \\
+% \end{longtable}
+% }

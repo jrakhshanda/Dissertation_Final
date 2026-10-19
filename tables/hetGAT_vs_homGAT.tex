@@ -1,0 +1,25 @@
+% Requires \usepackage[table]{xcolor}
+\begin{table*}[!htb]
+\centering\small
+\caption{Typed minus merged GAT per system, in F1 points: median over 100 paired splits, with the size of Cliff's $\delta$ (N/S/M/L) in parentheses. $^{*}$: significant (signed-rank, Holm across systems, $\alpha=0.05$). Shaded cells indicate significant negative differences.\label{tab:gat_typed_persystem}}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+& \multicolumn{2}{c}{N2V} & \multicolumn{2}{c}{W2V} & \multicolumn{2}{c}{\zs{}} & \multicolumn{2}{c}{\ft{}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+System & Macro & Micro & Macro & Micro & Macro & Micro & Macro & Micro \\
+\midrule
+A.UML & +1.7 (S)$^{*}$ & +0.9 (N)$^{*}$ & +1.3 (N) & +0.3 (N) & $-$0.4 (N) & +1.0 (S)$^{*}$ & +1.9 (S)$^{*}$ & +2.7 (M)$^{*}$ \\
+C.Img & $-$0.3 (N) & +1.0 (S)$^{*}$ & 0.0 (N) & +1.4 (S)$^{*}$ & \cellcolor{gray!20}$-$2.8 (S)$^{*}$ & $-$1.4 (N) & \cellcolor{gray!20}$-$5.0 (L)$^{*}$ & +0.9 (N)$^{*}$ \\
+JabRef & $-$0.3 (N) & \cellcolor{gray!20}$-$0.7 (S)$^{*}$ & +7.6 (L)$^{*}$ & +4.1 (L)$^{*}$ & +2.4 (S)$^{*}$ & +4.4 (L)$^{*}$ & +2.5 (S)$^{*}$ & +5.2 (L)$^{*}$ \\
+Lucene & +0.9 (N)$^{*}$ & +0.3 (N)$^{*}$ & +3.9 (M)$^{*}$ & +0.9 (S)$^{*}$ & +0.6 (N) & \cellcolor{gray!20}$-$0.8 (S)$^{*}$ & +2.7 (M)$^{*}$ & +1.3 (M)$^{*}$ \\
+SH-3D & $-$0.1 (N) & \cellcolor{gray!20}$-$1.5 (S)$^{*}$ & +5.8 (L)$^{*}$ & +1.5 (S) & +11.8 (L)$^{*}$ & +12.2 (L)$^{*}$ & +13.5 (L)$^{*}$ & +14.4 (L)$^{*}$ \\
+T.Mates & \cellcolor{gray!20}$-$1.7 (S)$^{*}$ & \cellcolor{gray!20}$-$4.6 (L)$^{*}$ & +10.4 (L)$^{*}$ & +8.7 (L)$^{*}$ & +4.6 (M)$^{*}$ & +2.3 (M)$^{*}$ & +15.9 (L)$^{*}$ & +8.8 (L)$^{*}$ \\
+Bash & +1.7 (S)$^{*}$ & +0.8 (N)$^{*}$ & \cellcolor{gray!20}$-$4.8 (L)$^{*}$ & \cellcolor{gray!20}$-$5.8 (L)$^{*}$ & \cellcolor{gray!20}$-$7.9 (L)$^{*}$ & \cellcolor{gray!20}$-$5.8 (L)$^{*}$ & \cellcolor{gray!20}$-$2.1 (S)$^{*}$ & \cellcolor{gray!20}$-$1.2 (N)$^{*}$ \\
+HDF & +0.3 (N) & +2.5 (S)$^{*}$ & +9.8 (L)$^{*}$ & +13.9 (L)$^{*}$ & +5.6 (L)$^{*}$ & +4.1 (M)$^{*}$ & +7.4 (L)$^{*}$ & +7.3 (L)$^{*}$ \\
+Chrome & +7.4 (L)$^{*}$ & +1.5 (L)$^{*}$ & +8.5 (L)$^{*}$ & +0.6 (S)$^{*}$ & \cellcolor{gray!20}$-$4.1 (L)$^{*}$ & \cellcolor{gray!20}$-$2.5 (L)$^{*}$ & +3.9 (L)$^{*}$ & +1.3 (L)$^{*}$ \\
+HDC & +2.1 (S)$^{*}$ & +1.1 (N)$^{*}$ & +5.7 (L)$^{*}$ & +3.5 (M)$^{*}$ & \cellcolor{gray!20}$-$3.3 (S)$^{*}$ & $-$2.3 (N) & \cellcolor{gray!20}$-$0.5 (N)$^{*}$ & +2.9 (S)$^{*}$ \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
