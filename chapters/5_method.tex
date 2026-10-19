@@ -77,7 +77,7 @@ Paper~IV uses edge attributes differently in its diffusion variant. GDC rewires 
 \setlength{\tabcolsep}{4pt}
 \begin{adjustbox}{max width=\textwidth}
 \begin{threeparttable}
-\renewcommand{\arraystretch}{1.1}
+\renewcommand{\arraystretch}{1.05}
 \begin{tabular}{@{} c l l l l @{}}
 \toprule
 \textbf{P} & \textbf{Nodes} & \textbf{Edges} & \textbf{Node features} & \textbf{Edge features} \\
@@ -264,8 +264,9 @@ The properties are homophily $\mathcal{H}$, the proportion of static dependencie
 \centering
 \small
 \caption[Properties of the benchmark systems.]{Properties of the benchmark systems, with the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph.\label{table:system_properties}}
+\setlength{\tabcolsep}{11pt}
 \renewcommand{\arraystretch}{1.0}
-\begin{threeparttable}
+\begin{adjustbox}{max width=\textwidth}
 \setlength{\tabcolsep}{11pt}
 \begin{tabular}{l S[table-format=2.2] S[table-format=1.2] S[table-format=3.2]}
 \toprule
@@ -288,9 +289,10 @@ HDF & 48.02 & 0.35 & 17.00 \\
 Libxml & 35.08 & 0.21 & 4.82 \\
 \bottomrule
 \end{tabular}
-\begin{tablenotes}[flushleft]
+\end{adjustbox}
+\smallskip
+\begin{minipage}{\textwidth}
 \footnotesize
-\item Papers~II and~IV reported \tmq{} without aggregating the multiplicity of member-level dependencies into a single file-pair edge weight, so the values here are not directly comparable.
-\end{tablenotes}
-\end{threeparttable}
+Papers~II and~IV reported \tmq{} without aggregating the multiplicity of member-level dependencies into a single file-pair edge weight, so the values here are not directly comparable.
+\end{minipage}
 \end{table}
