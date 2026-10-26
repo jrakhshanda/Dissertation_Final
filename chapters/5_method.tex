@@ -16,10 +16,18 @@ Input representation determines what information is available to the nodes befor
  
 The learning mechanism determines how these inputs and graph relations are used to learn file representations. The studies compare random-walk methods and graph neural networks, with learning objectives suited to recovery or mapping.
 
+% \begin{figure}[!thb]
+%     \centering
+%     \includegraphics[width=1\textwidth]{figures/design_space.pdf}
+%     \caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism.. \label{fig:design_space}}
+% \end{figure}
+
 \begin{figure}[!thb]
     \centering
-    \includegraphics[width=1\textwidth]{figures/design_space.pdf}
-    \caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input signal, and learning mechanism. \label{fig:design_space}}
+    \begin{adjustbox}{max width=1\textwidth}
+        \input{figures/design_space.tex}
+    \end{adjustbox}
+\caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism.. \label{fig:design_space}}
 \end{figure}
  
 
@@ -29,14 +37,14 @@ The studies progressively examine how dependency structure, project organization
  
 The prior approach, NEGAR~\cite{negar}, evaluates dependency types through separate pipelines and uses neither folder organization nor lexical information, leaving open whether typed dependencies can be modeled jointly and whether organizational and lexical signals provide complementary evidence for recovery. Papers~I and II take a first step on this question with a multi-relational file-level graph. Both fuse folder-path and code-identifier tokens as node features, so the contribution of each source cannot yet be separated from the others.
 
-Paper~III keeps the graph and feature construction of Paper~II, apart from the Word2Vec settings, and moves to a semi-supervised setting, formulating mapping as node classification. It introduces a graph-free multilayer perceptron (MLP) baseline, trained under the same features and self-training procedure, to compare GNN-based prediction against feature-only prediction.
+Paper~III keeps the graph and feature construction of Paper~II, apart from the Word2Vec settings, and moves to a semi-supervised setting, formulating mapping as node classification. It introduces an MLP baseline, trained under the same features and self-training procedure, to compare GNN-based prediction against feature-only prediction.
 
 Paper~IV, a further recovery study, returns to dependency structure and project organization, without lexical features. Removing the lexical features allows the contribution of project organization to be assessed without the fused signal of the earlier studies. It compares dependency-only file graphs against folder-augmented heterogeneous graphs under matched conditions, using both random-walk and graph-attention learners, and evaluates ways to extend the effective reach of message passing.
  
 Paper~V extends the mapping design by introducing a dependency-guided contextual code representation and by expanding the graph to include folder and member nodes. It compares structural, lexical, and contextual representations with and without message passing, and across graph variants that add or remove folder and member nodes, under one matched supervised mapping setting.
 
 % ____________ Signal Taxonomy ____________________
-\section{Input Signal Taxonomy}
+\section{Graph and Signal Representation}
 \label{sec:graph_signal_representation}
 
 The design space defines the representational choices in the abstract. This section instantiates them concretely, showing which graph each study constructs and which signals it places on that graph's nodes and edges. Table~\ref{tab:graph_signal} summarizes these choices across the five studies.
@@ -69,7 +77,7 @@ In zero-shot use, UniXcoder encodes these views without further training. It is 
 \subsection{Edge Attributes}\label{sec:edge_attributes}
 Edge attributes form a narrower axis of the design space and are used beyond relation type in only Papers~I and~IV. In the remaining studies, edges are defined only by their relation type. Paper~I evaluates a variant that augments file-level dependency edges with attributes describing the member-level interactions that produce them: an $\ell_2$-normalized binary encoding of interaction type and a log-normalized interaction frequency. This tests whether the origin and frequency of a dependency provide information beyond its typed presence.
  
-Paper~IV uses edge attributes differently in its diffusion variant. GDC rewires the file graph using PPR and assigns each rewired edge a scalar diffusion weight, which biases attention towards diffusion-close neighbors. Unlike the attributes of Paper~I, these weights are derived from graph topology rather than from additional implementation information. They therefore extend the effective reach of message passing rather than introduce a separate input signal.
+Paper~IV uses edge attributes differently in its diffusion variant. GDC rewires the file graph using PPR and assigns each rewired edge a scalar diffusion weight, which biases attention towards diffusion-close neighbors. Unlike the attributes of Paper~I, these weights are derived from graph topology rather than from additional implementation information. They therefore extend the structural reach of the encoder without adding information beyond the dependency graph.
 
 \begin{table}[!htb]
 \caption[Graph construction and signal representation across thesis.]{Graph construction and signal representation across the five papers (P). Numbers in parentheses give vector dimensions; ID denotes code identifiers. \label{tab:graph_signal}}
@@ -117,7 +125,7 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 
 \begin{table}[!htb]
 \centering
-\caption[Encoder configurations and training settings across the five studies.]{Encoder configurations and training settings across the five studies, grouped by architecture recovery and C2A mapping. Where a study evaluates multiple encoders, each encoder is listed separately. Dim. denotes the encoder embedding dimension; LR denotes learning rate. Dataset-specific settings for the largest systems are omitted and reported in the individual papers. \label{tab:learning_settings}}
+\caption[Encoder configurations and training settings across studies.]{Encoder configurations and training settings across the five studies, grouped by architecture recovery and C2A mapping. Where a study evaluates multiple encoders, each encoder is listed separately. Dim. denotes the encoder embedding dimension; LR denotes learning rate. Dataset-specific settings for the largest systems are omitted and reported in the individual papers. \label{tab:learning_settings}}
 \renewcommand{\arraystretch}{1.1}
 \begin{adjustbox}{max width=\textwidth}
 \begin{threeparttable}
@@ -125,21 +133,23 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 \toprule
 & \textbf{P} & \textbf{Encoder} & \textbf{Objective} & \textbf{Dim.} & \textbf{Layers} & \textbf{Heads} & \textbf{\makecell[l]{Optimizer\\ LR}} & \textbf{Epochs} \\
 \midrule
-\multirow{10}{*}{\rotatebox[origin=c]{90}{Architecture recovery}}
-& I & GAT & Contrastive & 128 & 1 & 1 & \makecell[l]{Adam~\cite{adam}\\ $10^{-3}$} & 50 \\
+
+\multirow{10}{*}{\rotatebox[origin=c]{90}{Recovery}}
+& \multirow{2}{*}{I} & GAT & \multirow{2}{*}{Contrastive} & 128 & 1 & 1 & \multirow{2}{*}{\makecell[l]{Adam~\cite{adam}\\ $10^{-3}$}} & \multirow{2}{*}{50} \\
+&  & GAT-E &  & 128 & 1 & 1 &  &  \\
 \addlinespace[0.25cm]
-& \multirow{3}{*}{II} & N2V & Skip-gram & 128 & -- & -- & \makecell[l]{SGD~\cite{goodfellow2016deep}\\ $0.025$} & 5 \\
-&  & GCN & \multirow{2}{*}{Reconstruction} & 128 & 1 & -- & \multirow{2}{*}{\makecell[l]{Adam\\ $10^{-4}$ ($10^{-3}$)$^{\dagger}$}} & \multirow{2}{*}{30 (50)$^{\dagger}$} \\
+& \multirow{2}{*}{II} & GCN & \multirow{2}{*}{Reconstruction} & 128 & 1 & -- & \multirow{2}{*}{\makecell[l]{Adam\\ $10^{-4}$ ($10^{-3}$)$^{\dagger}$}} & \multirow{2}{*}{30 (50)$^{\dagger}$} \\
 &  & GAT &  & 128 & 1 & 1 &  &  \\
 \addlinespace[0.25cm]
-& \multirow{6}{*}{IV} & N2V & \multirow{2}{*}{Skip-gram} & 128 & -- & -- & \makecell[l]{SGD\\ $0.025$} & 5 \\
+& \multirow{6}{*}{IV} & N2V & \multirow{2}{*}{Skip-gram} & 128 & -- & -- & \makecell[l]{SGD~\cite{goodfellow2016deep}\\ $0.025$} & 5 \\
 &  & M2V &  & 64 & -- & -- & \makecell[l]{SparseAdam\\ $0.05$} & 20 \\
 &  & GAT & \multirow{4}{*}{\makecell[l]{Reconstruction\\ + KL}} & 256 & 2 & 2 & \multirow{4}{*}{\makecell[l]{Adam\\ $10^{-3}$}} & \multirow{4}{*}{100} \\
 &  & GAT-DC &  & 256 & 1 or 2$^{\ddagger}$ & 2 &  &  \\
 &  & HGAT &  & 256 & 1 & 2 &  &  \\
 &  & HGAT-TD &  & 256 & 1 & 2 &  &  \\
 \midrule
-\multirow{6}{*}{\rotatebox[origin=c]{90}{C2A Mapping}}
+
+\multirow{6}{*}{\rotatebox[origin=c]{90}{Mapping}}
 & \multirow{3}{*}{III} & GCN & \multirow{6}{*}{CCE} & 256 & 2 & -- & \multirow{6}{*}{\makecell[l]{Adam\\ $10^{-3}$}} & \multirow{3}{*}{\makecell[l]{100 warm-up\\ $+$ $\leq 4 \times 30$$^{\ast}$}} \\
 &  & GAT &  & 256 & 2 & 4$\times$64 &  &  \\
 &  & MLP &  & 256 & 1 & -- &  &  \\
@@ -151,8 +161,8 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 \end{tabular}
 \begin{tablenotes}[flushleft]
 \normalsize
-\item GAT-DC: GAT on a graph rewired by GDC. HGAT: heterogeneous GAT over file and folder nodes with merged dependency types. HGAT-TD: HGAT with a separate GAT layer for each dependency type.
-\item M2V: MetaPath2Vec. SGD: stochastic gradient descent. KL: Kullback--Leibler divergence. For the MLPs, layer counts include hidden layers, excluding the linear classification head.
+\item SGD: stochastic gradient descent.
+\item For the mapping studies, layer counts exclude the linear classification head.
 \item $\dagger$ Very small systems (fewer than 100 entities).
 \item $\ddagger$ GAT-DC: one layer for more than 500 files and more than 10 modules, two otherwise.
 \item $\ast$ Paper~III epochs: warm-up plus at most the stated rounds of 30 epochs each, with pseudo-labels requiring confidence $> 0.95$.
@@ -164,7 +174,7 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 \subsection{Controlled-Comparison Logic \label{sec:controlled_comparison}}
 The studies examine selected choices within the design space through controlled comparisons. Some choices are coupled, since adding folder or member nodes also introduces relations and changes the paths available for message passing. A full factorial evaluation of all combinations would be computationally prohibitive. Each comparison therefore varies one or two choices while keeping the remaining conditions fixed where possible, allowing differences in outcome to be related to the choices under investigation.
  
-The mapping studies compare graph-based encoders with a graph-free MLP using the same input features and training procedure. These comparisons test whether access to dependency-neighborhood information improves mapping beyond the file representations alone. Paper~IV compares a dependency-only graph with the same graph augmented by folder nodes while keeping the learning setting fixed, testing the contribution of organizational structure in the absence of lexical features. Paper~V extends this logic by varying feature initialization and, with HGT, graph structure across file-only, folder-augmented, member-augmented, and combined graph variants. This makes it possible to examine the effects of input features and structural additions separately and, where combinations are included, their interaction.
+The mapping studies compare graph-based encoders with an MLP using the same input features and training procedure. These comparisons are consistent with a contribution of dependency-graph information, but they change the predictor together with the available structure. Paper~IV compares a dependency-only graph with the same graph augmented by folder nodes while keeping the learning setting fixed, testing the contribution of organizational structure in the absence of lexical features. Paper~V extends this logic by varying feature initialization and, with HGT, graph structure across file-only, folder-augmented, member-augmented, and combined graph variants. It also enables and disables dependency neighbors within each predictor while holding the file representations fixed. This makes it possible to examine the effects of input features and structural additions separately and, where combinations are included, their interaction.
 
 \section{Benchmark Systems}
 \label{sec:data}
@@ -263,11 +273,12 @@ The properties are homophily $\mathcal{H}$, the proportion of static dependencie
 \begin{table}[htb]
 \centering
 \small
-\caption[Properties of the benchmark systems.]{Properties of the benchmark systems, with the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph.\label{table:system_properties}}
+\caption[Properties of the benchmark systems.]{Properties of the benchmark systems, with the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph. Shaded cells mark the highest value in each column. \label{table:system_properties}}
 \setlength{\tabcolsep}{11pt}
 \renewcommand{\arraystretch}{1.0}
 \begin{adjustbox}{max width=\textwidth}
 \setlength{\tabcolsep}{11pt}
+\sisetup{mode=text, reset-text-family=false}
 \begin{tabular}{l S[table-format=2.2] S[table-format=1.2] S[table-format=3.2]}
 \toprule
 {System} & {\makecell{Normalized TurboMQ\\ \tmq{}}} & {\makecell{Homophily\\$\mathcal{H}$}} & {\makecell{Avg. module size\\$\langle \mathcal{M} \rangle$}} \\

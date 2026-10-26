@@ -23,7 +23,7 @@
 % % --- OPTION A: ACM-inspired ---
 \usepackage{libertine}
 \usepackage[libertine]{newtxmath}
-
+\newfontfamily\figurefont{Linux Libertine O}
 % --- OPTION B: IEEE ---
 % \usepackage{newtxtext}
 % \usepackage[varg]{newtxmath}
@@ -35,6 +35,8 @@
 % 3. TEXT FORMATTING AND TYPOGRAPHY
 % ============================================================
 \usepackage{tikz}
+\usepackage[compatibility=false]{caption}
+\usetikzlibrary{arrows.meta}
 \usepackage{enumerate}
 \usepackage{enumitem}
 \usepackage{csquotes}
@@ -58,7 +60,6 @@
 \usepackage{longtable}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \usepackage{threeparttable}
-% \usepackage{xcolor}
 \usepackage{calc}
 \usepackage{pdfpages}
 \usepackage{xstring}
@@ -85,14 +86,35 @@
 \usepackage{url}
 \urlstyle{acsstyle}
 \usepackage{xurl}
+\usepackage{etoolbox}
+\usepackage{xcolor}
+\definecolor{hscolor}{RGB}{0,77,102}
+\definecolor{darkcerulean}{rgb}{0.03, 0.27, 0.49}
 
 \hypersetup{
-  hidelinks,
+  colorlinks=true,
+  linkcolor=darkcerulean,
+  citecolor=darkcerulean,
+  filecolor=darkcerulean,
+  menucolor=darkcerulean,
+  urlcolor=black,
   pdftitle={Representing Architectural Evidence in Software Systems: A Graph Learning Approach},
   pdfauthor={Rakhshanda Jabeen},
   pdfsubject={PhD Dissertation},
   pdfkeywords={Software Architecture Recovery; Code-to-Architecture Mapping;
     Graph Neural Networks; Representation Learning; Software Engineering}
+}
+
+% black links in the contents and in the lists of figures and tables
+\newcommand{\blacklinks}[1]{%
+  \pretocmd{#1}{\hypersetup{linkcolor=black}}{}{}%
+  \apptocmd{#1}{\hypersetup{linkcolor=hscolor}}{}{}%
+}
+\blacklinks{\chaptertoc}
+\AtBeginDocument{%
+  \blacklinks{\tableofcontents}%
+  \blacklinks{\listoffigures}%
+  \blacklinks{\listoftables}%
 }
 % ============================================================
 % 8. CUSTOM COMMANDS -- GENERAL HELPERS
@@ -118,32 +140,14 @@
   bottom=1ex,
   before skip=3ex,
   after skip=3ex,
-  title=#2\unskip, %\unskip
+  title=#2\unskip,
   #1
 }
 
-% \newtcolorbox{GrayBox}[2][]{%
-%   enhanced,
-%   float,
-%   floatplacement=htbp,
-%   rounded corners,
-%   arc=3pt,
-%   width=\linewidth,
-%   center,
-%   colback=gray!0,
-%   colframe=black!70,
-%   boxrule=0.5pt,
-%   left=1ex,
-%   right=1ex,
-%   top=1ex,
-%   bottom=1ex,
-%   title=#2\unskip,
-%   #1
-% }
-
 \newcommand{\parg}[1]{%
-  \par\medskip \noindent\textbf{\textit{#1}} %\quad%
+  \par\medskip \noindent\textbf{#1}\quad%
 }
+
 \newcommand{\abbr}[1]{{\small #1}}
 \newcommand{\zs}{UXC\textsubscript{ZS}}
 \newcommand{\ft}{UXC\textsubscript{FT}}

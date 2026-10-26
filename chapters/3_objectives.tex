@@ -25,7 +25,7 @@ f_{\theta}: \mathcal{G}\;\longrightarrow\;\mathbf{Z}\in\mathbb{R}^{|\mathcal{V}_
 \end{equation}
 that maps each source code file $i \in \mathcal{V}_{\texttt{file}}$ to a $d$-dimensional embedding $\mathbf{z}_i \in \mathbb{R}^{d}$, where $\theta$ denotes the learnable parameters. The resulting file embeddings are clustered into a recovered architectural decomposition $\hat{\mathcal{C}}$, which partitions the source code files into $m$ disjoint modules:
 \begin{equation}
-\hat{\mathcal{C}} = \{C_1, \dots, C_m\},
+\hat{\mathcal{C}} = \{C_1, \dots, C_m\}.
 \label{eq:sar-partition}
 \end{equation}
 
@@ -57,7 +57,7 @@ To design, compare, and benchmark graph-based representation learning methods fo
 \end{enumerate}
 This objective is addressed through comparisons across recovery and mapping studies on file-level graphs. Most comparisons jointly encode folder, lexical, and dependency signals within one encoder. The comparisons cover GCN, GAT, and HGT encoders and merged versus relation-specific dependencies. Recovery experiments compare contrastive and reconstruction objectives using the same encoder, inputs, and benchmark systems. Mapping studies also vary model depth; one study and its cross-study extension use inputs without folder signals.
 % _______________________
-\subsection{Architectural Information in Implementation Signals}
+\subsection{Representations of Implementation Signals}
 \label{sec:obj_2}
 
 \begin{GrayBox}{Objective~2}
@@ -68,9 +68,9 @@ To determine what architectural information dependency structure and individual 
     \item How does dependency-guided adaptation of a contextual code representation affect the architectural signal it carries?
     \item How do structural, lexical, and contextual file representations compare in mapping without message passing?
 \end{enumerate}
-This objective examines the architectural information carried by individual implementation signals. In recovery, it uses dependency structure alone on the homogeneous SDG, without lexical or folder information, and examines how much structural context is needed across systems. In mapping, it compares file representations without adding folder organization, member-level detail, or SDG-based message passing. These representations include Word2Vec, zero-shot UniXcoder, Node2Vec, and UniXcoder fine-tuned through SDG-guided contrastive learning without module labels. The latter two incorporate dependency information during representation learning. A graph-free MLP classifier uses each file's representation independently, so it can access dependency information only if that information is already encoded in the representation.
+This objective examines the architectural information provided by representations of individual implementation signals. In recovery, it uses dependency structure alone on the homogeneous SDG, without lexical or folder information, and examines how much structural context is needed across systems. In mapping, it compares file representations without adding folder organization, member-level detail, or SDG-based message passing. These representations include Word2Vec, zero-shot UniXcoder, Node2Vec, and UniXcoder fine-tuned through SDG-guided contrastive learning without module labels. The latter two incorporate dependency information during representation learning. A multilayer perceptron (MLP) classifier uses each file's representation independently, so it can access dependency information only if that information is already encoded in the representation.
 % ______________________
-\subsection{Interaction Between Input Signals and Graph Structure}
+\subsection[Implementation Signals and Graph Structure]{Interaction Between Implementation Signals and Graph Structure}
 \label{sec:obj_3}
 
 \begin{GrayBox}{Objective~3}
@@ -82,4 +82,4 @@ To determine how the contribution of file representations changes with dependenc
     \item How does adding folder organization to the graph change what the file representations contribute to recovery and mapping?
     \item How does performance differ with and without member-level nodes and edge-level interaction details?
 \end{enumerate}
-This objective examines how additional graph structure changes the contribution of file representations. In recovery, folder nodes and containment meta-relations are added to the SDG and evaluated through message passing or random walks; edge attributes describing the member-level interactions behind each dependency, including their type and frequency, are examined separately. In mapping, graph-free and graph-based neural predictors are compared, and dependency neighbors are enabled or disabled within each predictor while holding file representations fixed. Aggregation direction is also varied. Folder and member nodes are evaluated with Word2Vec, Node2Vec, and fine-tuned UniXcoder. Member nodes also change how lexical and contextual content enters the model, and a rule based on the directory hierarchy and initial labels provides a reference.
+This objective examines how additional graph structure changes the contribution of file representations. In recovery, folder nodes and containment meta-relations are added to the SDG and evaluated through message passing or random walks; edge attributes describing the member-level interactions behind each dependency, including their type and frequency, are examined separately. In mapping, an MLP and graph-based neural predictors are compared, and each predictor is evaluated with and without access to dependency neighbors while holding file representations fixed. Aggregation direction is also varied. Folder and member nodes are evaluated with Word2Vec, Node2Vec, and fine-tuned UniXcoder. Member nodes also change how lexical and contextual content enters the model, and a rule based on the directory hierarchy and initial labels provides a reference.

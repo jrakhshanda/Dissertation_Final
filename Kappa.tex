@@ -66,7 +66,7 @@ This thesis aims to determine how graph-based representation learning can be des
 
 The investigation starts with file-level dependency graphs in which the signals are supplied as node attributes, examines the signals individually, and then adds two further node types, with member nodes used only for mapping. A folder node represents a directory and is connected to its parent folder and to the files it contains. A member node aggregates all program elements of a single source file, such as its methods and fields, and is connected to that file. Adding these nodes only after the signals have been examined individually makes it possible to separate the effect of the initial file representation from the effects of graph structure and of the way information is shared between connected files. The aim is not to identify one graph model or representation that is uniformly preferable, but to examine under which conditions different signals and learning mechanisms are useful.
 
-The thesis assigns source-code files to architectural modules and evaluates the assignments against a published reference decomposition. The file is the unit of analysis throughout. Member-level information may serve as evidence, but assignments are not made at the class, method, or subsystem level. The thesis spans unsupervised recovery and semi-supervised mapping with limited labeled data and considers static implementation artifacts: dependencies, folder organization, and source code content. Other sources of evidence, such as commit co-change history and dynamic dependencies observed at runtime, are not studied. Chapter~\ref{ch:research_objective} states the formal problem and the objectives.
+The thesis assigns source-code files to architectural modules and evaluates the assignments against a published reference decomposition. The file is the unit of analysis throughout. Member-level information may serve as evidence, but assignments are not made at the class, method, or subsystem level. The thesis spans unsupervised recovery and supervised mapping with limited labeled data and considers static implementation artifacts: dependencies, folder organization, and source code content. Other sources of evidence, such as commit co-change history and dynamic dependencies observed at runtime, are not studied. Chapter~\ref{ch:research_objective} states the formal problem and the objectives.
 
 \section{Thesis Contributions}
 \label{sec:intro-contributions}
@@ -77,10 +77,9 @@ The thesis makes four contributions: three research contributions, each correspo
 
     \item \textbf{Graph-based representation learning for recovery and mapping.} The thesis develops and evaluates graph-based formulations for SAR (Papers~I and~II) and C2A mapping (Paper~III). These formulations explicitly represent implementation artifacts and their relations, and support learning without module labels for recovery and from a small labeled set for mapping. The studies compare alternative self-supervised objectives (Papers~I and~II), encoder architectures (Papers~II--V), dependency-relation representations (Papers~III and~IV), and message-passing configurations (Paper~III), and benchmark the resulting methods against established approaches (Papers~I--IV).
 
-    \item \textbf{An empirical evaluation of architectural signals.} The thesis examines the architectural information carried by dependency structure and by lexical and contextual representations of source-code content, before folder organization, member-level detail, and message passing between neighboring files are added. Paper~IV examines how far the software dependency graph alone supports recovery. Paper~V compares structural, lexical, and contextual initial file representations with a graph-free classifier, so that the classifier receives no information from neighboring files beyond what each representation already encodes. Paper~V also examines whether a contextual code representation from a transformer model can be adapted using dependency information to reflect architectural proximity better.
-    % The results indicate that representations encoding dependency information, either directly or through such adaptation, generally outperform those that do not, although no single representation is best on every system.
-
-    \item \textbf{An analysis of the effect of graph structure on recovery and mapping.} The thesis adds folder organization and member-level detail to the file-level graph, makes dependency neighbors available through message passing, and examines whether each contributes beyond the initial file representation and whether the conclusions on the individual signals continue to hold. In recovery, Paper~IV examines folder nodes and Paper~I edge-level attributes. In mapping, Paper~V examines folder nodes, member nodes, and controlled comparisons that switch dependency neighbors on and off within each predictor. The results indicate that the benefit of additional graph relations or message passing depends on the information already encoded in the file representation and on the predictor used to aggregate neighbors.
+    \item \textbf{An empirical evaluation of architectural signals.} The thesis examines the architectural information carried by dependency structure and by lexical and contextual representations of source-code content, before folder organization, member-level detail, and message passing between neighboring files are added. Paper~IV examines how far the software dependency graph alone supports recovery. Paper~V compares structural, lexical, and contextual initial file representations with a graph-free classifier, so that the classifier receives no information from neighboring files beyond what each representation already encodes. Paper~V also examines whether a contextual code representation from a transformer model can be adapted using dependency information to reflect architectural proximity.
+    
+    \item \textbf{An analysis of the effect of graph structure on recovery and mapping.} The thesis adds folder organization and member-level detail to the file-level graph, makes dependency neighbors available through message passing, and examines whether each contributes beyond the initial file representation and whether the conclusions on the individual signals continue to hold. In recovery, Paper~IV examines folder nodes and Paper~I edge-level attributes. In mapping, Paper~V examines folder nodes, member nodes, and message passing, comparing each predictor with and without dependency-neighbor access, and Papers~III and~V compare aggregation directions. Where possible, these comparisons hold the file representation fixed, so that the contribution of the added structure can be separated from that of the representation.
 
     \item \textbf{A controlled cross-study evaluation.} The five studies use different benchmark scopes, which limit direct comparison of their results. The thesis, therefore, extends the evaluation of their methods to a common set of benchmark systems (Section~\ref{sec:cross_study_eval}). Recovery methods from Papers~I, II, and~IV are evaluated on fourteen systems using a common clustering algorithm and assessed by both agreement with reference decompositions and dependency cohesion. Mapping method comparisons build on Papers~III and~V and use ten systems under matched input representations, initial labeled sets, and self-training conditions. Mapping methods are assessed by the F1 score. Results are reported per system with significance tests and effect sizes.
 \end{enumerate}
@@ -93,7 +92,7 @@ The remainder of the thesis is organized as follows. Chapter~\ref{ch:background}
 
 Chapter~\ref{ch:research_objective} formulates the research problem and defines the research objectives and research questions. Chapter~\ref{ch:studies} maps the included studies to these objectives and summarizes, for each study, what it built, its benchmark scope, its main baselines, and its principal findings. Chapter~\ref{ch:methodology} presents the research method, including the shared empirical and constructive design, the study progression, the investigated design space, the implementation signals and graph configurations, the benchmark systems, the evaluation protocol, and the controlled cross-study evaluation.
 
-Chapter~\ref{ch:findings} synthesizes the findings of the included studies and of the cross-study evaluation by research objective. Chapter~\ref{ch:discussion} discusses the findings across studies, examines how input signals, graph construction, dependency homophily, connectivity, and structural reach influence recovery and mapping, and addresses the limitations of the work. Chapter~\ref{ch:conclusion} concludes the thesis by summarizing the main findings and contributions and identifying directions for further research.
+Chapter~\ref{ch:findings} synthesizes the findings of the included studies and of the cross-study evaluation by research objective. Chapter~\ref{ch:discussion} discusses the findings across studies, examines how input signals, graph construction, dependency homophily and structural reach influence recovery and mapping, and addresses the limitations of the work. Chapter~\ref{ch:conclusion} concludes the thesis by summarizing the main findings and contributions and identifying directions for further research.
 
 % ---------------------------------------------------
 % CHAPTER 2 — BACKGROUND
@@ -101,11 +100,11 @@ Chapter~\ref{ch:findings} synthesizes the findings of the included studies and o
 \chapter{Background \label{ch:background}}
 \chaptertoc
 
- This chapter presents the background needed to frame the research problem and the methods used in this thesis. It first reviews prior approaches to software architecture recovery and code-to-architecture mapping, with attention to how they represent and combine implementation-level evidence. It then introduces the artifact representations, graph-based learning methods and the graph properties that affect them, learning paradigms, and evaluation concepts used in the subsequent chapters.
- 
+This chapter presents the background needed to frame the research problem and the methods used in this thesis. It first reviews prior approaches to software architecture recovery and code-to-architecture mapping, with attention to how they represent and combine implementation-level evidence. It then introduces the artifact representations, graph-based learning methods, the graph properties that affect them, the learning paradigms, and the evaluation concepts used in the subsequent chapters.
+
 \section{Prior Approaches \label{sec:bg_prior}}
 
-Prior approaches to architecture recovery and C2A mapping draw on the same implementation signals: static dependencies between source files, directory layout, and identifiers and comments in the code. Some also use system version history, which is not studied in this thesis. The approaches differ in how they represent, combine, and learn from these signals. Table~\ref{tab:taxonomy} lists representative methods with the signals they use, their learning or aggregation paradigm, and a primary limitation. The remainder of this section traces the progression shown in the table, from search-based and clustering methods on dependency graphs, through hand-specified multi-signal fusion, to more recent learned representations based on graph embeddings and language models.
+Prior approaches to architecture recovery and C2A mapping draw on the same implementation signals: static dependencies between source files, directory layout, and identifiers and comments in the code. Some also use system version history, which is not studied in this thesis. The approaches differ in how they represent, combine, and learn from these signals. Table~\ref{tab:taxonomy} gives selected examples, with the signals they use, their learning or aggregation paradigm, and a primary limitation; it is not an exhaustive inventory of the work discussed below. The remainder of this section traces the progression shown in the table, from search-based and clustering methods on dependency graphs, through hand-specified multi-signal fusion, to learned representations based on graph embeddings and language models.
 
 % =================================
 % Taxonomy Table
@@ -117,7 +116,7 @@ Prior approaches to architecture recovery and C2A mapping draw on the same imple
 \def\no{\ensuremath{\times}}
 \def\taskrow#1{\addlinespace[3pt]\rowcolor{gray!22}\multicolumn{6}{l}{\normalsize\textbf{#1}} \\}
 \def\famrow#1{\multicolumn{6}{l}{\small\textbf{\emph{#1}}} \\[2pt]}
- 
+
 \begin{longtable}{@{} >{\raggedright\arraybackslash}p{0.18\textwidth} c c c >{\raggedright\arraybackslash}p{0.32\textwidth} >{\raggedright\arraybackslash}p{0.33\textwidth} @{}}
 \caption[Taxonomy of representative prior approaches.]{Representative approaches to SAR and C2A mapping. SD: static dependencies; F: folder hierarchy or file paths; T: identifiers, comments, or other code text. $^\dagger$ denotes an additional signal not studied in this thesis. Further approaches are discussed in the text. \label{tab:taxonomy}}\\
 \toprule
@@ -143,9 +142,9 @@ FCA~\cite{fca} & \yes & \no & \no & Fast clustering on the neighborhood degree m
 LIMBO~\cite{limbo} & \yes & \no & \no & Information-bottleneck hierarchical clustering & Preset cluster count; does not scale to large systems \\
 WCA~\cite{wca} & \yes & \no & \no & Weighted hierarchical clustering & Preset cluster count; low component-level accuracy \\
 \midrule
-\famrow{Semantic and directory-based clustering}
-Anquetil et al.~\cite{file_clustering} & \no & \yes & \no & Clustering on file paths and names & Folders can mix responsibilities; needs consistent naming \\
-ARC~\cite{arc} & \no & \no & \yes & LDA-based topic modeling & Shared terminology mixes modules; preset cluster count \\
+\famrow{Semantic and name-based clustering}
+Anquetil et al.~\cite{file_clustering} & \no & \no & \yes & File-name clustering using common substrings and lexical concepts & Short or cryptic names can hinder concept extraction \\
+ARC~\cite{arc} & \yes & \no & \yes & LDA-based topic modeling & Shared terminology mixes modules; preset cluster count \\
 % UNVERIFIED limitation
 ZBR~\cite{zbr} & \no & \no & \yes & TF-IDF weighted lexical zones, hierarchical clustering & Shared terminology mixes modules \\
 \midrule
@@ -163,14 +162,14 @@ Amalfitano et al.~\cite{amalfitano2025automated} & \no & \no & \yes & Generative
 SemArc~\cite{sar_sem} & \yes & \no & \yes & LLM code interpretation, anchor-based clustering & Scalability; possible benchmark overlap with pretraining data \\
 \midrule
 \taskrow{Code-to-architecture mapping}
-\famrow{Rule-based mapping}
+\famrow{Rule-based and retrieval-based mapping}
 Tzerpos and Holt~\cite{tzerpos1997orphan} & \yes & \no & \yes & Orphan adoption by naming and structure criteria & Hard-coded patterns \\
-HuGMe~\cite{christl2007automated} & \yes & \no & \yes & Attraction functions for semi-automatic mapping & Lexical and dependency evidence combined manually \\
+HuGMe~\cite{christl2007automated} & \yes & \no & \no & Dependency-based attraction functions for semi-automatic mapping & Requires an initial partial mapping \\
 \makecell[tl]{IRAttract\\ LSIAttract~\cite{bittencourt_IR}} & \no & \no & \yes & Information-retrieval based attraction functions & No explicit dependency structure \\
+InMap~\cite{InMap} & \no & \no & \yes & Interactive ranking from module descriptions & No dependency structure \\
 \midrule
 \famrow{Learned mapping}
 NBAttract~\cite{olsson2022automatically} & \yes & \no & \yes & Semi-supervised Naive Bayes & Dependencies enter as per-file features, not graph structure \\
-InMap~\cite{InMap} & \no & \no & \yes & Interactive ranking from module descriptions & No dependency structure \\
 \midrule
 \famrow{Embedding-based and LLMs}
 Johansson et al.~\cite{johansson2024mapping} & \no & \no & \yes & Pretrained embeddings with classifiers & No explicit dependency or folder structure \\
@@ -180,25 +179,27 @@ Rukmono et al.~\cite{rukmono2024deductive} & \no & \no & \yes & GPT-4 mapping to
 
 \subsection{Software Architecture Recovery}
 
-Traditional recovery methods treat software artifacts as a dependency graph and recover modules through several related paradigms. A first group formulates recovery as search over a modularization objective: some optimize a single modularity criterion favoring high cohesion within modules and low coupling across them~\cite{bunch_sahc_nahc,dagc}, while others use multi-objective or evolutionary search to balance several criteria at once~\cite{mca_eca}. A second group clusters directly on dependency-derived similarity or information-theoretic criteria~\cite{cct,hcc_2019,limbo,wca}, with ACDC~\cite{acdc} instead building clusters from recurring subsystem patterns, and a third emphasizes practicality, determinism, or scalability in the clustering procedure itself~\cite{fca,neighborhood_tree_2019,gma_2021}. These methods can be effective when dependencies reflect architectural structure, but recovery quality is sensitive to how the dependency graph is constructed and how dependency types are weighted.
+Traditional recovery methods treat software artifacts as a dependency graph and recover modules through several related paradigms. A first group formulates recovery as search over a modularization objective. Some methods optimize a single modularity criterion that favors high cohesion within modules and low coupling across them~\cite{bunch_sahc_nahc,dagc}, while others use multi-objective or evolutionary search to balance several criteria at once~\cite{mca_eca}. A second group clusters directly on dependency-derived similarities or information-theoretic criteria~\cite{cct,hcc_2019,limbo,wca}. ACDC~\cite{acdc} takes a different approach by building clusters from recurring subsystem patterns. A third group focuses on the clustering procedure itself. FCA~\cite{fca} speeds up clustering for large systems by working on the neighborhood degree matrix; Mohammadi and Izadkhah~\cite{neighborhood_tree_2019} build clusters from the neighborhoods of artifacts in the dependency graph, and Pourasghar et al.~\cite{gma_2021} use relationship depth. Overall, graph-based recovery methods can work well when dependencies reflect architectural structure, but their effectiveness depends on which dependency relations the graph includes and how the method uses them.
 
-Semantic approaches use identifiers and comments instead of, or alongside, dependencies, and can outperform dependency-only methods in some systems~\cite{comparative_survey}. ARC, ZBR, and Risi et al. cluster artifacts in a latent semantic space learned from source code, whether through topic models, TF-IDF zones, or LSI~\cite{arc,zbr,risi2012fold}, and Kargar et al.~\cite{kargar2017semantic} build a semantic dependency graph from lexical cues and optimize it by local search. Anquetil et al.~\cite{file_clustering} instead use file names and directory paths as a proxy for architecture. Non-structural signals of this kind can be noisy in isolation, since reused terminology and utility directories mix entities from several modules.
+Semantic approaches use identifiers and comments instead of, or alongside, dependencies, and can outperform dependency-only methods in some systems~\cite{comparative_survey}. ARC~\cite{arc} uses latent Dirichlet allocation (LDA) to infer concerns from source text and combines them with structural information. ZBR and Risi et al. derive semantic similarities using lexical zones and latent semantic indexing (LSI), respectively~\cite{zbr,risi2012fold}, while Kargar et al.~\cite{kargar2017semantic} build a semantic dependency graph from lexical cues and optimize it by local search. Anquetil et al.~\cite{file_clustering} take a related but distinct approach by clustering files according to their names, using common substrings and concepts found in routine names or comments. Non-structural signals of this kind can be noisy in isolation, since reused terminology may span modules.
 
-Hybrid approaches combine multiple sources to improve robustness. Weighted similarity fusion with search-based partitioning and many-objective remodularization augment a structural objective with semantic or evolution-related criteria~\cite{sc_misra,escrc,nsga3,sadat2019multi}. Puhala et al.~\cite{ensemble_recovery} combine several clustering results into a consensus solution, and Yang et al.~\cite{evol} use semantic cues to guide label propagation over the dependency graph. Naim et al.~\cite{naim2017cchd} combine structural and contextual information through coordinated clustering, adapting the combination through incremental developer feedback rather than fixed weights. SADE~\cite{sade} and SARIF~\cite{sarif} both fuse signals by building a weighted dependency graph and applying community detection; SARIF, used as a baseline in the recovery studies in this thesis, extends this pipeline with directory similarity and community detection. Across this group, the fusion is usually a fixed rule or a heuristic weighting rather than a representation learned jointly from the signals.
- 
-Representation learning has also been applied to recovery. NEGAR~\cite{negar} learns embeddings from the dependency graph through random walks and clusters the resulting vectors, and reports that recovery quality varies across dependency types, motivating methods able to exploit several relations jointly. NEGAR runs a separate pipeline per dependency type, however, and does not incorporate non-structural signals. These limitations motivate the recovery studies synthesized in this thesis. They examine multi-relational graph representation learning through reconstruction and contrastive learning objectives, the integration of directory and lexical information~\cite{gaer,arl_2026}, and the extent to which the choice of input graph interacts with encoder reach~\cite{structsar}.
+Hybrid approaches use multiple sources to capture complementary evidence. Some integrate structural and semantic relations before hierarchical clustering~\cite{sc_misra,escrc}. Others incorporate semantic information into search-based modularization, and NSGA-III also uses development change history~\cite{sadat2019multi,nsga3}. Puchala et al.~\cite{ensemble_recovery} combine several clustering results into a consensus solution, while Yang et al.~\cite{evol} use semantic cues to guide label propagation over the dependency graph. Naim et al.~\cite{naim2017cchd} combine structural and contextual information through coordinated clustering, refining the combination through incremental developer feedback. SADE~\cite{sade} and SARIF~\cite{sarif} combine signals in weighted dependency graphs and apply community detection. SARIF also incorporates directory similarity. These methods bring information together at different stages, from constructing relations and defining search objectives to guiding or combining clustering results. In most cases, the fusion is specified by a designed procedure, consensus rule, or heuristic weighting rather than learned jointly as a representation of the signals.
 
-More recently, LLMs have reached recovery as well: SemArc~\cite{sar_sem} uses an LLM to interpret code and architectural semantics against canonical patterns, then clusters components with an anchor-based strategy. Amalfitano et al.~\cite{amalfitano2025automated} evaluate general-purpose LLMs prompted iteratively to recover class diagrams and architectural patterns and styles from source code, and find that they identify structural elements better than class relationships and fine-grained design patterns. Related work applies language models to recovery of large legacy systems~\cite{archagent}.
+Representation learning has also been applied to recovery. NEGAR~\cite{negar} learns node representations from dependency graphs through random walks and clusters the resulting vectors. It applies this pipeline separately to graphs at different implementation levels and does not incorporate non-structural signals.
+
+Another approach uses large language models to infer architectural structures and patterns from source code. SemArc~\cite{sar_sem} uses LLMs to identify implementation-level and architectural semantics, drawing on canonical architectural patterns as a knowledge base. It also incorporates explicit and implicit dependencies before applying component-as-anchor clustering. Amalfitano et al.~\cite{amalfitano2025automated} evaluate general-purpose LLMs on identifying implementation-level class diagrams, architectural and design patterns, and architectural styles. Their prompts include a self-reflection step to simulate iterative refinement. ArchAgent~\cite{archagent} combines static analysis and adaptive code segmentation with LLM-based synthesis to recover multi-view architectures from large, cross-repository codebases.
 
 \subsection{Code-to-architecture Mapping}
- 
-Tzerpos and Holt~\cite{tzerpos1997orphan} introduced orphan adoption as the incremental assignment of unmapped entities to a documented architecture. Christl et al.~\cite{christl2007automated} built on this with HuGMe, a semi-automatic method that recommends mappings through attraction functions and leaves the decision to the architect, and Bittencourt et al.~\cite{bittencourt_IR} studied attraction functions derived from information retrieval (IRAttract and LSIAttract), assigning each entity to the module its text most resembles. These methods rely on the same two signals as recovery, lexical similarity and dependency proximity to already-mapped entities, but combine them through fixed, manually specified rules, the mapping analog of the fusion schemes above.
- 
-A later shift replaces these hand-designed rules with learned models. Olsson et al.~\cite{olsson2022automatically} propose NBAttract, a semi-supervised Naive Bayes mapper that combines lexical and dependency-derived features through Concrete Dependency Abstraction. Florean et al.~\cite{florean2021textclassifierscomparison} compare text classifiers for the same task and show that both the classifier and the text representation affect mapping quality. InMap~\cite{InMap} instead ranks candidate mappings interactively from natural language module descriptions as a recommendation system. In these methods, dependency information, where used, typically enters as a feature attached to individual entities rather than as an explicit graph structure. Our earlier work~\cite{jabeen2025graph} took the corresponding step to graph representation learning, evaluating GCN-based models on homogeneous and dependency-type-aware graphs and showing that a small labeled set can be expanded through self-training.
 
-Pretrained models have also been applied to mapping: Johansson et al.~\cite{johansson2024mapping} evaluate pretrained embeddings alongside TF-IDF and GloVe as input to method-level classifiers, and in follow-up work find that classification performance depends less on lexical overlap or class balance and more on how separable the classes are in the embedding space, an effect that varies with documentation granularity~\cite{johansson2026mapping}. Rukmono et al.~\cite{rukmono2024deductive} use chain-of-thought prompting with GPT-4 to map implementation units to a predefined reference architecture, which raises scalability concerns as system size grows. These models exploit lexical and semantic signal at a scale earlier methods could not, but typed dependencies stay implicit in their input.
+Tzerpos and Holt~\cite{tzerpos1997orphan} introduced orphan adoption, the incremental assignment of unmapped entities to a documented architecture using naming and structural criteria. Christl et al.~\cite{christl2007automated} built on this with HuGMe, a semi-automatic method that extends a partial mapping through dependency-based attraction functions and leaves uncertain assignments for the architect to review. Bittencourt et al.~\cite{bittencourt_IR} later introduced the information-retrieval attraction functions IRAttract and LSIAttract, which use lexical similarity between entities and modules. InMap~\cite{InMap} takes an interactive recommendation approach, ranking candidate mappings from natural-language module descriptions. Like HuGMe, it keeps the architect involved, but through interactive recommendations rather than review of uncertain assignments. Together, these approaches rely on predefined criteria, attraction functions, or retrieval-based ranking rather than a jointly learned representation, the mapping analog of the fusion schemes above.
 
-Across recovery and mapping, a common methodological limitation remains. Existing approaches either rely on one source of information, combine several sources through predefined rules, or fix how each source is represented within a learned model. Consequently, the effects of graph structure, directory organization, and source-code content are rarely isolated under matched conditions. The studies comprising this thesis address this limitation by examining how these signals should be represented, combined, and propagated for architecture recovery and C2A mapping.
+Learned classifiers provide another approach to mapping. Olsson et al.~\cite{olsson2022automatically} propose NBAttract, a semi-supervised Naive Bayes mapper that combines lexical and dependency information encoded via Concrete Dependency Abstraction (CDA). Florean et al.~\cite{florean2021textclassifierscomparison} compare text classifiers and text representations for the same task. Our earlier work~\cite{jabeen2025graph} represents dependencies directly as edges in homogeneous and dependency-type-aware graphs, in contrast to NBAttract's feature-based encoding. It evaluates graph convolutional network (GCN) variants and uses iterative pseudo-labeling to expand a small initial labeled set.
+
+Some mapping studies use pretrained embeddings as classifier inputs, while others prompt general-purpose LLMs to produce mappings. Johansson et al.~\cite{johansson2024mapping} evaluate pretrained embeddings alongside TF-IDF and GloVe as input to method-level classifiers. In follow-up work, they examine how documentation granularity relates to classification performance with pretrained embeddings~\cite{johansson2026mapping}. Rukmono et al.~\cite{rukmono2024deductive} use chain-of-thought prompting with GPT-4 to map implementation units to a predefined reference architecture. Both approaches use lexical or semantic information, while typed dependencies remain implicit in their inputs.
+
+\subsection{Limitations Across Recovery and Mapping}
+
+Across recovery and mapping, many of the reviewed approaches rely on a single information source, combine sources through predefined rules, or use a fixed representation of each source within a learned model. Comparing the contributions of graph structure, directory organization, and source-code content requires varying these choices under matched conditions. The studies comprising this thesis examine how these signals can be represented, combined, and propagated for architecture recovery and C2A mapping.
 
 % % Studies in this thesis (kept commented out: the Background introduces prior work only; the table is stale and needs the merged dependency type and supervised-only mapping for Paper V if it is ever reinstated)
 % % ======================
@@ -225,33 +226,33 @@ Across recovery and mapping, a common methodological limitation remains. Existin
 % \end{table}
 % % =======================
 \section[Representing Artifact Content]{Representing Artifact Content and Organization \label{sec:bg_content}}
- 
+
 A software system carries architectural evidence in more than one form. Its files and members are connected by static dependencies, but they also have names, occupy locations in the folder hierarchy that reflect how developers group related functionality~\cite{garcia2013}, and contain identifiers and comments that encode domain-specific knowledge~\cite{sarif}. In a representation learning framework, dependencies can be represented as graph relations, while the content associated with individual artifacts must be encoded numerically for a learning model to operate on. This section introduces the two families of representation used in the thesis: lexical and contextual.
- 
+
+
 \subsection{Lexical Representations \label{sec:bg_lexical}}
-Lexical representations treat file paths and source-code identifiers as tokens drawn from a vocabulary. The simplest representation is a binary bag-of-words (BoW) vector, in which each dimension indicates whether a token is present. Because it allocates one dimension to every vocabulary token, the representation becomes high-dimensional and sparse as the vocabulary grows. Word2Vec (W2V)~\cite{word2vec} instead learns a dense vector for each identifier from a corpus of source-code tokens using a skip-gram model.
- 
-In skip-gram, each token is used to predict tokens occurring within a fixed context window. The vectors are trained to assign higher scores to observed token--context pairs than to randomly sampled pairs through negative sampling. As a result, tokens that occur in similar contexts receive similar vectors. An artifact is then represented by averaging the vectors of its identifiers, producing a compact, fixed-dimensional encoding of its lexical content.
+
+Lexical representations treat folder-path components and source-code identifiers as tokens. The simplest representation is a binary bag-of-words (BoW) vector, in which each dimension indicates whether a token is present in the artifact’s folder path or source code. Because it allocates one dimension to every vocabulary token, the representation becomes high-dimensional and sparse as the vocabulary grows. Word2Vec (W2V)~\cite{word2vec} instead learns a dense vector for each source-code identifier from a corpus of source-code tokens using a skip-gram model.
+
+In skip-gram, each token is used to predict tokens occurring within a fixed context window. The vectors are trained to assign higher scores to observed token--context pairs than to randomly sampled pairs through negative sampling. As a result, tokens that occur in similar contexts receive similar vectors. An artifact’s Word2Vec representation is obtained by averaging the vectors of its source-code identifiers, producing a compact, fixed-dimensional encoding.
 
 \subsection{Contextual Representations}
-Contextual representations encode identifiers in the context of the surrounding code rather than as an unordered collection of identifiers. The same identifier can therefore receive different representations in different contexts, whereas a trained Word2Vec model assigns a fixed vector to each token. We use the pretrained code transformer UniXcoder~\cite{unixcoder} to obtain contextual code representations.
 
-Input text is extracted using Tree-sitter~\cite{tree_sitter} with the Java, C, or C++ grammar matching each file. The syntax tree guides fragment selection but is not itself passed to the encoder. A file-level view contains type declarations, fields or global variables, and constructor signatures with short body excerpts where applicable. A member-level view contains method and function declarations and definitions. Each file receives one vector per view, with the member-level vector obtained by mean-pooling over overlapping text chunks.
+Contextual representations encode tokens in the context of the surrounding code rather than as an unordered collection of identifiers. The same identifier can therefore receive different representations in different contexts, whereas a trained Word2Vec model assigns a fixed vector to each token. Transformer-based encoders use attention to combine information from tokens within the input sequence, allowing each token’s representation to reflect how it is used in the code. Through pretraining on large corpora, these encoders learn patterns that can support different code analysis tasks. UniXcoder~\cite{unixcoder} is one such model, producing contextual token representations that can be pooled into a single vector for a code fragment.
 
-In zero-shot use, UniXcoder encodes these views without further training. We also fine-tune it separately for each system on file-level views using a contrastive objective~\cite{infonce} to incorporate dependency structure. Positive pairs are drawn from each file's two-hop dependency neighborhood, falling back to a direct neighbor when no two-hop candidate exists. Other files in the batch serve as negatives, except directly connected files, which are masked unless selected as the positive pair. Module labels are not used in this loss. The resulting model encodes both views, although fine-tuning uses only file-level text.
+A pretrained code encoder can be used without further training or adapted through fine-tuning. Fine-tuning adjusts its representations using a training objective and examples relevant to the target setting, which can include dependency information.
 
 \section[Graph Representation Learning]{Graph-Based Representation Learning \label{sec:bg-gnn}}
- 
-Content representations encode artifacts individually and therefore do not represent the dependencies and containment meta-relations between them. Graph-based representation learning derives additional information from these relations. The approaches used in this thesis fall into two groups: random-walk embeddings, which derive vectors directly from graph neighborhoods, and graph neural networks, which propagate and transform information along graph edges.
- 
+
+Content encoders process artifacts individually, although their representations can capture dependency information introduced during fine-tuning. Graph-based representation learning uses the dependencies and containment relations between artifacts explicitly to learn node representations. The approaches used in this thesis fall into two groups: random-walk embeddings, which derive vectors directly from graph neighborhoods, and graph neural networks, which propagate and transform information along graph edges.
+
 \subsection{Random-Walk Embeddings \label{sec:bg_random_walk}}
 Random-walk methods learn node embeddings in two steps. First, they construct a corpus by sampling random walks over the graph, where each walk is a sequence of nodes. Node2Vec (N2V)~\cite{node2vec} samples walks over a homogeneous graph, which in this thesis is unweighted and undirected, whereas MetaPath2Vec (M2V)~\cite{metapath2vec} extends this to heterogeneous graphs by constraining walks to follow a predefined sequence of node and relation types. Second, a skip-gram model (see Section~\ref{sec:bg_lexical}) is trained over this corpus, treating the nodes within a fixed context window of a target node as its observed context, so that nodes with similar walk contexts receive similar embeddings. Walk length, context window, and the number of walks per node determine which nodes are treated as similar. These methods learn from walk co-occurrence alone and therefore do not jointly incorporate artifact content.
 
 \subsection{Graph Neural Networks \label{sec:bg_gnns}}
 Graph neural networks (GNNs) provide a common framework for learning from artifact-level information and graph structure, producing node representations shaped by both. A GNN encoder maps each node, together with its initial representation and graph neighborhood, to a vector through message passing~\cite{neuralMP}. At each layer, a node aggregates the current representations of its neighbors, combines them with its own, and applies a learned transformation. GNN architectures differ primarily in how they transform and aggregate these messages, and this thesis uses three variants.
- 
-The graph convolutional network (GCN)~\cite{gcn} aggregates neighboring representations through degree-normalized message passing, which prevents high-degree nodes from dominating solely because they have many dependencies. The graph attention network (GAT)~\cite{gat} instead learns attention weights over neighbors, allowing their contributions to differ according to their representations. Both encoders can be applied either to a graph in which dependency types are collapsed or to a multi-relational graph with relation-specific parameters. When the graph contains multiple node types and typed relations, this thesis also uses the heterogeneous graph transformer (HGT)~\cite{hgt}, which parameterizes attention by meta-relation. Thus, the contribution of a neighbor depends jointly on the source-node type, target-node type, and edge type.
- 
+
+The graph convolutional network~\cite{gcn} aggregates neighboring representations through degree-normalized message passing, which helps prevent high-degree nodes from dominating solely because they have many dependencies. The graph attention network (GAT)~\cite{gat} instead learns attention weights over neighbors, allowing their contributions to differ according to their representations. Both encoders can be applied either to a graph in which dependency types are collapsed or to a multi-relational graph with relation-specific parameters. When the graph contains multiple node types and typed relations, this thesis also uses the heterogeneous graph transformer (HGT)~\cite{hgt}, which parameterizes attention by meta-relation. Thus, the contribution of a neighbor depends jointly on the source-node type, target-node type, and edge type.
 \subsection{Graph Properties and Learning \label{sec:bg_properties}}
 
 Two properties are particularly relevant to how well graph-based encoders can support downstream tasks: homophily and structural reach. A graph is homophilic with respect to a labeling when connected nodes tend to share a label. Under homophily, neighborhood aggregation reinforces label-consistent information; under heterophily, it mixes information from different labels and may obscure distinctions needed by the downstream task~\cite{gnn_homophily}. Formally, let $G=(V,E)$ be a graph in which each node $v \in V$ has a label $y_v$. Homophily $\mathcal{H}$ is the proportion of edges whose two endpoints have the same label,
@@ -259,47 +260,54 @@ Two properties are particularly relevant to how well graph-based encoders can su
 \mathcal{H} = \frac{|\{e=(u,v) \in E : y_u = y_v\}|}{|E|},
 \label{eq:homophily}
 \end{equation}
-so that $\mathcal{H}=0$ means every edge connects nodes with different labels and $\mathcal{H}=1$ means every edge connects nodes with the same label~\cite{gnn_homophily}. For software systems, the nodes are files, the edges are static dependencies between them merged across dependency types, and the label is the ground-truth module. Since $\mathcal{H}$ is computed from the reference decomposition, it can be determined only once such a decomposition exists. The concentration of dependencies within modules varies across systems, and so does the usefulness of dependency-driven random walks and message passing.
+so that $\mathcal{H}=0$ means every edge connects nodes with different labels and $\mathcal{H}=1$ means every edge connects nodes with the same label~\cite{gnn_homophily}. For software systems, the nodes are files, the edges are static dependencies between them merged across dependency types, and the label is the ground-truth module. In this setting, homophily relates to cohesion and coupling by measuring the proportion of dependencies that remain within modules rather than cross module boundaries. It provides an overall measure of this balance, but does not distinguish how those dependencies are distributed across individual modules.
 
-The second property is the structural reach of the encoder, which we use to mean the set of nodes from which a node representation can receive information by construction. For an $L$-layer message-passing encoder, this set is the $L$-hop neighborhood of the node. Increasing depth does not necessarily make the additional hops useful, because repeated aggregation can make node representations progressively less distinguishable, an effect known as over-smoothing~\cite{gnn_oversmoothing}. GNN encoders are therefore commonly kept shallow, which limits the structural context directly available to each node. Reach in this sense is a property of the encoder and the input graph and not a measured quantity: it states which nodes can contribute to a representation, not how much they do. When relevant architectural information lies beyond this range, performance depends not only on the encoder architecture but also on whether the input graph makes that information reachable within a small number of hops. Random-walk embeddings can capture longer-range structural context because a sampled walk may traverse many hops before its nodes are used to learn an embedding, although they do not propagate artifact-level representations along the graph.
- 
+Since $\mathcal{H}$ is computed from the reference decomposition, it can be determined only once such a decomposition exists. The concentration of dependencies within modules varies across systems, and so does the usefulness of dependency-driven random walks and message passing.
+
+The second property is the structural reach of the encoder, which we use to mean the set of nodes that can contribute information to a node representation. For an $L$-layer message-passing encoder, this is the node's $L$-hop neighborhood. Reach describes which nodes can contribute by construction, rather than how much they contribute in practice. Increasing depth extends this reach, but repeated aggregation can make node representations progressively less distinguishable, an effect known as over-smoothing~\cite{gnn_oversmoothing}. GNN encoders are therefore commonly kept shallow.
+
+With a shallow encoder, access to more distant architectural information depends on how the input graph connects the nodes. Changing these connections can make that information reachable within fewer message-passing steps. Random-walk embeddings can capture longer-range structural context through sampled walks, although they do not propagate artifact-level representations along the graph.
+
 Two further techniques alter the structural information available to a shallow encoder without increasing its number of message-passing layers. Laplacian positional encoding (LPE) augments each node representation with leading eigenvectors of the graph Laplacian, giving the encoder information about the node's structural position before message passing begins~\cite{lpe}. Graph diffusion convolution (GDC)~\cite{gdc} rewires the input graph using personalized PageRank (PPR), connecting diffusion-close nodes directly and assigning the resulting edges diffusion-derived weights. This makes multi-hop structural proximity available within a fixed number of message-passing layers.
- 
+
 \subsection{Learning Paradigms \label{sec:bg_learning}}
 
 The encoder architecture determines how information propagates through the graph, but not what drives learning. That role belongs to the training objective, which depends on the supervision available. The studies in this thesis use two learning settings that reflect the recovery and mapping tasks.
 
-\paragraph{Architecture recovery.} No module labels are available during recovery, so the studies use self-supervised learning, in which the model learns from an auxiliary signal derived from the graph itself. The methods used in this thesis distinguish positive pairs derived from the original graph from negative pairs obtained by sampling or corrupting the graph. The training objective is to minimize binary cross-entropy (BCE) over positive and negative node pairs:
+\paragraph{Architecture recovery.} No module labels are available during recovery, so the studies use self-supervised learning, in which the model learns from an auxiliary signal derived from the graph itself. These methods construct positive and negative training examples from the graph, with the examples differing between methods. Binary cross-entropy (BCE) measures how well the model distinguishes positive from negative examples. For a single example, it is defined as:
 \begin{equation}
     \mathcal{L}_{\mathrm{BCE}} = -\left[y\log\hat{y} + (1-y)\log(1-\hat{y})\right],
     \label{eq:bce}
 \end{equation}
 where $y \in \{0,1\}$ is the target and $\hat{y}$ is the predicted probability.
 
-Contrastive learning trains a model to distinguish original examples from corrupted ones. Deep Graph Infomax (DGI)~\cite{dgi} applies this principle to graphs by treating node--summary pairs in the original graph as positive and pairs constructed from a corrupted view as negative. Graph autoencoders (GAE)~\cite{gae} instead learn node representations by reconstructing observed graph edges, treating observed edges as positives and sampled non-edges as negatives. Their variational form (VGAE)~\cite{gae} models each node's latent representation as a Gaussian distribution rather than a single vector and adds a Kullback--Leibler (KL) divergence term that penalizes deviations from a standard normal prior. Random-walk methods are also trained without labels, using the skip-gram objective on node co-occurrences in random walks, where co-occurring node pairs are positive and randomly sampled pairs are negative, as described in Section~\ref{sec:bg_random_walk}.
+Contrastive learning trains representations by contrasting positive and negative pairs. Deep Graph Infomax (DGI)~\cite{dgi} applies this principle to graphs by treating node--summary pairs in the original graph as positive and pairs constructed from a corrupted view as negative. Graph autoencoders (GAE)~\cite{gae} instead learn node representations by reconstructing observed graph edges, treating observed edges as positives and sampled non-edges as negatives. Their variational form (VGAE)~\cite{gae} models each node's latent representation as a Gaussian distribution rather than a single vector and adds a Kullback--Leibler (KL) divergence term that penalizes deviations from a standard normal prior. Random-walk methods learn without module labels through the skip-gram objective described in Section~\ref{sec:bg_random_walk}.
 
-The learned embeddings are then partitioned with a clustering algorithm, typically agglomerative hierarchical clustering (AHC)~\cite{agglomerative}, for architecture recovery. This clustering step is unsupervised: it derives module groups from similarity between embeddings. The number of clusters is either selected automatically from a predefined search range or fixed in advance.
+The learned embeddings are then partitioned with a clustering algorithm, typically agglomerative hierarchical clustering~\cite{agglomerative}, for architecture recovery. This clustering step is unsupervised: it derives module groups from similarity between embeddings. The number of clusters is either selected automatically from a predefined search range or fixed in advance.
 
 \paragraph{Code-to-architecture mapping.} Mapping starts from known module assignments for a limited number of files, so the studies train a classifier on these labeled files with supervised learning. Because the module set is known and fixed, the classifier assigns each file to one of the $K$ predefined modules through a softmax layer, which yields a probability distribution over the modules, and the highest softmax probability of a prediction is its confidence. It is trained with categorical cross-entropy (CCE), $-\sum_{k=1}^{K} y_k\log\hat{y}_k$, which for a one-hot target is the negative log-probability assigned to the true module.
- 
+
 Unlabeled files can also contribute through iterative self-training~\cite{lee2013pseudo}, which Paper~III applies on top of supervised training. The classifier assigns pseudo-labels to unlabeled files whose confidence exceeds a predefined threshold, retrains on the labeled and pseudo-labeled files, and repeats over successive rounds until no prediction meets the criterion or a maximum number of rounds is reached.
 
 \section[Evaluation and Ground Truth]{Evaluation and Ground Truth}
 \label{sec:bg-eval}
- 
-The studies in this thesis evaluate their outputs against expert-produced reference decompositions. Since SAR and C2A mapping produce different outputs, they require different evaluation metrics: recovery is evaluated through partition-agreement metrics, whereas mapping is evaluated through conventional classification metrics. This section introduces these measures and discusses how the reference decomposition should be understood as ground truth. The provenance of the specific reference mappings used in this work is discussed in Chapter~\ref{ch:methodology}.
- 
-Multiple reasonable architectural decompositions may exist for the same software system, since experts can disagree on architectural boundaries and design intent~\cite{garcia2013}, so a recovered decomposition may differ from the particular reference used for evaluation without necessarily being wrong. No single metric can settle this on its own, and the studies in this thesis instead report a set of complementary metrics for recovery: MoJoFM, A2A, and \cc{} as measures of alignment with the reference, and TurboMQ as a reference-independent measure of modularization quality. The adjusted Rand index (ARI)~\cite{ari} is reported alongside them as a clustering-agreement measure that corrects for chance and remains meaningful even when the recovered and reference partitions have different numbers of modules.
- 
-MoJoFM~\cite{mojofm} is widely used in architecture recovery. It counts the minimum number of move and join operations needed to transform the recovered partition into the reference partition, normalized by the maximum possible number of such operations. Because its join operations are comparatively cheap, MoJoFM is less sensitive to over-fragmentation: many small clusters can still score well when they broadly align with the reference. A2A~\cite{a2a} extends MoJoFM with costs for adding, removing, and moving entities and clusters. It can assign a high score to two architectures that are structurally quite different, overestimating their similarity~\cite{turbomq}, which makes it the least discriminative of the four in practice. \cc{}~\cite{c2c} measures the percentage of reference modules that are sufficiently covered by a recovered module, where coverage is judged against a threshold on the overlap between the two; conventional thresholds of 0.10, 0.33, and 0.50 correspond to weak, moderate, and majority matches. This makes it sensitive to fragmentation: a reference module split across several recovered modules, with no single one holding a majority share, fails the threshold even where individual file assignments look reasonable under a different metric, and its dependence on a fixed threshold makes it more volatile than the other metrics. ARI ranges from $-1$ to $1$, where $0$ is the agreement expected by chance, and together with MoJoFM it is the more stable and discriminative of the four.
- 
-Unlike the metrics above, which measure alignment with the reference decomposition, TurboMQ~\cite{turbomq} measures modularity: it rewards intra-cluster cohesion and penalizes inter-cluster coupling, computed directly on the dependency graph without reference to any external partition. TurboMQ can favor decompositions with many clusters, so this thesis reports the normalized TurboMQ (\tmq{}) obtained by dividing by the number of clusters in the recovered decomposition to reduce this bias.
 
-Reference agreement and modularity are therefore different properties, and a decomposition can score well on one without scoring well on the other. Unlike TurboMQ, which uses dependencies alone, MoJoFM, A2A, ARI, and \cc{} measure agreement with a decomposition that experts defined from documentation, source code, and knowledge of the system, so the reference can reflect responsibilities and project organization that dependencies do not record. Utilities and shared libraries also create cross-module dependencies under any decomposition~\cite{garcia2013,noisy_deps}. A reference decomposition therefore need not maximize modularity, and this thesis reports both kinds of metrics for recovery without treating either as the objective.
+The studies in this thesis evaluate their outputs against reference decompositions from published, expert-validated benchmarks, supporting comparison with prior work. Recovery produces a partition whose cluster labels have no predefined meaning, whereas mapping assigns files to known architectural modules. Recovery is therefore evaluated through partition-agreement metrics and mapping through conventional classification metrics. This section introduces these measures and discusses how reference decompositions should be understood as ground truth. The provenance of the specific reference mappings is discussed in Chapter~\ref{ch:methodology}.
 
-For mapping, the evaluation is a per-file classification into known modules, and the standard metrics apply directly. Precision, recall, and their harmonic mean F1 are reported per module and aggregated at the macro and micro level. The macro-average treats every module equally and therefore surfaces performance on small modules that would be hidden by a micro-average dominated by large ones. The mapping studies report both, as the difference between them is itself informative about how the model handles the class imbalance that reference decompositions typically exhibit.
- 
-This thesis draws its reference decompositions from published, expert-validated benchmarks, so that results remain comparable with prior work and no new judgment is introduced into the evaluation. Matching the reference on every system does not make a method right in any stronger sense than the reference itself.
+A reference decomposition provides an established basis for comparison, but it need not be the only reasonable architectural interpretation of a system. Experts may disagree on architectural boundaries and design intent~\cite{garcia2013}, so a recovered decomposition can differ from the reference without necessarily being wrong.
+
+Complementary metrics assess different aspects of a recovered decomposition. MoJoFM, A2A, and \cc{} measure alignment with a reference decomposition. The adjusted Rand index (ARI)~\cite{ari} measures partition agreement while correcting for chance. TurboMQ provides a complementary, reference-independent measure of modularization quality based on the dependency graph.
+
+MoJoFM~\cite{mojofm} is widely used in architecture recovery. It counts the minimum number of move and join operations needed to transform the recovered partition into the reference partition, normalized by the maximum possible number of such operations. Because its join operations are comparatively cheap, MoJoFM is less sensitive to over-fragmentation: many small clusters can still score well when they broadly align with the reference. A2A~\cite{a2a} extends MoJoFM with costs for adding, removing, and moving entities and clusters. It can assign a high score to two architectures that are structurally quite different, overestimating their similarity~\cite{turbomq}.
+
+\cc{}~\cite{c2c} measures the percentage of reference modules that are sufficiently covered by a recovered module, where coverage is judged against a threshold on the overlap between the two; conventional thresholds of 0.10, 0.33, and 0.50 correspond to weak, moderate, and majority matches. This makes it sensitive to fragmentation: a reference module split across several recovered modules does not count as matched if none of them meets the chosen overlap threshold, even where individual file assignments look reasonable under a different metric. ARI ranges from $-1$ to $1$, where $0$ is the agreement expected by chance.
+
+Unlike the metrics above, which measure alignment with the reference decomposition, TurboMQ~\cite{turbomq} measures modularity: it rewards intra-cluster cohesion and penalizes inter-cluster coupling, computed directly on the dependency graph without reference to any external partition. TurboMQ can favor decompositions with many clusters. Normalized TurboMQ (\tmq{}) divides the TurboMQ score by the number of recovered clusters to reduce this bias.
+
+The reference-agreement metrics described above assess how closely a recovered decomposition matches an expert-produced reference, whereas TurboMQ evaluates its dependency structure. Expert-produced references can reflect responsibilities and project organization identified through documentation, source code, and knowledge of the system. These boundaries need not coincide with groups of densely connected files, since shared utilities and libraries can create dependencies across architectural modules~\cite{garcia2013}. A reference decomposition therefore need not maximize dependency modularity, and a recovered decomposition can score well on one kind of measure without scoring well on the other.
+
+For mapping, the evaluation is a per-file classification into known modules, and the standard metrics apply directly. Precision, recall, and their harmonic mean F1 are reported per module and aggregated at the macro and micro level. The macro-average treats every module equally and therefore surfaces performance on small modules that would be hidden by a micro-average dominated by large ones. Reporting both reveals differences in performance across modules of different sizes.
+
 % ----------------------------------------------------
 % CHAPTER 3 — RESEARCH PROBLEM AND objectives
 % ----------------------------------------------------
@@ -311,7 +319,7 @@ This chapter formalizes the research problem addressed in this thesis and define
 \section{Problem Formulation}
 \label{sec:problem-formulation}
 Architecture recovery and C2A mapping both assign source-code files to architectural modules, but differ in the architectural information available. This thesis approaches recovery by learning file representations without module labels and clustering them into modules. In C2A mapping, the target modules and a subset of file assignments are known, and the task is to predict the remaining assignments. Both tasks are formulated here using a common graph representation.
- 
+
 Despite this difference in supervision, both tasks draw on dependencies, project organization, and source-code content as discussed in Section~\ref{sec:intro-motivation}. This thesis uses graph-based representation learning to combine these signals as evidence of module membership.
 
 Accordingly, a software system is represented as a graph:
@@ -328,12 +336,12 @@ Formally, for recovery, we learn an encoder $f_{\theta}$ in a self-supervised ma
 f_{\theta}: \mathcal{G}\;\longrightarrow\;\mathbf{Z}\in\mathbb{R}^{|\mathcal{V}_{\texttt{file}}|\times d},
 \label{eq:sar}
 \end{equation}
-that maps each source code file $i \in \mathcal{V}_{\texttt{file}}$ to a $d$-dimensional embedding $\mathbf{z}_i \in \mathbb{R}^{d}$, where $\theta$ denotes the learnable parameters. The resulting file embeddings are clustered to a recovered architectural decomposition $\hat{\mathcal{C}}$, which partitions the source code files into $m$ disjoint modules:
+that maps each source code file $i \in \mathcal{V}_{\texttt{file}}$ to a $d$-dimensional embedding $\mathbf{z}_i \in \mathbb{R}^{d}$, where $\theta$ denotes the learnable parameters. The resulting file embeddings are clustered into a recovered architectural decomposition $\hat{\mathcal{C}}$, which partitions the source code files into $m$ disjoint modules:
 \begin{equation}
-\hat{\mathcal{C}} = \{C_1, \dots, C_m\},
+\hat{\mathcal{C}} = \{C_1, \dots, C_m\}.
 \label{eq:sar-partition}
 \end{equation}
- 
+
 In C2A mapping, a set of target modules $\mathcal{C} = \{C_1, \dots, C_m\}$ is known, together with a labeled subset of files $\mathcal{L} \subseteq \mathcal{V}_{\texttt{file}}$ and their module assignments $Y_{\mathcal{L}}$. The task is to learn:
 %
 \begin{equation}
@@ -349,7 +357,7 @@ The two problems use the same implementation signals, but differ in how represen
 
 The research aim is operationalized through three objectives that progress from joint representation learning to examining individual signals and file representations, and then to their interaction within richer graphs. Objective 1 designs, compares, and benchmarks graph-based methods for recovery and mapping by combining dependency, organizational, and lexical signals. This examines their joint usefulness, but not their individual contributions. Objective 2 therefore examines the architectural information these signals and representations carry, including how source-code content should be represented. Objective 3 investigates how their usefulness changes as structural context is added and whether findings from Objectives 1 and 2 remain valid.
 
-\subsection{Representation Learning for Architecture Recovery and C2A Mapping}
+\subsection[Representation Learning for Recovery and Mapping]{Representation Learning for Architecture Recovery and C2A Mapping}
 \label{sec:obj_1}
 
 \begin{GrayBox}{Objective~1}
@@ -373,7 +381,7 @@ To determine what architectural information dependency structure and individual 
     \item How does dependency-guided adaptation of a contextual code representation affect the architectural signal it carries?
     \item How do structural, lexical, and contextual file representations compare in mapping without message passing?
 \end{enumerate}
-This objective examines the architectural information carried by individual implementation signals. In recovery, it uses dependency structure alone on a homogeneous SDG, without lexical or folder information, and examines how much structural context is needed across systems. In mapping, it compares file representations without adding folder organization, member-level detail, or SDG-based message passing. These representations include Word2Vec, zero-shot UniXcoder, Node2Vec, and UniXcoder fine-tuned through SDG-guided contrastive learning without module labels. The latter two incorporate dependency information during representation learning. A graph-free MLP classifier uses each file's representation independently, so it can access dependency information only if that information is already encoded in the representation.
+This objective examines the architectural information carried by individual implementation signals. In recovery, it uses dependency structure alone on the homogeneous SDG, without lexical or folder information, and examines how much structural context is needed across systems. In mapping, it compares file representations without adding folder organization, member-level detail, or SDG-based message passing. These representations include Word2Vec, zero-shot UniXcoder, Node2Vec, and UniXcoder fine-tuned through SDG-guided contrastive learning without module labels. The latter two incorporate dependency information during representation learning. A multilayer perceptron (MLP) classifier uses each file's representation independently, so it can access dependency information only if that information is already encoded in the representation.
 % ______________________
 \subsection{Interaction Between Input Signals and Graph Structure}
 \label{sec:obj_3}
@@ -387,7 +395,7 @@ To determine how the contribution of file representations changes with dependenc
     \item How does adding folder organization to the graph change what the file representations contribute to recovery and mapping?
     \item How does performance differ with and without member-level nodes and edge-level interaction details?
 \end{enumerate}
-This objective examines how additional graph structure changes the contribution of file representations. In recovery, folder nodes and containment meta-relations are added to the SDG and evaluated through message passing or random walks; edge attributes describing the member-level interactions behind each dependency, including their type and frequency, are examined separately. In mapping, graph-free and graph-based neural predictors are compared, and dependency neighbors are enabled or disabled within each predictor while holding file representations fixed. Aggregation direction is also varied. Folder and member nodes are evaluated for each representation, with member nodes also changing how lexical and contextual content enters the model, and a rule based on the directory hierarchy and initial labels provides a reference.
+This objective examines how additional graph structure changes the contribution of file representations. In recovery, folder nodes and containment meta-relations are added to the SDG and evaluated through message passing or random walks; edge attributes describing the member-level interactions behind each dependency, including their type and frequency, are examined separately. In mapping, an MLP and graph-based neural predictors are compared, and each predictor is evaluated with and without access to dependency neighbors while holding file representations fixed. Aggregation direction is also varied. Folder and member nodes are evaluated with Word2Vec, Node2Vec, and fine-tuned UniXcoder. Member nodes also change how lexical and contextual content enters the model, and a rule based on the directory hierarchy and initial labels provides a reference.
 % ----------------------------------------------------
 % CHAPTER 4 — Overview of Papers
 % ----------------------------------------------------
@@ -412,15 +420,15 @@ The objectives are addressed across complementary studies rather than by a singl
 The studies progress from relation-aware graph representation learning for architecture recovery to dependency-based message passing for C2A mapping, then examine structure-only recovery and systematically compare and combine implementation signals for mapping.
 
 \phantomsection
-\subsection*{Paper~I. ~Contrastive Learning for Architecture Recovery}
+\subsection[Paper~I: Architecture Recovery]{Paper~I.\quad Graph Representation Learning for Software Architecture Recovery}
 \label{sec:overview-arl}
 
 The first study~\cite{arl_2026} establishes the initial feasibility of learning architectural representations from a multi-relational software dependency graph for architecture recovery. Each dependency type is modeled as a separate directed relation among source-code files, while node features combine folder-hierarchy tokens with code identifiers not involved in inter-file dependencies. Relation-specific GAT encoders produce file representations that are trained without architectural labels using a contrastive objective and subsequently clustered to recover modules. The study also examines whether member-level interaction attributes add architectural information beyond the presence of a dependency.
  
-The study evaluates the proposed approach on four systems against SARIF~\cite{sarif}, a hand-tuned information-fusion baseline that combines dependency, textual, and directory signals through manually designed similarity functions. The proposed approach outperforms SARIF on all four systems.
+The study evaluates the proposed approach on four systems against SARIF~\cite{sarif}, a hand-tuned information-fusion baseline that combines dependency, textual, and directory signals through manually designed similarity functions. The proposed approach reaches higher MoJoFM than SARIF on all four systems.
 
 \phantomsection
-\subsubsection*{Paper~II. GAER: Graph Auto-Encoders for Architecture Recovery}
+\subsection[Paper~II: Architecture Recovery]{Paper~II.\quad GAER: Graph Auto-Encoders for Unsupervised Software Architecture Recovery}
 \label{sec:overview-gaer}
 
 The second study~\cite{gaer} extends the investigation of Paper~I to a reconstruction-based learning approach and a broader empirical setting. GAER retains the multi-relational dependency graph but replaces contrastive learning with a graph autoencoder trained to reconstruct observed dependencies. Code identifiers are now embedded with Word2Vec rather than encoded as binary vectors, while directory tokens remain binary-encoded. The study compares GCN and GAT encoders before clustering the learned representations into architectural modules.
@@ -428,28 +436,28 @@ The second study~\cite{gaer} extends the investigation of Paper~I to a reconstru
 The study evaluates ten benchmark systems against eight established dependency-based, semantic, structural representation learning, and hybrid recovery approaches. GAER achieves higher or comparable ground-truth alignment across most systems for MoJoFM, A2A, \cc{}, and ARI.
 
 \phantomsection
-\subsubsection*{Paper~III. When Does the Dependency Graph Help C2A Mapping?}
+\subsection[Paper~III: C2A Mapping]{Paper~III.\quad When Does the Dependency Graph Help Code-to-Architecture Mapping?}
 \label{sec:overview-c2a}
 
-The third study~\cite{c2a_mapping} shifts from unsupervised architecture recovery to C2A mapping, in which the target modules are known and a limited set of files is initially labeled. It reuses the graph construction and node features of Paper~II, expanding the labeled set into a full mapping via iterative self-training. The study compares GCN and GAT models with a graph-free MLP that uses the same file features, classifier, and self-training procedure. It further examines the effect of preserving dependency types, message-passing depth, and aggregation direction.
+The third study~\cite{c2a_mapping} is an extended version of an earlier mapping paper~\cite{jabeen2025graph}. It shifts from unsupervised architecture recovery to C2A mapping, in which the target modules are known, and a limited set of files is initially labeled. It reuses the graph construction and node features of Paper~II, expanding the labeled set into a full mapping via iterative self-training. The study compares GCN and GAT models with an MLP that uses the same file features, classifier, and self-training procedure. It further examines the effect of preserving dependency types, message-passing depth, and aggregation direction.
  
-Across ten benchmark systems, all learned approaches outperform the Naive Bayes mapping baseline~\cite{olsson2022automatically}.
+Across ten benchmark systems, all learned approaches outperform the Naive Bayes mapping baseline~\cite{olsson2022automatically}. The gain of GAT and GCN over the MLP varies by system and is largest on Chromium, the largest system.
 
 \phantomsection
-\subsubsection*{Paper~IV. Graph Embeddings for Architecture Recovery}
+\subsection[Paper~IV: Architecture Recovery]{Paper~IV.\quad Graph Embeddings for Software Architecture Recovery}
 \label{sec:overview-structsar}
 
 The fourth study returns to architecture recovery but isolates the value of structural and organizational information by removing lexical file features~\cite{structsar}. Unlike the first three studies, it learns representations from graph structure alone. The study first evaluates recovery from a homogeneous dependency graph using Node2Vec, a GAT encoder trained within a variational graph autoencoder, and the same encoder applied to a graph rewired by PPR diffusion (GAT-DC). It then extends the graph with folder nodes and containment relations, comparing the dependency structure alone against the dependency structure combined with developer-defined folder organization, using MetaPath2Vec, a heterogeneous GAT (HGAT), and a variant that preserves dependency types rather than merging them (HGAT-TD).
  
-The study evaluates eleven systems against four classical dependency-only recovery baselines. The dependency-only GAT, GAT-DC, and Node2Vec outperform these baselines on most systems and metrics.
+The study evaluates eleven systems against four classical dependency-only recovery baselines. The dependency-only GAT-DC and Node2Vec outperform these baselines on most systems and metrics.
 
 \phantomsection
-\subsubsection*{Paper~V. What Carries Architectural Signal? A C2A Mapping Study}
+\subsection[Paper~V: C2A Mapping]{Paper~V.\quad What Carries Architectural Signal? A Code-to-Architecture Mapping Study}
 \label{sec:overview-hetmap}
- 
-The fifth study examines which implementation signals contribute to C2A mapping and how their usefulness changes with graph structure and message passing~\cite{hetmap}. It compares structural Node2Vec, lexical Word2Vec, and contextual UniXcoder file representations, with UniXcoder evaluated before and after dependency-guided contrastive fine-tuning. Each representation is first evaluated using a graph-free MLP. Node2Vec, Word2Vec, and fine-tuned UniXcoder then initialize HGT on four graph configurations: files only, files with folders, files with members, and the full folder-file-member graph, with dependencies merged into a single relation type. Each member node summarizes the program members of one file. A GAT on the file-level dependency graph is evaluated as a second message-passing predictor.
 
-The study uses the ten systems and labeled sets of Paper~III. The MLP is the baseline for the graph configurations, and a directory-hierarchy rule is the reference for folder-augmented configurations. The rule assigns an unlabeled file the most common module among the labeled files in its directory, backing off to progressively larger enclosing subtrees when the directory has no labeled file.
+The fifth study examines which implementation signals contribute to C2A mapping and how their usefulness changes with graph structure and message passing~\cite{hetmap}. It compares structural Node2Vec, lexical Word2Vec, and contextual UniXcoder file representations, with UniXcoder evaluated before and after dependency-guided contrastive fine-tuning. Each representation is first evaluated using an MLP. Node2Vec, Word2Vec, and fine-tuned UniXcoder then initialize HGT on four graph configurations: files only, files with folders, files with members, and the full folder-file-member graph, with dependencies merged into a single relation type. Each member node summarizes the program members of one file. A GAT on the file-level dependency graph is evaluated as a second message-passing predictor.
+ 
+The study uses the ten systems and labeled sets of Paper~III. The MLP is the baseline for the graph configurations, and a directory-hierarchy rule is the reference for folder-augmented configurations. The rule assigns an unlabeled file the most common module among the labeled files in its directory, backing off to progressively larger enclosing subtrees when the directory has no labeled file associated with it.
 % ----------------------------------------------------
 % CHAPTER 5 — RESEARCH METHOD
 % ----------------------------------------------------
@@ -471,10 +479,18 @@ Input representation determines what information is available to the nodes befor
  
 The learning mechanism determines how these inputs and graph relations are used to learn file representations. The studies compare random-walk methods and graph neural networks, with learning objectives suited to recovery or mapping.
 
+% \begin{figure}[!thb]
+%     \centering
+%     \includegraphics[width=1\textwidth]{figures/design_space.pdf}
+%     \caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input signal, and learning mechanism. \label{fig:design_space}}
+% \end{figure}
+
 \begin{figure}[!thb]
     \centering
-    \includegraphics[width=1\textwidth]{figures/design_space.pdf}
-    \caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input signal, and learning mechanism. \label{fig:design_space}}
+    \begin{adjustbox}{max width=1\textwidth}
+        \input{figures/design_space.tex}
+    \end{adjustbox}
+\caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input signal, and learning mechanism. \label{fig:design_space}}
 \end{figure}
  
 
@@ -484,7 +500,7 @@ The studies progressively examine how dependency structure, project organization
  
 The prior approach, NEGAR~\cite{negar}, evaluates dependency types through separate pipelines and uses neither folder organization nor lexical information, leaving open whether typed dependencies can be modeled jointly and whether organizational and lexical signals provide complementary evidence for recovery. Papers~I and II take a first step on this question with a multi-relational file-level graph. Both fuse folder-path and code-identifier tokens as node features, so the contribution of each source cannot yet be separated from the others.
 
-Paper~III keeps the graph and feature construction of Paper~II, apart from the Word2Vec settings, and moves to a semi-supervised setting, formulating mapping as node classification. It introduces a graph-free multilayer perceptron (MLP) baseline, trained under the same features and self-training procedure, to compare GNN-based prediction against feature-only prediction.
+Paper~III keeps the graph and feature construction of Paper~II, apart from the Word2Vec settings, and moves to a semi-supervised setting, formulating mapping as node classification. It introduces an MLP baseline, trained under the same features and self-training procedure, to compare GNN-based prediction against feature-only prediction.
 
 Paper~IV, a further recovery study, returns to dependency structure and project organization, without lexical features. Removing the lexical features allows the contribution of project organization to be assessed without the fused signal of the earlier studies. It compares dependency-only file graphs against folder-augmented heterogeneous graphs under matched conditions, using both random-walk and graph-attention learners, and evaluates ways to extend the effective reach of message passing.
  
@@ -532,7 +548,7 @@ Paper~IV uses edge attributes differently in its diffusion variant. GDC rewires 
 \setlength{\tabcolsep}{4pt}
 \begin{adjustbox}{max width=\textwidth}
 \begin{threeparttable}
-\renewcommand{\arraystretch}{1.1}
+\renewcommand{\arraystretch}{1.05}
 \begin{tabular}{@{} c l l l l @{}}
 \toprule
 \textbf{P} & \textbf{Nodes} & \textbf{Edges} & \textbf{Node features} & \textbf{Edge features} \\
@@ -572,7 +588,7 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 
 \begin{table}[!htb]
 \centering
-\caption[Encoder configurations and training settings across the five studies.]{Encoder configurations and training settings across the five studies, grouped by architecture recovery and C2A mapping. Where a study evaluates multiple encoders, each encoder is listed separately. Dim. denotes the encoder embedding dimension; LR denotes learning rate. Dataset-specific settings for the largest systems are omitted and reported in the individual papers. \label{tab:learning_settings}}
+\caption[Encoder configurations and training settings across studies.]{Encoder configurations and training settings across the five studies, grouped by architecture recovery and C2A mapping. Where a study evaluates multiple encoders, each encoder is listed separately. Dim. denotes the encoder embedding dimension; LR denotes learning rate. Dataset-specific settings for the largest systems are omitted and reported in the individual papers. \label{tab:learning_settings}}
 \renewcommand{\arraystretch}{1.1}
 \begin{adjustbox}{max width=\textwidth}
 \begin{threeparttable}
@@ -580,21 +596,23 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 \toprule
 & \textbf{P} & \textbf{Encoder} & \textbf{Objective} & \textbf{Dim.} & \textbf{Layers} & \textbf{Heads} & \textbf{\makecell[l]{Optimizer\\ LR}} & \textbf{Epochs} \\
 \midrule
-\multirow{10}{*}{\rotatebox[origin=c]{90}{Architecture recovery}}
-& I & GAT & Contrastive & 128 & 1 & 1 & \makecell[l]{Adam~\cite{adam}\\ $10^{-3}$} & 50 \\
+
+\multirow{10}{*}{\rotatebox[origin=c]{90}{Recovery}}
+& \multirow{2}{*}{I} & GAT & \multirow{2}{*}{Contrastive} & 128 & 1 & 1 & \multirow{2}{*}{\makecell[l]{Adam~\cite{adam}\\ $10^{-3}$}} & \multirow{2}{*}{50} \\
+&  & GAT-E &  & 128 & 1 & 1 &  &  \\
 \addlinespace[0.25cm]
-& \multirow{3}{*}{II} & N2V & Skip-gram & 128 & -- & -- & \makecell[l]{SGD~\cite{goodfellow2016deep}\\ $0.025$} & 5 \\
-&  & GCN & \multirow{2}{*}{Reconstruction} & 128 & 1 & -- & \multirow{2}{*}{\makecell[l]{Adam\\ $10^{-4}$ ($10^{-3}$)$^{\dagger}$}} & \multirow{2}{*}{30 (50)$^{\dagger}$} \\
+& \multirow{2}{*}{II} & GCN & \multirow{2}{*}{Reconstruction} & 128 & 1 & -- & \multirow{2}{*}{\makecell[l]{Adam\\ $10^{-4}$ ($10^{-3}$)$^{\dagger}$}} & \multirow{2}{*}{30 (50)$^{\dagger}$} \\
 &  & GAT &  & 128 & 1 & 1 &  &  \\
 \addlinespace[0.25cm]
-& \multirow{6}{*}{IV} & N2V & \multirow{2}{*}{Skip-gram} & 128 & -- & -- & \makecell[l]{SGD\\ $0.025$} & 5 \\
+& \multirow{6}{*}{IV} & N2V & \multirow{2}{*}{Skip-gram} & 128 & -- & -- & \makecell[l]{SGD~\cite{goodfellow2016deep}\\ $0.025$} & 5 \\
 &  & M2V &  & 64 & -- & -- & \makecell[l]{SparseAdam\\ $0.05$} & 20 \\
 &  & GAT & \multirow{4}{*}{\makecell[l]{Reconstruction\\ + KL}} & 256 & 2 & 2 & \multirow{4}{*}{\makecell[l]{Adam\\ $10^{-3}$}} & \multirow{4}{*}{100} \\
 &  & GAT-DC &  & 256 & 1 or 2$^{\ddagger}$ & 2 &  &  \\
 &  & HGAT &  & 256 & 1 & 2 &  &  \\
 &  & HGAT-TD &  & 256 & 1 & 2 &  &  \\
 \midrule
-\multirow{6}{*}{\rotatebox[origin=c]{90}{C2A Mapping}}
+
+\multirow{6}{*}{\rotatebox[origin=c]{90}{Mapping}}
 & \multirow{3}{*}{III} & GCN & \multirow{6}{*}{CCE} & 256 & 2 & -- & \multirow{6}{*}{\makecell[l]{Adam\\ $10^{-3}$}} & \multirow{3}{*}{\makecell[l]{100 warm-up\\ $+$ $\leq 4 \times 30$$^{\ast}$}} \\
 &  & GAT &  & 256 & 2 & 4$\times$64 &  &  \\
 &  & MLP &  & 256 & 1 & -- &  &  \\
@@ -606,8 +624,8 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 \end{tabular}
 \begin{tablenotes}[flushleft]
 \normalsize
-\item GAT-DC: GAT on a graph rewired by GDC. HGAT: heterogeneous GAT over file and folder nodes with merged dependency types. HGAT-TD: HGAT with a separate GAT layer for each dependency type.
-\item M2V: MetaPath2Vec. SGD: stochastic gradient descent. KL: Kullback--Leibler divergence. For the MLPs, layer counts include hidden layers, excluding the linear classification head.
+\item SGD: stochastic gradient descent.
+\item For the mapping studies, layer counts exclude the linear classification head.
 \item $\dagger$ Very small systems (fewer than 100 entities).
 \item $\ddagger$ GAT-DC: one layer for more than 500 files and more than 10 modules, two otherwise.
 \item $\ast$ Paper~III epochs: warm-up plus at most the stated rounds of 30 epochs each, with pseudo-labels requiring confidence $> 0.95$.
@@ -619,7 +637,7 @@ In the mapping studies (Papers~III and~V), the target modules are known, and a s
 \subsection{Controlled-Comparison Logic \label{sec:controlled_comparison}}
 The studies examine selected choices within the design space through controlled comparisons. Some choices are coupled, since adding folder or member nodes also introduces relations and changes the paths available for message passing. A full factorial evaluation of all combinations would be computationally prohibitive. Each comparison therefore varies one or two choices while keeping the remaining conditions fixed where possible, allowing differences in outcome to be related to the choices under investigation.
  
-The mapping studies compare graph-based encoders with a graph-free MLP using the same input features and training procedure. These comparisons test whether access to dependency-neighborhood information improves mapping beyond the file representations alone. Paper~IV compares a dependency-only graph with the same graph augmented by folder nodes while keeping the learning setting fixed, testing the contribution of organizational structure in the absence of lexical features. Paper~V extends this logic by varying feature initialization and, with HGT, graph structure across file-only, folder-augmented, member-augmented, and combined graph variants. This makes it possible to examine the effects of input features and structural additions separately and, where combinations are included, their interaction.
+The mapping studies compare graph-based encoders with an MLP using the same input features and training procedure. These comparisons are consistent with a contribution of dependency-graph information, but they change the predictor together with the available structure. Paper~IV compares a dependency-only graph with the same graph augmented by folder nodes while keeping the learning setting fixed, testing the contribution of organizational structure in the absence of lexical features. Paper~V extends this logic by varying feature initialization and, with HGT, graph structure across file-only, folder-augmented, member-augmented, and combined graph variants. It also enables and disables dependency neighbors within each predictor while holding the file representations fixed. This makes it possible to examine the effects of input features and structural additions separately and, where combinations are included, their interaction.
 
 \section{Benchmark Systems}
 \label{sec:data}
@@ -718,10 +736,12 @@ The properties are homophily $\mathcal{H}$, the proportion of static dependencie
 \begin{table}[htb]
 \centering
 \small
-\caption[Properties of the benchmark systems.]{Properties of the benchmark systems, with the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph.\label{table:system_properties}}
-\renewcommand{\arraystretch}{1.0}
-\begin{threeparttable}
+\caption[Properties of the benchmark systems.]{Properties of the benchmark systems, with the normalized TurboMQ of the ground-truth decomposition computed on the dependency-count-weighted graph. Shaded cells mark the highest value in each column. \label{table:system_properties}}
 \setlength{\tabcolsep}{11pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{adjustbox}{max width=\textwidth}
+\setlength{\tabcolsep}{11pt}
+\sisetup{mode=text, reset-text-family=false}
 \begin{tabular}{l S[table-format=2.2] S[table-format=1.2] S[table-format=3.2]}
 \toprule
 {System} & {\makecell{Normalized TurboMQ\\ \tmq{}}} & {\makecell{Homophily\\$\mathcal{H}$}} & {\makecell{Avg. module size\\$\langle \mathcal{M} \rangle$}} \\
@@ -743,11 +763,12 @@ HDF & 48.02 & 0.35 & 17.00 \\
 Libxml & 35.08 & 0.21 & 4.82 \\
 \bottomrule
 \end{tabular}
-\begin{tablenotes}[flushleft]
+\end{adjustbox}
+\smallskip
+\begin{minipage}{\textwidth}
 \footnotesize
-\item Papers~II and~IV reported \tmq{} without aggregating the multiplicity of member-level dependencies into a single file-pair edge weight, so the values here are not directly comparable.
-\end{tablenotes}
-\end{threeparttable}
+Papers~II and~IV reported \tmq{} without aggregating the multiplicity of member-level dependencies into a single file-pair edge weight, so the values here are not directly comparable.
+\end{minipage}
 \end{table}
 % median tmq of GT is 44.40.
 % ----------------------------------------------------
@@ -759,40 +780,52 @@ Libxml & 35.08 & 0.21 & 4.82 \\
 This chapter presents and synthesizes the findings against the three research objectives. It first reports the cross-study evaluation results, then combines them with the findings of the five studies to answer the research questions.
 
 \section{Results of the Cross-Study Evaluations\label{sec:cross_study_results}}
+
 This section reports four cross-study evaluations in architecture recovery and C2A mapping. Boxplots pool 100 runs per method and system across all systems. They show the pooled distribution of outcomes without separating within-system from between-system variation. System-wise tests complement these plots.
 
 \subsection{Recovery: Learning Objectives and Graph Inputs \label{sec:cont_recon}\label{sec:recovery_cross_study}}
 
-The two recovery evaluations cover all fourteen benchmark systems. MoJoFM, ARI, and \cc{} assess agreement with the reference decomposition, while \tmq{} assesses dependency cohesion independently of that reference. These measures provide complementary views: rankings by median score across systems are nearly the same under MoJoFM, ARI, and \cc{}, with two exceptions: GCN ranks above the contrastive GAT and GAT-E under ARI, and GAT-DC and N2V exchange places under \cc{}. Rankings under \tmq{} differ. 
+The two recovery evaluations cover all fourteen benchmark systems. The first compares the contrastive approach of Paper~I with the reconstruction-based approach of Paper~II using GAT and common node features. It also includes GAT-E, the edge-attribute variant of Paper~I. The approaches retain their respective training settings, so the comparison does not isolate the learning objective alone.
 
-Figure~\ref{fig:overview-recovery} presents both recovery comparisons, with MoJoFM in part~(a) and \tmq{} in part~(b).
-\begin{figure}[!t]
+The second compares the attributed-graph GCN and GAT of Paper~II with the structure-only methods of Paper~IV. These comprise GAT, GAT-DC, and Node2Vec on the file-level dependency graph, and MetaPath2Vec and HGAT on the folder-augmented graph.
+
+MoJoFM, ARI, and \cc{} measure agreement with the reference decomposition, while \tmq{} measures dependency cohesion independently of that reference. Figure~\ref{fig:overview-recovery} presents the results using MoJoFM and \tmq{}. The comparisons use a common clustering procedure, as described in Section~\ref{sec:cross_study_eval}.
+
+\begin{figure}[!htb]
     \centering
     \begin{subfigure}{1\textwidth}
         \centering
-        \includegraphics[width=0.95\textwidth]{figures/recovery_alignment.pdf}
+        \includegraphics[width=1\textwidth]{figures/recovery_alignment.pdf}
          \caption{MoJoFM.}
         \label{fig:recovery-objectives}
     \end{subfigure}
     \par\vspace{0.3cm}
     \begin{subfigure}{1\textwidth}
         \centering
-        \includegraphics[width=0.95\textwidth]{figures/recovery_cohesion.pdf}
-        \caption{Normalized TurboMQ (\tmq{}).}
+        \includegraphics[width=1\textwidth]{figures/recovery_cohesion.pdf}
+        \caption{\tmq{}.}
         \label{fig:recovery-graphs}
     \end{subfigure}
     % \par
     \caption[Overview of recovery results across studies.]{Recovery results across studies: agreement with the reference decomposition (a) and dependency cohesion (b). The attributed-graph methods are the contrastive (Paper~I) and reconstruction (Paper~II) variants; the structure-only methods (Paper~IV) use the folder-augmented or the file-level graph. Boxplots pool all runs per system; dots mark system medians, and the boxed value indicates the median of these medians.}
     \label{fig:overview-recovery}
-\end{figure} The first comparison is between two learning objectives: the contrastive objective of Paper~I, applied to GAT and its edge-attribute variant GAT-E, and the reconstruction objective of Paper~II, applied to GAT, with Paper~I evaluated on the node features of Paper~II. The second compares Paper~II's attributed-graph GCN and GAT with Paper~IV's structure-only representations: GAT, GAT-DC, and N2V on the file-level dependency graph, and M2V and HGAT on the folder-augmented graph. For N2V, clustering with Ward linkage instead of k-means changes the median across systems from 0.293 to 0.266 in ARI, from 68.9 to 63.5 in MoJoFM, and from 63.9 to 66.1 in \tmq{}; the direction of the change varies across systems for ARI and MoJoFM, whereas \tmq{} is higher on thirteen of fourteen systems.
+\end{figure}
 
-\paragraph{Agreement with the reference decomposition.} In part~(a), median MoJoFM values are similar across the contrastive and reconstruction variants, but the contrastive variants show a wider spread toward lower scores. Within the contrastive setup, Mann-Whitney U tests find a significant difference between GAT and GAT-E only on OODT's MoJoFM, with a small effect favoring GAT. Edge attributes, therefore, provide no consistent advantage in recovery.
- 
-With the common GAT encoder, reconstruction significantly outperforms contrastive learning on MoJoFM and ARI for nine of the fourteen systems. Effects are large for AS4, Bash, Chromium, Libxml, and OODT, and small to medium for C.Img, HDF, SH-3D, and TeamMates. Differences are not significant for ArgoUML, HDC, JabRef, or Lucene; contrastive learning performs better only on Hadoop. Attributed GCN and GAT also achieve a higher median MoJoFM than all structure-only methods.
- 
-\paragraph{Dependency cohesion.} In part~(b), attributed GCN has the lowest median \tmq{} of all methods, and among the attributed GAT encoders, the one trained with a reconstruction objective has a higher median than the contrastive GAT and GAT-E. This reconstruction GAT lies above the folder-augmented HGAT and M2V and below the file-level structure-only methods, with N2V attaining the highest value. Because \tmq{} varies widely across systems, even for the ground truth, the comparison with each system's own ground truth below is more informative than these medians.
-One-sample Wilcoxon signed-rank tests compare each method's runs against the ground-truth architecture, whose median \tmq{} across the benchmark is 43.0 (Table~\ref{table:system_properties}). Table~\ref{tab:gt_cohesion} counts the systems on which each method falls below or above it. GCN falls below the ground truth on most systems; the contrastive variants and the folder-augmented methods on about half; and the other methods on five or fewer, with N2V below only on Libxml, where all Paper~IV methods fall below. Reference agreement and dependency cohesion thus do not rank the methods in the same order, as the attributed methods lead on GT-alignment while the file-level structure-only methods, N2V in particular, attain higher \tmq{}.
-\begin{table}[h]
+\paragraph{Agreement with the reference decomposition.} In Figure~\ref{fig:overview-recovery}(a), the contrastive and reconstruction variants have similar median MoJoFM values, but the contrastive variants show a wider spread toward lower scores. System-wise comparisons significantly favor the reconstruction-based GAT over the contrastive GAT on both MoJoFM and ARI for nine of the fourteen systems. Effects are large for ArchStudio4, Bash, Chromium, Libxml, and OODT, and small to medium for Commons-Imaging, HDF, SweetHome-3D, and TeamMates. Differences are not significant for ArgoUML, HDC, JabRef, or Lucene, while contrastive learning performs better only on Hadoop.
+
+Adding edge attributes within the contrastive setup provides no consistent advantage. Mann--Whitney $U$ tests find a significant difference between GAT and GAT-E only for MoJoFM on OODT, with a small effect favoring GAT.
+
+Comparing graph inputs, attributed GCN and GAT achieve a higher median MoJoFM than all structure-only methods. ARI and \cc{} give broadly similar rankings to MoJoFM when methods are ordered by their median scores across systems. The exceptions are that GCN ranks above the contrastive GAT variants under ARI, while GAT-DC and Node2Vec exchange places under \cc{}.
+
+\paragraph{Dependency cohesion.} Figure~\ref{fig:overview-recovery}(b) shows a different ordering from reference agreement. The file-level structure-only methods achieve higher median \tmq{} than the attributed methods, with Node2Vec attaining the highest value. Among the attributed methods, reconstruction-based GAT scores above the contrastive variants, while GCN has the lowest median of all methods. Reconstruction-based GAT also scores above the folder-augmented HGAT and MetaPath2Vec.
+
+Because \tmq{} varies widely across systems, we also compare each method with the reference architecture of the same system. Table~\ref{tab:gt_cohesion} reports how many systems have significantly lower or higher scores, using one-sample Wilcoxon signed-rank tests. GCN falls below the reference on eleven of fourteen systems. The contrastive and folder-augmented methods fall below it on seven or eight systems, whereas the remaining methods do so on five or fewer. Node2Vec exceeds the reference on thirteen systems and falls below it only on Libxml.
+
+Together, these comparisons show that agreement with the reference decomposition and dependency cohesion favor different methods. The attributed methods achieve higher reference agreement, while the file-level structure-only methods produce more dependency-cohesive partitions.
+
+The common clustering procedure changes Node2Vec's results relative to its original k-means configuration. Using Ward linkage lowers the median ARI across systems from 0.293 to 0.266 and MoJoFM from 68.9 to 63.5, while increasing normalized TurboMQ from 63.9 to 66.1. Changes in reference agreement vary in direction across systems, whereas normalized TurboMQ increases on thirteen of the fourteen systems.
+
+\begin{table}[htb]
 \centering
 \caption[Recovered partitions compared with the ground truth in \tmq{}.]{Number of the fourteen systems on which a method's \tmq{} is significantly below or above that of the ground truth (one-sample Wilcoxon signed-rank test, $p<0.05$); on the remaining systems, the difference is not significant. \label{tab:gt_cohesion}}
 \renewcommand{\arraystretch}{1.0}
@@ -801,7 +834,7 @@ One-sample Wilcoxon signed-rank tests compare each method's runs against the gro
 \toprule
 & \multicolumn{4}{c}{\textbf{Attributed graph (Papers~I \& II)}} & \multicolumn{5}{c}{\textbf{Structure-only (Paper~IV)}} \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-10}
-& \multicolumn{2}{c}{Contrastive} & \multicolumn{2}{c}{Reconstruction} & \multicolumn{2}{c}{Folder-F} & \multicolumn{3}{c}{File-level} \\
+& \multicolumn{2}{c}{Contrastive} & \multicolumn{2}{c}{Reconstruction} & \multicolumn{2}{c}{Folder-augmented} & \multicolumn{3}{c}{File-level} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-10}
 & GAT & GAT-E & GAT & GCN & M2V & HGAT & GAT & GAT-DC & N2V \\
 \midrule
@@ -814,28 +847,34 @@ Above    & 4 & 4 & 7 & 3  & 6 & 5 & 11 & 9 & 13 \\
 \end{table}
 
 \subsection{Mapping: Predictors and Dependency Types \label{sec:mapping_cross_study}}
-Two mapping evaluations are reported, both on the ten systems that use the same labeled sets as Paper~III and assessed with macro- and micro-F1. The first compares the graph-free MLP, GCN, and GAT of Paper~III with HGT on the same input and labeled sets, which tests HGT on a multi-relational dependency graph in which each dependency type is a separate relation. The second tests whether the observations of Paper~III on modeling dependency types as separate relations hold on the input vectors of Paper~V, using the GAT architecture of Paper~III.
 
-\paragraph{Predictor comparison.} Figure~\ref{fig:overview-mapping} shows macro- and micro-F1 on the ten mapping systems for the graph-free MLP, GCN, and GAT of Paper~III and for HGT. GAT has the highest median in both metrics. HGT's median micro-F1 lies between GCN and GAT, whereas its median macro-F1 is the lowest among all methods, below MLP and GCN.
+The two mapping evaluations cover the ten-system mapping benchmark and use macro- and micro-F1. The first compares HGT with the MLP, GCN, and GAT of Paper~III using the same file features and labeled sets. The graph-based predictors use a file-level graph with separate dependency relations.
 
-System-wise tests show that HGT is significantly lower than GAT on nine of ten systems for macro-F1 and on eight for micro-F1, with mostly large effects. The only system where HGT is significantly higher than GAT is Chromium in micro-F1 (+1.9 points, large effect). Compared with MLP, HGT is significantly lower on seven systems across both metrics, with small-to-large effects, and compared with GCN on six systems in macro-F1 and five in micro-F1. It is higher than MLP on Chromium and JabRef in both metrics, and higher than GCN on two systems in macro-F1 and four in micro-F1.
- 
+The second compares typed and merged GAT using the four file representations from Paper~V. It examines whether the benefit of preserving dependency types extends beyond the combined lexical and folder-path features used in Paper~III.
+
+\paragraph{Predictor comparison.} Figure~\ref{fig:overview-mapping} shows that GAT has the highest median macro- and micro-F1. HGT’s median micro-F1 lies between GCN and GAT, but its median macro-F1 is the lowest of all four predictors.
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.92\textwidth]{figures/overview_mapping_benchmark.pdf}
+    \includegraphics[width=0.90\textwidth]{figures/overview_mapping_benchmark.pdf}
     \caption[Overview of C2A mapping results across studies.]{Macro- and micro-F1 for MLP, GCN, GAT, and HGT on the same input features and labeled-set splits. Boxplots pool all runs per system; dots mark system medians, and the boxed value indicates the median of these medians.\label{fig:overview-mapping}}
 \end{figure}
 
-\paragraph{Effects of dependency type modeling.} Table~\ref{tab:gat_typed_summary} compares typed and merged (single-relation) GAT from Paper~III, using source-to-target aggregation, on the four file representations of Paper~V: W2V, N2V, and zero-shot (\zs{}) and fine-tuned (\ft{}) UniXcoder. None includes folder information. Typing generally improves performance: median differences are positive for every representation under both metrics, but significant across systems only for W2V and, in micro-F1, for \ft{}.
- 
-The effect is not uniform across systems and inputs; however, every vector has significant losses on some systems. Bash is the clearest case, with significant losses for W2V, \zs{}, and \ft{} in both metrics, and \zs{} combines large gains on SH-3D and HDF with large losses on Bash and Chrome.
- 
+System-wise comparisons significantly favor GAT over HGT on nine of ten systems for macro-F1 and eight for micro-F1, with mostly large effects. HGT significantly outperforms GAT only on Chromium's micro-F1, by 1.9 points with a large effect.
+
+In the system-wise tests, HGT does not generally outperform MLP and GCN. Compared with MLP, it scores significantly lower on seven systems for each metric, with small-to-large effects, and higher on Chromium and JabRef for both. Compared with GCN, it scores significantly lower on six systems for macro-F1 and five for micro-F1, and higher on two and four systems, respectively.
+
+\paragraph{Effects of dependency type modeling.} Table~\ref{tab:gat_typed_summary} compares typed and merged GAT using Word2Vec, Node2Vec, and zero-shot and fine-tuned UniXcoder representations. Both variants use the GAT architecture of Paper~III with source-to-target aggregation. None of the input representations includes folder information.
+
+Preserving dependency types yields positive median F1 differences across systems for all four representations. The largest median gain is for Word2Vec in macro-F1, at 5.8 points, and for fine-tuned UniXcoder in micro-F1, at 2.8 points. System-wise tests show significant gains on seven of ten systems for Word2Vec under both metrics, and on seven systems for fine-tuned UniXcoder in macro-F1 and nine in micro-F1.
+
+The benefit is not uniform. Every representation also shows significant losses on some systems. Bash is a recurring exception, with significant losses for Word2Vec and both UniXcoder representations under both metrics. Zero-shot UniXcoder shows particularly mixed effects, with large gains on SweetHome-3D and HDF and large losses on Bash and Chromium.
+
 \begin{table}[!htb]
 \centering
-\caption[Typed versus merged GAT across file representations.]{Typed minus merged GAT across ten systems. $\Delta$: median F1 difference (points); $+$ve: positive differences; $\uparrow$/$\downarrow$: significant gains/losses (paired Wilcoxon, Holm-corrected, $\alpha=0.05$). N/S/M/L: system counts by Cliff's $\delta$ magnitude (negligible/small/medium/large), regardless of direction or significance.}
- 
+\caption[Typed versus merged GAT across file representations.]{Typed minus merged GAT across the ten systems, by input vector and metric. $\Delta$: median F1 difference in points. $+$ve: number of systems with a positive difference. $\uparrow$/$\downarrow$: number of systems with a significant gain/loss (paired Wilcoxon signed-rank test, Holm-corrected across the ten systems for each vector and metric, $\alpha=0.05$). N/S/M/L: number of systems with negligible, small, medium, or large Cliff's $\delta$ between the typed and merged scores.}
 \label{tab:gat_typed_summary}
 \begin{adjustbox}{max width=\linewidth}
+\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{l rcccc rcccc}
 \toprule
 & \multicolumn{5}{c}{Macro-F1}
@@ -857,83 +896,103 @@ W2V   & +5.8 & 8 & 7 & 1 & 2/0/1/7 & +1.4 & 9 & 7 & 1 & 1/4/1/4 \\
 % _________ Contrubutions __________________
 \section{Synthesis of Research Findings \label{sec:contruibutions}}
 
-This section synthesizes the five studies and the cross-study results in Section~\ref{sec:cross_study_results} by research objective (Section~\ref{sec:research-objectives}). It examines how graph-based representation learning supports recovery and C2A mapping, what architectural information implementation signals provide, and how their value changes in richer graphs. The following sections integrate this evidence by research objective.
+This section combines the findings of the five studies with the cross-study results in Section~\ref{sec:cross_study_results} to answer the research questions. The synthesis follows the three research objectives, examining the use of representation learning for recovery and mapping, the information carried by individual implementation signals, and the contribution of additional graph structure.
 
 % ===== OBJECTIVE 1 Answers START ===========
 \subsection{Objective~1: Representation Learning for Recovery and Mapping\label{sec:cont_1}}
- 
-Objective~1 (Sec.~\ref{sec:obj_1}) is addressed through the design and empirical evaluation of graph-based representation learning for architecture recovery and C2A mapping. The thesis constructs a software graph from implementation-level signals, evaluates GNNs that learn joint representations of dependencies, code identifiers, and organizational signals for both tasks (RQ1.1), and tests whether dependency types should be modeled as separate relations or merged into a single relation (RQ1.2). GCN and GAT are compared as encoder architectures, and the sensitivity of the representation to the learning objective and model depth is examined (RQ1.3).
 
-\paragraph{RQ1.1} Papers~I--III combine folder organization, code identifiers, and dependencies into learned representations for architecture recovery and C2A mapping. Improvements over their respective baselines, in agreement with the reference decomposition (recovery) and F1 (mapping), support this approach across both tasks but do not isolate the contribution of each signal. In Paper~III, a graph-free MLP using the same node features also outperforms the Naive Bayes reference on every system and both F1 metrics. The improvement over that reference, therefore, does not, by itself, establish a benefit from dependency-based message passing.
+Objective~1 examines how graph-based representation learning supports architecture recovery and C2A mapping. The findings address the combination of implementation signals (RQ1.1), the treatment of dependency types (RQ1.2), and the effects of learning objective, encoder architecture, and depth (RQ1.3).
 
-\paragraph{RQ1.2} Papers~I--III model dependency types as separate relations, each processed by its own encoder channel, with outputs combined by summation. This allows different dependency types to contribute differently to the representation. Paper~III directly compares this design with merged dependencies: separate relations significantly outperform a single relation across all systems for both GCN and GAT using lexical and folder-token features. However, the multi-relational encoders also have more parameters, so the comparison does not isolate relation typing from added capacity. Papers~I and~II use separate relations without testing a merged alternative.
+\paragraph{RQ1.1: Joint representation of implementation signals.} Papers~I--III combine dependencies, code identifiers, and folder organization to learn representations for recovery and mapping. These methods improve on their respective baselines in reference agreement for recovery and F1 for mapping. The results support the combined representations, but do not establish how much each signal contributes.
 
-The benefit is weaker or absent in the other settings. In dependency-only recovery, separate relations markedly reduced performance in preliminary file-level experiments, so Paper~IV reports only merged dependencies in this setting. With folder nodes and containment edges added, typing has a modest, system-dependent benefit that varies across measures. In mapping with the GAT of Paper~III and the folder-free input vectors of Paper~V, typing tends to improve performance, but less than in Paper~III and with variation across vectors and systems (Sec.~\ref{sec:mapping_cross_study}). Modeling dependency types does not by itself make an encoder stronger: HGT, which conditions attention on the dependency type, does not match GAT in the cross-study comparison on the typed dependencies of Paper~III.
+In Paper~III, an MLP using the same file features also outperforms the Naive Bayes baseline on every system under both F1 metrics. Improvement over that baseline therefore does not, by itself, demonstrate a benefit from dependency-based message passing.
 
-Separate dependency relations therefore benefit GAT in the evaluated mapping settings, but do not consistently improve recovery. Their effects vary across input representations, tasks, and encoders. Because these factors change together across studies, the comparisons do not establish which factors explain this variation.
+\paragraph{RQ1.2: Modeling dependency types.} Papers~I--III represent dependency types as separate relations, each processed by its own encoder channel, and combine the outputs by summation. Paper~III compares this design with merging all dependencies into a single relation. With lexical and folder-token features, separate relations significantly improve both GCN and GAT across all evaluated systems. However, the separate channels also add parameters, so the comparison does not isolate dependency typing from model capacity. Papers I and II do not test a merged alternative.
 
-\paragraph{RQ1.3} The studies indicate that the usefulness of a learned representation depends on the learning objective, encoder, and model depth. Three comparisons support these dependencies:
+The cross-study mapping comparison extends this evaluation to the folder-free representations of Paper~V. Separate relations generally benefit GAT, but the benefit is less consistent than in Paper~III and varies across representations and systems, with significant losses on some systems (Section~\ref{sec:mapping_cross_study}). HGT does not match GAT on the typed dependency graph, showing that the use of dependency types alone does not determine predictor performance.
 
-\begin{itemize}[leftmargin=1em, topsep=3pt, itemsep=1pt]
-\item \emph{Learning objective:} Architectural alignment depends on the objective used to train the encoder. Papers~I and~II initially examine contrastive learning and dependency reconstruction under different features and benchmarks, preventing a direct comparison. The matched extension in Section~\ref{sec:cont_recon} finds that reconstruction generally produces better architectural alignment under a common GAT encoder and input representation, although the advantage is not universal. This supports reconstruction as the stronger objective in the evaluated setting, rather than treating the two objectives as interchangeable.
- 
-\item \emph{Encoder architecture:} Encoder choice affects performance in both recovery and mapping. Across both tasks, GAT generally outperforms GCN, and in the mapping comparisons it also outperforms HGT. GCN and GAT share the graph, node features, and relation-specific transformations, but differ in message weighting: GCN uses fixed, degree-normalized weights, whereas GAT learns weights through multi-head attention. This adds flexibility and parameters, so the comparison does not isolate attention from added capacity. The MLP provides a further qualification: GAT usually outperforms it, whereas GCN frequently underperforms it. Access to dependencies, therefore, does not by itself ensure better predictions; the encoder determines how that information is used (Papers~II, III, and~V). For this reason, Objective~2 examines the architectural information in the signals before they are combined.
- 
-\item \emph{Encoder depth:} Propagation depth does not yield a uniform improvement. A second layer helps some systems and harms others, so no setting is uniformly preferable (Paper~III).
+Recovery provides less consistent support for separate relations. In Paper~IV, preliminary experiments on file-level dependency graphs showed markedly lower performance with separate relations, so the reported dependency-only comparisons use merged dependencies. With folder nodes and containment relations included, preserving dependency types gives modest benefits that vary across systems and evaluation measures.
+
+Overall, separate dependency relations benefit mapping more consistently than recovery in the evaluated settings. Their effects vary with the input representations and encoder, but differences between the studies prevent these factors from being isolated.
+
+\paragraph{RQ1.3: Learning objective, encoder architecture, and depth.} The studies examine how these three choices affect recovery and mapping.
+
+\begin{itemize}[leftmargin=1.1em, topsep=3pt] % topsep=3pt, itemsep=1pt
+\item \emph{Learning objective:} The cross-study evaluation in Section~\ref{sec:cont_recon} compares the contrastive approach of Paper~I with the reconstruction-based approach of Paper~II using common node features and a GAT encoder. Reconstruction generally achieves better agreement with the reference decomposition, although the advantage is not universal. Because the approaches retain different training settings, the comparison supports the reconstruction-based approach without isolating the learning objective alone.
+
+\item \emph{Encoder architecture:} GAT generally outperforms GCN across recovery and mapping (Papers~II and~III), and HGT in the cross-study mapping comparison. GCN uses degree-normalized aggregation, whereas GAT learns weights for neighboring representations. However, the models also differ in parameterization, so these results cannot be attributed to attention alone. In mapping, GAT usually outperforms the MLP, while GCN frequently underperforms it. Access to dependencies therefore does not guarantee better predictions.
+
+\item \emph{Encoder depth:} Paper~III finds no consistent benefit from increasing message-passing depth. A second layer improves performance on some systems and reduces it on others.
 \end{itemize}
 
 \begin{GrayBox}{Summary of Objective~1}
-Representations that combine dependency, lexical, and folder signals improve on the evaluated baselines in both recovery and mapping, but these comparisons do not isolate the contribution of each signal (RQ1.1). Separate dependency relations benefit mapping more consistently than dependency-only recovery, with effects varying across inputs and encoders (RQ1.2). Of the two self-supervised objectives, reconstruction yields better architectural alignment than contrastive learning under common input signals and encoder. GAT generally outperforms GCN across both tasks and HGT in mapping, whereas the effect of model depth varies across systems (RQ1.3).
+Combining dependency, lexical, and folder signals improves on the evaluated baselines in recovery and mapping, although the contribution of each signal is not isolated (RQ1.1). Preserving dependency types benefits mapping more consistently than recovery, with effects varying across inputs and encoders (RQ1.2). The reconstruction-based approach generally achieves better reference agreement than the contrastive approach, but their training settings also differ. GAT generally outperforms GCN across both tasks and HGT in the cross-study mapping comparison, while increasing encoder depth has no consistent benefit (RQ1.3).
 \end{GrayBox}
 % _________ Objective~2 __________________
 
-\subsection[Objective~2: Architectural Information in Implementation]{Objective~2: Architectural Information in Implementation Signals \label{sec:cont_2}}
+\subsection{Objective~2: Architectural Information in Implementation Signals \label{sec:cont_2}}
 
-Objective~2 (Sec.~\ref{sec:obj_2}) is addressed by examining architectural information before signals are combined. Paper~IV investigates dependency-only recovery (RQ2.1). Paper~V examines dependency-guided adaptation of contextual code representations (RQ2.2) and compares structural, lexical, and contextual file representations (RQ2.3). Its comparisons use a common MLP and labeled splits, without organizational information or additional message passing.
+Objective~2 (Section~\ref{sec:obj_2}) examines the architectural information carried by individual implementation signals. The findings address recovery from dependency structure alone (RQ2.1), dependency-guided adaptation of contextual code representations (RQ2.2), and the comparison of structural, lexical, and contextual file representations (RQ2.3).
 
-\paragraph{RQ2.1} Paper~IV shows that dependency structure alone supports recovery: N2V and GAT-DC outperform classical recovery baselines, whereas GAT alone is generally weaker than both. Two patterns help explain their performance.
- 
-The first is structural reach. N2V and GAT-DC outperform the two-layer GAT in terms of reference agreement across most systems. GAT-DC closes much of the gap to N2V using the same encoder with diffusion-expanded neighborhoods, suggesting that recovery is driven more by the available structural context than by the encoder choice alone. The second is GT cohesion. Dependency-only recovery is strongest when the GT architecture is cohesive within the dependency graph. It remains difficult when cross-module and within-module dependencies are similarly dense, as on Hadoop and TeamMates.
- 
-The conclusion also depends on the evaluation criterion (Sec.~\ref{sec:recovery_cross_study}). Dependency-only representations, particularly N2V, produce the most dependency-cohesive partitions, and GAT-DC improves reference agreement over GAT on most systems without a corresponding advantage in dependency cohesion.
+\paragraph{RQ2.1: Recovery from dependency structure.} Paper~IV shows that dependency structure alone supports recovery. Node2Vec and GAT-DC outperform the classical recovery baselines, while plain GAT is generally weaker than both.
 
-\paragraph{RQ2.2} A general-purpose code encoder captures lexical and syntactic similarities that do not necessarily follow module boundaries. Adapting the pretrained code transformer UniXcoder with positive and negative pairs drawn from the dependency graph improves the file representation over its zero-shot form on nearly all systems for a mapping task. Both representations are used as fixed inputs to the same graph-free MLP, trained on a small labeled set. The positive pairs come mainly from two-hop neighborhoods, following the Paper~IV finding that structural reach beyond direct neighbors matters for recovery from dependencies. Since the classifier, labeled files, and evaluation are unchanged, the gains reflect the adapted representation and suggest that it captures dependency-derived architectural information. However, the contribution of dependency-derived pairs is not isolated, since no comparison with non-dependency pairs is included (Paper~V).
+Structural reach helps explain this difference. Node2Vec and GAT-DC achieve better reference agreement than the two-layer GAT on most systems. Applying diffusion to the GAT input graph closes much of the gap to Node2Vec, suggesting that access to a wider dependency neighborhood contributes to recovery performance.
 
-\paragraph{RQ2.3} With an MLP, representations that encode dependency information generally support mapping better than lexical or zero-shot contextual representations. N2V encodes dependencies through random walks, while \ft{} incorporates them through dependency-guided adaptation of UniXcoder. Both generally outperform W2V and \zs{}, although exceptions remain, including JabRef, where W2V is among the strongest. W2V and \zs{} show no consistent ordering, with each significantly outperforming the other on several systems.
+Performance also depends on how closely dependency structure follows the reference decomposition. Recovery is strongest when dependencies are concentrated within reference modules and remains difficult when within-module and cross-module dependencies are similarly dense, as on Hadoop and TeamMates.
 
-Neither dependency-encoding representation is uniformly best: N2V performs significantly better on six systems and \ft{} on three. No clear condition explains their relative performance. N2V's micro-F1 is lower on the three least homophilic systems, SH-3D, HDF, and TeamMates, yet \ft{} outperforms it on only two of these, SH-3D and TeamMates, and also on JabRef. Together with the improvement from \zs{} to \ft{} (RQ2.2), the broader results suggest that the advantage is associated with dependency information rather than a particular model family. However, the representations also differ in content and training procedure, so the contribution of dependency information alone cannot be isolated.
+The evaluation criterion matters as well (Section~\ref{sec:recovery_cross_study}). Node2Vec produces the most dependency-cohesive partitions, while GAT-DC improves reference agreement over plain GAT on most systems without a corresponding advantage in dependency cohesion.
+
+\paragraph{RQ2.2: Dependency-guided adaptation of code representations.} Paper~V finds that dependency-guided fine-tuning of UniXcoder improves mapping performance over its zero-shot form on nearly all systems. Both representations are held fixed during classifier training and evaluated using the same MLP and labeled sets, without folder information or additional message passing.
+
+Fine-tuning uses a contrastive objective with positive pairs drawn mainly from two-hop dependency neighborhoods. This choice follows the observation in Paper~IV that structural context beyond direct neighbors can support recovery. With the classifier and evaluation conditions held fixed, the gains support adapting the pretrained representation to the target system using dependency information.
+
+However, the comparison does not isolate the contribution of dependency-based pair selection, since it includes no fine-tuning alternative using pairs selected without dependency information.
+
+\paragraph{RQ2.3: Comparing file representations.} Paper~V compares structural, lexical, and contextual file representations using the same graph-free MLP and labeled sets, without folder information or additional message passing. Representations that encode dependency information generally perform better. Node2Vec captures dependencies through random walks, while fine-tuned UniXcoder incorporates them through dependency-guided adaptation. Both generally outperform Word2Vec and zero-shot UniXcoder, although there are exceptions, including JabRef, where Word2Vec is among the strongest. Word2Vec and zero-shot UniXcoder show no consistent ordering, with each significantly outperforming the other on several systems.
+
+Neither Node2Vec nor fine-tuned UniXcoder is uniformly best. Node2Vec performs significantly better on six systems under both F1 metrics, while fine-tuned UniXcoder performs significantly better on three systems under both metrics and additionally on HDC under macro-F1.
+
+Together with the improvement from zero-shot to fine-tuned UniXcoder (RQ2.2), these findings suggest that dependency information contributes to the stronger representations. However, the representations also differ in content and training procedure, so the contribution of dependency information alone cannot be isolated.
 
 \begin{GrayBox}{Summary of Objective~2}
-Dependency structure alone supports recovery to a bounded extent, limited by structural reach and by the cohesion of the reference architecture in the dependency graph. The outcome depends on the criterion: N2V produces the most dependency-cohesive partitions, whereas GAT-DC improves reference agreement over GAT without a gain in cohesion (RQ2.1). Dependency-guided adaptation consistently improves a pretrained code transformer over its zero-shot form (RQ2.2). Representations that encode dependency information, N2V and fine-tuned UniXcoder, generally outperform W2V and zero-shot UniXcoder, which do not encode dependencies and do not differ consistently from each other. N2V most often performs best, but fine-tuned UniXcoder is significantly stronger on some systems, so no representation is best on every system (RQ2.3).
+Dependency structure alone supports recovery, with performance depending on structural reach and how closely dependencies follow the reference modules. Reference agreement and dependency cohesion favor different methods (RQ2.1). Dependency-guided fine-tuning improves UniXcoder over its zero-shot form on nearly all systems, although the contribution of dependency-based pair selection is not isolated (RQ2.2). Node2Vec and fine-tuned UniXcoder generally outperform Word2Vec and zero-shot UniXcoder in mapping without folder information or additional message passing, but neither is uniformly best. Differences in content and training prevent the advantage from being attributed solely to dependency information (RQ2.3).
 \end{GrayBox}
 
 % % _________ Objective~3 __________________
-\subsection{Interaction Between Input Signals and Graph Structure \label{sec:cont_3}}
-Objective~3 (Sec.~\ref{sec:obj_3}) examines how additional graph context changes the findings of Objectives~1 and~2. Controlled dependency neighbor comparisons in mapping (Paper~V), together with recovery evidence, examine how the usefulness of dependency neighbors varies with predictor, aggregation direction, task, and file representation (RQ3.1). Folder organization is then examined in recovery (Paper~IV) and mapping (Paper~V), including its effect on the relative performance of file representations (RQ3.2). Finally, member-level nodes in mapping and edge-level attributes in recovery are examined (RQ3.3)
+\subsection{Objective~3: Interaction Between Input Signals and Graph Structure \label{sec:cont_3}}
 
-\paragraph{RQ3.1} Architecture recovery offers no condition without a dependency neighborhood, so the effect of neighbor access can be tested only in mapping; in recovery, what dependency neighbors support depends on how far they reach and how well they follow module boundaries (RQ2.1 and RQ2.3).
+Objective~3 (Section~\ref{sec:obj_3}) examines how graph structure contributes beyond the initial file representations. The findings address dependency-neighbor aggregation and its direction (RQ3.1), folder organization (RQ3.2), and the additional detail provided by member nodes and edge attributes (RQ3.3).
 
-In mapping, comparing a graph-based predictor with an MLP changes both the predictor and the available structure. Neighbor access was therefore tested by switching aggregation on and off within HGT, GAT, and a neighbor MLP while holding file vectors fixed. The neighbor MLP appends the mean of its neighbors' vectors to each file's own vector. Source-to-target aggregation updates a file from the files that depend on it, whereas undirected aggregation also permits propagation in the reverse direction.
+\paragraph{RQ3.1: Dependency neighbors and aggregation direction.} Paper~V examines the contribution of dependency neighbors by comparing HGT, GAT, and a neighbor MLP with and without neighbor aggregation, holding file representations fixed. The neighbor MLP appends the mean of neighboring files' vectors to each file's own vector. These comparisons assess neighbor access within each predictor, avoiding the change in predictor architecture involved in comparing a GNN with a graph-free MLP.
 
-Dependency neighbors add information beyond the file vectors, but how much they add depends on the predictor, the input vector, and the aggregation direction. The gains are larger for W2V and zero-shot UniXcoder, which do not encode dependencies, than for N2V; GAT is generally the strongest predictor, and HGT gains the least. With neighbors, fine-tuned UniXcoder gains more than N2V, which narrows the gap observed without neighbors (RQ2.3). The better direction depends on the system and not on the predictor or the input vector, and undirected aggregation also adds reverse edges, so direction and neighborhood size are not separated (Paper~V).
+Dependency neighbors mostly improve mapping beyond the information already present in the file representations, but the gains vary across predictors and inputs. For GAT and the neighbor MLP, gains are larger for Word2Vec and zero-shot UniXcoder, which do not encode dependencies, than for Node2Vec. However, fine-tuned UniXcoder benefits more than Node2Vec. GAT is generally the strongest predictor, while HGT gains the least from neighbor access. With GAT, fine-tuned UniXcoder scores higher than Node2Vec in micro-F1 on seven of the ten systems with either aggregation direction, up from three without aggregation (RQ2.3), whereas in macro-F1 the count rises only from four to five.
 
-Paper~III also compared aggregation directions for GAT and GCN and found source-to-target aggregation generally preferable for GAT. The two studies differ in dependency typing, node features, depth, and training, and the better direction agrees between them on some systems and disagrees on others, so neither the benefit nor the preferred direction can be assumed to transfer across setups (Papers~III).
+Aggregation direction also affects performance. Source-to-target aggregation updates a file using information from files that depend on it, while undirected aggregation permits information to flow in both directions. In Paper~V, source-to-target aggregation lowered median macro-F1 with Node2Vec, which already encodes dependency context, whereas undirected aggregation improved it. The preferred direction varied across systems rather than across predictors or input representations. Systems that combine low homophily with high average degree favored source-to-target aggregation, while several sparser systems favored undirected aggregation. However, making the graph undirected also adds reverse edges, so the comparison does not separate direction from neighborhood size, and the ten systems do not separate connectivity from homophily.
 
-\paragraph{RQ3.2} Folder organization is represented in two forms: directory tokens alongside identifiers in attributed node features (Papers~I to~III), and folder nodes linked by containment relations in folder-augmented graphs (Papers~IV and~V). In recovery, it moves the two criteria in opposite directions. Methods that include organizational information, whether as features or as nodes, align more closely with the reference decomposition, particularly where dependencies provide weak evidence of its boundaries. Dependency-only methods instead produce more dependency-cohesive partitions (Sec.~\ref{sec:recovery_cross_study}).
- 
-In mapping, structure is added in steps, and labeled files allow the model to learn how folders relate to modules. In Paper~V, adding folder nodes gives the largest and most consistent gains of any step across representations, with W2V gaining the most. With fine-tuned UniXcoder, the folder-aware model approaches the accuracy of a rule based on directory hierarchy and initial labels on most systems and exceeds it only on Lucene. Among files misclassified by the directory-based rule, adding folder nodes and enabling message passing through them yields more corrections than regressions on some systems, but the reverse on others. These gains show that folder location is informative for the reference mappings, but do not establish a consistent benefit for files whose directory is misleading. All representations receive the same folder-token input, and these findings are specific to HGT with source-to-target dependency aggregation.
+Paper~III examines aggregation direction for GAT and GCN and finds source-to-target aggregation generally preferable for GAT. This preference agrees with Paper~V on some systems but differs on others. The studies also differ in dependency typing, node features, depth, and training, so neither the benefit of aggregation nor the preferred direction can be assumed to transfer across settings.
 
+These comparisons isolate neighbor access in mapping. The dependency-only recovery methods have no corresponding condition without dependency context. Their results instead show how recovery varies with structural reach and how closely dependencies follow reference-module boundaries (RQ2.1).
 
-\paragraph{RQ3.3} Neither member-level nodes nor edge-level interaction attributes consistently improve performance in the evaluated settings. In mapping with HGT, adding member nodes to the file graph lowers the median F1 for all three representations, and once folder nodes are present, the effect depends on the representation. Member nodes also change how features enter the model, so these effects cannot be attributed solely to the added structure (Paper~V).
+\paragraph{RQ3.2: Folder organization.} The studies represent folder organization either through directory tokens in file features (Papers~I--III) or through folder nodes and containment relations (Papers~IV and~V). In recovery, methods that include organizational information achieve better agreement with the reference decomposition, particularly where dependencies provide weak evidence of module boundaries. Dependency-only methods instead produce more dependency-cohesive partitions (Section~\ref{sec:recovery_cross_study}).
 
-In recovery, augmenting dependency edges with attributes that describe the member-level interaction behind each dependency gave no significant gain over the base dependency-only representation. This may indicate that the added detail elaborates dependencies that frequently cross module boundaries rather than clarifying architectural signal (Paper~I).
+In mapping, Paper~V finds that adding folder nodes produces the largest and most consistent gains across the evaluated additions to the graph, with Word2Vec benefiting most. Across these configurations, folder nodes use the same folder-token features. With fine-tuned UniXcoder, the folder-aware model approaches the mapping performance of a rule based on directory hierarchy and the initial labeled set on most systems, exceeding it only on Lucene.
+
+The overall gains do not establish a consistent benefit for files that the directory-based rule assigns incorrectly. On these files, the folder-aware model is more accurate than the model without folder nodes on some systems, similar on others, and less accurate on others, and on most of the systems where the rule makes errors it still assigns most of them incorrectly. The analysis does not isolate files whose module differs from the majority module of their directory. Folder location is therefore informative for the reference mappings, while whether the model handles such files reliably remains untested. These mapping findings apply to HGT with source-to-target dependency aggregation and hold with one or two layers.
+
+\paragraph{RQ3.3: Member nodes and edge attributes.} Neither member-level nodes nor edge-level interaction attributes consistently improve performance in the evaluated settings.
+
+In Paper~V, adding member nodes to the file-only graph lowers the median F1 for all three representations evaluated with HGT. When folder nodes are also present, the effect of adding member nodes varies with the representation. These additions change both the graph structure and how features enter the model, so their effects cannot be attributed to structure alone.
+
+Paper~I reports small gains from edge attributes on some systems. However, the cross-study evaluation finds no significant improvement over the same model without these attributes (Section~\ref{sec:recovery_cross_study}). Paper~I attributes the limited benefit on TeamMates to edge attributes amplifying noisy cross-module interactions, suggesting that additional interaction detail may be less useful where dependencies poorly reflect module boundaries.
 
 \begin{GrayBox}{Summary of Objective~3}
-Aggregation over the dependency neighborhood improves mapping beyond the information already in the file vectors, most reliably for GAT and the neighbor MLP, while the size of the gain depends on the vector and the aggregation direction (RQ3.1). Folder organization provides the strongest additional signal, with qualifications: in recovery, greater agreement with the reference can coincide with weaker dependency cohesion, and in mapping, aggregate gains do not establish a benefit for files whose directory is misleading (RQ3.2). Finer-grained structure does not necessarily provide more useful evidence: member-level nodes give no consistent improvement, and edge-level attributes give no significant gain in recovery (RQ3.3).
+Dependency-neighbor aggregation improves mapping beyond the initial file representations, most reliably for GAT and the neighbor MLP. The magnitude of improvement depends on both the predictor and the input representation, with fine-tuned UniXcoder gaining more than Node2Vec, while the preferred aggregation direction varies across systems (RQ3.1). Folder organization provides the strongest additional signal in the evaluated mapping configurations, but does not consistently help correct files misclassified by the directory-based rule. In recovery, higher agreement with the reference architecture can coincide with weaker dependency cohesion (RQ3.2). Adding finer-grained structure does not extend these benefits consistently. Member-level nodes give no consistent improvement in mapping, and edge-level attributes give no significant gain in the cross-study recovery evaluation (RQ3.3).
 \end{GrayBox}
 
-% ========== Discussion ==============
- \chapter{Discussion \label{ch:discussion}}
+% ----------------------------------------------------
+% CHAPTER 7 — Discussion
+% ----------------------------------------------------
+\chapter{Discussion \label{ch:discussion}}
  \chaptertoc
 
 This chapter interprets the findings across the five studies and presents an exploratory analysis of how system properties relate to recovery performance. It examines differences between recovery-method rankings under reference agreement and dependency cohesion, the relationship between dependency homophily and recovery performance, and the role of structural reach in recovery and mapping. It concludes with the limitations of the work. Unless directly tested, the proposed explanations remain interpretations of the observed patterns.
@@ -956,25 +1015,25 @@ The compared methods differ in graph construction, input information, and learni
 % -----------------------------------------
 \subsection{System Properties and Recovery Performance}
 
-We examine associations between recovery performance and benchmark-system properties. For each method in the cross-study recovery evaluation, we correlate per-system median scores with dependency homophily and average module size using Kendall's $\tau$ across the 14 systems (Figure~\ref{fig:recovery-correlations}). Given the small sample and multiple tests, these correlations are treated as exploratory associations rather than independent effects.
+We examine associations between recovery performance and benchmark-system properties. For each method in the cross-study recovery evaluation, we correlate per-system median scores with dependency homophily and average module size using Kendall's $\tau$ across the fourteen systems (Figure~\ref{fig:recovery-correlations}). Given the small sample and multiple tests, these correlations are treated as exploratory associations rather than independent effects.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.98\textwidth]{figures/correlations_recovery.pdf}
     \caption[Correlation between architecture recovery metrics and system properties.]{\small Kendall's $\tau$ correlation between recovery outcomes (MoJoFM, ARI, \tmq{}) and two system properties, homophily $\mathcal{H}$ and average module size $\langle \mathcal{M}\rangle$, per method. GAT, GAT-DC, and N2V (structure-only) operate on the homogeneous dependency graph alone; GCN and GAT (attributed graph) operate on the multi-relational dependency graph with node features derived from file location and code identifiers. \label{fig:recovery-correlations}}
 \end{figure}
-Dependency homophily shows the clearest association with performance, particularly for structure-only methods. The structure-only GAT, GAT-DC, and N2V all show significant positive associations with homophily for MoJoFM and \tmq{}, while only the GAT does so for ARI. The attributed GCN and GAT show weaker and less consistent associations. Lexical and file-location attributes may provide complementary evidence when dependencies cross module boundaries, but these comparisons do not isolate their contribution from other methodological differences.
+Dependency homophily shows the clearest association with performance, particularly for structure-only methods. The structure-only GAT, GAT-DC, and Node2Vec all show significant positive associations with homophily for MoJoFM and \tmq{}, while only the GAT does so for ARI. The attributed GCN and GAT show weaker and less consistent associations. Lexical and file-location attributes may provide complementary evidence when dependencies cross module boundaries, but these comparisons do not isolate their contribution from other methodological differences.
 
-The N2V results are consistent with its reliance on dependency structure alone, so its sensitivity to homophily may be a property of the method and not only of the benchmark. Random walks define the contexts from which file representations are learned, without module labels to distinguish within-module from cross-module dependencies. When dependencies frequently cross module boundaries, files from different modules may therefore appear in similar walk contexts. The positive associations with MoJoFM and \tmq{} are consistent with this interpretation but do not establish the mechanism. Because homophily is computed from the reference decomposition, it provides a retrospective explanation and cannot guide the choice of a representation in advance.
+The Node2Vec results are consistent with its reliance on dependency structure alone, so its sensitivity to homophily may be a property of the method and not only of the benchmark. Random walks define the contexts from which file representations are learned, without module labels to distinguish within-module from cross-module dependencies. When dependencies frequently cross module boundaries, files from different modules may therefore appear in similar walk contexts. The positive associations with MoJoFM and \tmq{} are consistent with this interpretation but do not establish the mechanism. Because homophily is computed from the reference decomposition, it provides a retrospective explanation and cannot guide the choice of a representation in advance.
 
 Associations involving \tmq{} need a separate reading. Homophily describes dependency concentration within reference modules, whereas \tmq{} rewards dependency concentration within recovered clusters and is normalized by the number of clusters, so its associations with homophily and module size are partly built into the metric. They describe the structural quality that \tmq{} measures and do not independently support an effect on recovery accuracy.
 
-Average module size is positively associated with MoJoFM for three of the five methods, but with ARI for none. This pattern is difficult to interpret independently of other system properties: OODT and Libxml have both the smallest modules and the lowest homophily, while larger modules tend to occur in larger systems. With 14 systems, these associations cannot be separated, so no independent effect of module size is inferred.
+Average module size is positively associated with MoJoFM for three of the five methods, but with ARI for none. This pattern is difficult to interpret independently of other system properties: OODT and Libxml have both the smallest modules and the lowest homophily, while larger modules tend to occur in larger systems. With fourteen systems, these associations cannot be separated, so no independent effect of module size is inferred.
 
 \subsection{Structural Reach and Neighborhood Aggregation\label{sec:structural-reach}}
 We use structural reach to describe the extent of the dependency neighborhood from which a file's representation can incorporate information through message passing, diffusion, or random walks. The studies vary these mechanisms rather than measuring reach directly.
 
-In dependency-only recovery, Paper~IV finds that GAT-DC and N2V outperform plain GAT overall. GAT-DC makes diffusion-close nodes directly accessible to the encoder, while N2V learns from contexts formed by random walks. These results suggest that the two-hop neighborhood available to plain GAT provides insufficient context on some systems.
+In dependency-only recovery, Paper~IV finds that GAT-DC and Node2Vec outperform plain GAT overall. GAT-DC makes diffusion-close nodes directly accessible to the encoder, while Node2Vec learns from contexts formed by random walks. These results suggest that the two-hop neighborhood available to plain GAT provides insufficient context on some systems.
 
 However, GAT-DC also uses system-specific settings for depth and the number of retained diffusion neighbors. Paper~IV examines sensitivity to the retained-neighbor count, but the comparison with plain GAT does not isolate the contribution of structural reach under matched settings.
 
@@ -982,7 +1041,7 @@ Increasing depth offers another way to access more distant nodes, but it is not 
 
 Where dependencies cross module boundaries, additional layers may mix information from different modules. Repeated aggregation may also make node representations less distinguishable through over-smoothing~\cite{gnn_oversmoothing}. Neither mechanism was measured directly in these studies, so both remain possible explanations for the mixed effects of depth.
 
-In mapping, Paper~V shows that encoding dependency context in the input representation does not remove the potential benefit of neighbor aggregation during prediction. With file vectors held fixed, enabling aggregation produces different gains across predictors and directions, including when the input vectors already encode dependencies through Node2Vec. The usefulness of additional context therefore depends on how it is combined with the existing representation.
+In mapping, Paper~V shows that encoding dependency context in the input representation does not remove the potential benefit of neighbor aggregation during prediction. With file vectors held fixed, adding neighborhood aggregation produces different gains across predictors and directions, including when the input vectors already encode dependencies through Node2Vec. The usefulness of additional context therefore depends on how it is combined with the existing representation.
 
 Aggregation direction also varies in usefulness across settings. Papers~III and~V favor different directions on several systems, but also differ in dependency typing, features, depth, and training. These differences were not individually tested as explanations. Moreover, undirected aggregation adds reverse edges, so its comparison with source-to-target aggregation does not separate direction from neighborhood size.
 
@@ -995,7 +1054,7 @@ The conclusions are limited by the systems, architectural representations, and m
 \paragraph{Benchmark scope and external validity.}
 The studies evaluate overlapping subsets of open-source Java, C, and C++ systems with published reference decompositions. The findings may not generalize to other programming languages, application domains, build environments, or architectural styles. Although the methods may be applied without a reference decomposition, agreement with an intended architecture cannot be assessed without a comparable reference. Chromium is the only large-scale system evaluated, so evidence of scalability is limited to a single system. Each system is evaluated at a particular version; the studies therefore do not establish robustness to refactoring or changes in dependency structure across releases.
 
-The exploratory analysis across 14 systems does not establish whether dependency homophily affects recovery independently of system size, module granularity, or other system properties.
+The exploratory analysis across fourteen systems does not establish whether dependency homophily affects recovery independently of system size, module granularity, or other system properties.
 
 \paragraph{Static dependencies.}
 Static dependencies are extracted automatically with the Depends~\cite{depends} tool. The resulting graphs may omit runtime dependencies or dependencies the tool cannot resolve, and may include edges not realized at runtime. Recovery and mapping results therefore depend on the extracted graph's accuracy and coverage. Within this thesis, this limitation may affect dependency-derived signals, including dependency-guided fine-tuning of contextual embeddings. Folder and containment relations, lexical embeddings, and zero-shot contextual embeddings do not depend on this extraction. The studies neither independently validate extraction accuracy nor assess sensitivity to extraction errors.
@@ -1022,7 +1081,12 @@ Between-method comparisons involve differences in graph construction, inputs, tr
 In the mapping studies, each run pairs a labeled set with a training seed, so their contributions to variation are not separated in the main evaluation. When Paper~III varied the training seed with the labeled set held fixed, the ranking of a few configurations changed across seeds, whereas some advantages were robust. These results indicate seed sensitivity, but the limited comparisons do not characterize it fully. Close rankings should therefore be interpreted cautiously.
 
 % ============ Conclusion ===============
-\chapter{Conclusion \label{ch:conclusion}}
+\chapter[Conclusion]{Conclusion and Future Work \label{ch:conclusion}}
+\chaptertoc
+
+This chapter concludes the thesis by bringing together the findings on graph-based representation learning for software architecture recovery and C2A mapping. It summarizes the conclusions across the three research objectives, then outlines directions for further research arising from the findings and limitations of the work.
+
+\section{Conclusion \label{sec:conclusion}}
 
 This thesis examined how graph-based representation learning can support software architecture recovery and C2A mapping, and what different implementation signals contribute to these tasks. Recovery was studied as an unsupervised task and mapping as a supervised task with limited labeled data. Across five studies, the work progressed from learning joint representations of static dependencies, folder organization, and source-code content to examining their individual contributions and their interactions with graph structure.
 
@@ -1034,7 +1098,7 @@ The joint-signal comparisons did not separate the contributions of the individua
 
 In mapping with an MLP, Word2Vec and zero-shot UniXcoder showed no consistent ordering, so the pretrained code transformer was not consistently better than a lexical representation. Dependency-guided fine-tuning improved UniXcoder on nearly all systems, supporting adaptation of the pretrained representation to the target system using dependency information. Node2Vec and fine-tuned UniXcoder generally outperformed the other two representations. Neither of the two was uniformly best: Node2Vec most often performed best, while fine-tuned UniXcoder was significantly stronger on some systems. Dependency information was therefore useful in mapping as in recovery, regardless of representation family, although differences in content and training prevent attributing the performance differences to dependency information alone.
 
-The information carried by individual file representations did not establish what additional graph context could contribute. The third objective therefore examined how dependency-based message passing, folder organization, and member-level detail changed their usefulness. With undirected aggregation and fixed file representations, GAT and an MLP supplied with mean neighbor vectors improved on most systems for every representation, with no significant losses. Gains were largest for zero-shot UniXcoder and smallest for Node2Vec. Fine-tuned UniXcoder gained more than Node2Vec and had the highest median macro-F1 across systems for every predictor. Aggregation therefore changed the relative performance of the representations, with benefits depending on how dependency context was already encoded.
+The information carried by individual file representations did not establish what additional graph context could contribute. The third objective therefore examined how dependency-based message passing, folder organization, and member-level detail changed their usefulness. With undirected aggregation and fixed file representations, GAT and an MLP supplied with mean neighbor vectors improved on most systems for every representation, with no significant losses. Gains were largest for zero-shot UniXcoder and smallest for Node2Vec. Fine-tuned UniXcoder gained more than Node2Vec and had the highest median macro-F1 across systems for every predictor. The benefit of aggregation therefore depended on how dependency context was already encoded.
 
 Aggregation direction also mattered. Source-to-target aggregation lowered median macro-F1 with Node2Vec, and the preferred direction depended on the system rather than the predictor or representation. Papers~III and~V agreed on some systems but differed on others, so neither the benefit nor the preferred direction can be assumed to transfer across setups. Undirected aggregation also added reverse edges, so direction and neighborhood size were not separated.
 
@@ -1045,15 +1109,10 @@ Member-level detail gave no consistent improvement in the evaluated configuratio
 Taken together, dependency information remained useful, but encoding it in file representations did not make message passing redundant, and folder organization supplied further information. The dependence on encoder choice observed under Objective~1 recurred as a dependence on predictor and aggregation direction, and across the studies no representation or configuration was uniformly preferable: the contribution of each signal depended on how it was represented and combined with other evidence.
 
 \section{Future Work~\label{sec:future_work}}
-
 A first direction is to determine which aspects of graph context account for the observed performance differences. Undirected aggregation changed both propagation direction and neighborhood size, while member nodes changed graph structure and feature placement. Comparing incoming, outgoing, and combined neighborhoods at matched sizes could help distinguish direction from neighborhood size, while member-level comparisons should preserve feature content. Parameter-matched comparisons of relation-specific and collapsed-relation models could distinguish relational detail from model capacity.
-
+ 
 Paper~I included interaction frequency and type together as member-level edge attributes. The cross-study recovery evaluation found no significant improvement from these attributes, but did not isolate the contribution of frequency. Whether frequency adds architectural information, and how it should enter representation learning through edge weights, attention terms, or relation encodings, remains open for both recovery and mapping.
-
-A second direction concerns structural reach and the learning objective. Reach was compared across mechanisms only in recovery, where methods with extended reach were generally stronger than the two-layer GAT. However, random walks, diffusion, and deeper message passing differ in more than reach. Varying the amount of dependency context within each mechanism, while keeping other settings fixed, would help determine when wider context improves recovery and mapping.
-
-For recovery, embeddings and cluster assignments could be learned jointly and compared with the current two-stage pipeline, in which clustering follows representation learning under a proxy objective. Limited expert input, such as an expected number of modules or a plausible range for the number of clusters, could also guide recovery.
-
-A third direction concerns configuration selection and evaluation on unfamiliar and evolving systems. The benefit and preferred direction of neighbor aggregation varied across systems, but dependency homophily, used to interpret these differences, requires reference module assignments. Future work should examine whether properties observable in the dependency graph alone can guide configuration selection, with selection rules evaluated on systems not used to develop them. Folder-aware methods could also be assessed across systems that differ in how closely directories match the reference modules. Reporting performance separately for files whose module differs from that of their directory would help establish whether the methods provide useful predictions beyond directory organization.
-
-The mapping evaluations made all system files available, leaving performance on subsequently introduced files untested. Future work could evaluate whether a model trained on mapped files from one version can assign new and changed files in later versions without retraining. Practitioner studies could then assess whether the predictions support architecture maintenance.
+ 
+A second direction concerns configuration selection and evaluation on unfamiliar and evolving systems. The benefit and preferred direction of neighbor aggregation varied across systems, but dependency homophily, used to interpret these differences, requires reference module assignments. Future work should examine whether properties observable in the dependency graph alone can guide configuration selection, with selection rules evaluated on systems not used to develop them. Folder-aware methods could also be assessed across systems that differ in how closely directories match the reference modules. Reporting performance separately for files whose module differs from that of their directory would help establish whether the methods provide useful predictions beyond directory organization.
+ 
+The mapping evaluations made all system files available, leaving performance on subsequently introduced files untested. Future work could evaluate whether a model trained on mapped files from one version can assign new and changed files in later versions without retraining. The version history could also supply evolutionary signals, such as files that change together, which may carry architectural information that dependencies, folders, and code content do not. Practitioner studies could then assess whether the predictions support architecture maintenance.
