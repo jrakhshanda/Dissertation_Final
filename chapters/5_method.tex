@@ -27,7 +27,7 @@ The learning mechanism determines how these inputs and graph relations are used 
     \begin{adjustbox}{max width=1\textwidth}
         \input{figures/design_space.tex}
     \end{adjustbox}
-\caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism.. \label{fig:design_space}}
+\caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism. \label{fig:design_space}}
 \end{figure}
  
 
@@ -109,7 +109,7 @@ V & \makecell[l]{File / $+$Folder /\\ $+$Member} & merged
 \end{threeparttable}
 \end{adjustbox}
 \end{table}
-% ____________ Representataion Learning ___________________
+% ____________ Representation Learning ___________________
 \section{Learning Settings}
 \label{sec:learning_settings}
 
@@ -242,7 +242,7 @@ The mapping studies therefore use ten of the fourteen systems. ArchStudio4, Hado
 
 \subsection{Statistical Analysis \label{sec:stat_analysis}}
 
-To assess the statistical significance of observed differences between methods or configurations, nonparametric tests are used because metric values across repeated runs are not necessarily normally distributed. The recovery studies compare independent distributions of one hundred runs per configuration and use the Mann--Whitney $U$ test~\cite{mann}. In the mapping studies, the compared configurations use the same labeled set in each run, producing paired observations. These comparisons use the Wilcoxon signed-rank test~\cite{wilcoxon}. Where a recovered partition is compared with the ground-truth architecture, the 100 runs of a method are tested against the single ground-truth value of the normalized TurboMQ using the one-sample Wilcoxon signed-rank test.
+To assess the statistical significance of observed differences between methods or configurations, nonparametric tests are used because metric values across repeated runs are not necessarily normally distributed. The recovery studies compare independent distributions of 100 runs per configuration and use the Mann--Whitney $U$ test~\cite{mann}. In the mapping studies, the compared configurations use the same labeled set in each run, producing paired observations. These comparisons use the Wilcoxon signed-rank test~\cite{wilcoxon}. Where a recovered partition is compared with the ground-truth architecture, the 100 runs of a method are tested against the single ground-truth value of the normalized TurboMQ using the one-sample Wilcoxon signed-rank test.
 
 Statistical tests use a significance threshold of $\alpha = 0.05$. For the mapping comparisons, the resulting $p$-values are adjusted using Holm's procedure across the ten systems, separately for each metric and each pair of compared configurations.
 
@@ -265,7 +265,7 @@ The third evaluation adds HGT to the comparison of Paper~III to examine its perf
  
 The fourth evaluation examines whether the contribution of dependency types varies with the input representation. It compares typed GAT, with one channel per relation type, against merged GAT, which collapses all types into a single relation, using the four input representations from Paper~V: Word2Vec, Node2Vec, zero-shot UniXcoder, and fine-tuned UniXcoder. Both variants aggregate messages from source to target. None of these representations includes folder-path features, so this evaluation examines dependency types without organizational information in the node features.
 
-\subsection{Cross-Study Correlation with System Properties \label{sec:sytem_properties_corr}}
+\subsection{Cross-Study Correlation with System Properties \label{sec:system_properties_corr}}
 This analysis assesses whether recovery performance varies systematically with system properties. Each system contributes one observation per method and configuration: its median metric value across the 100 runs, and these values are correlated with the system properties using Kendall's $\tau$, a nonparametric rank correlation that accommodates tied ranks~\cite{kendall}. The sample size is therefore the number of systems, fourteen, and not the number of runs.
  
 The properties are homophily $\mathcal{H}$, the proportion of static dependencies whose source and target files belong to the same ground-truth module~\cite{gnn_homophily}, and average module size $\langle \mathcal{M} \rangle$, the mean number of files per ground-truth module, which characterizes the granularity of the target decomposition. Table~\ref{table:system_properties} reports both properties and the normalized TurboMQ of the ground-truth decomposition.

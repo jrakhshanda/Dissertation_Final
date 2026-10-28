@@ -43,7 +43,7 @@ Comparing graph inputs, attributed GCN and GAT achieve a higher median MoJoFM th
 
 \paragraph{Dependency cohesion.} Figure~\ref{fig:overview-recovery}(b) shows a different ordering from reference agreement. The file-level structure-only methods achieve higher median \tmq{} than the attributed methods, with Node2Vec attaining the highest value. Among the attributed methods, reconstruction-based GAT scores above the contrastive variants, while GCN has the lowest median of all methods. Reconstruction-based GAT also scores above the folder-augmented HGAT and MetaPath2Vec.
 
-Because \tmq{} varies widely across systems, we also compare each method with the reference architecture of the same system. Table~\ref{tab:gt_cohesion} reports how many systems have significantly lower or higher scores, using one-sample Wilcoxon signed-rank tests. GCN falls below the reference on eleven of fourteen systems. The contrastive and folder-augmented methods fall below it on seven or eight systems, whereas the remaining methods do so on five or fewer. Node2Vec exceeds the reference on thirteen systems and falls below it only on Libxml.
+Because \tmq{} varies widely across systems, each method is also compared with the reference architecture of the same system. Table~\ref{tab:gt_cohesion} reports how many systems have significantly lower or higher scores, using one-sample Wilcoxon signed-rank tests. GCN falls below the reference on eleven of fourteen systems. The contrastive and folder-augmented methods fall below it on seven or eight systems, whereas the remaining methods do so on five or fewer. Node2Vec exceeds the reference on thirteen systems and falls below it only on Libxml.
 
 Together, these comparisons show that agreement with the reference decomposition and dependency cohesion favor different methods. The attributed methods achieve higher reference agreement, while the file-level structure-only methods produce more dependency-cohesive partitions.
 
@@ -117,8 +117,8 @@ W2V   & +5.8 & 8 & 7 & 1 & 2/0/1/7 & +1.4 & 9 & 7 & 1 & 1/4/1/4 \\
 \end{adjustbox}
 \end{table}
 % \input{tables/hetGAT_vs_homGAT}
-% _________ Contrubutions __________________
-\section{Synthesis of Research Findings \label{sec:contruibutions}}
+% _________ Contributions __________________
+\section{Synthesis of Research Findings \label{sec:contributions}}
 
 This section combines the findings of the five studies with the cross-study results in Section~\ref{sec:cross_study_results} to answer the research questions. The synthesis follows the three research objectives, examining the use of representation learning for recovery and mapping, the information provided by representations of individual implementation signals, and the contribution of additional graph structure.
 

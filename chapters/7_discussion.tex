@@ -63,7 +63,7 @@ The studies evaluate overlapping subsets of open-source Java, C, and C++ systems
 
 The exploratory analysis across fourteen systems does not establish whether dependency homophily affects recovery independently of system size, module granularity, or other system properties.
 
-\paragraph{Dependencies graph.}
+\paragraph{Dependency graph.}
 Static dependencies are extracted automatically with the Depends~\cite{depends} tool. The resulting graphs may omit runtime dependencies or dependencies the tool cannot resolve, and may include edges not realized at runtime. Recovery and mapping results therefore depend on the extracted graph's accuracy and coverage. Within this thesis, this limitation may affect dependency-derived signals, including dependency-guided fine-tuning of contextual embeddings. Folder and containment relations, lexical embeddings, and zero-shot contextual embeddings do not depend on this extraction. The studies neither independently validate extraction accuracy nor assess sensitivity to extraction errors.
 
 \paragraph{Reference architectures and architectural representation.}
