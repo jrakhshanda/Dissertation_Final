@@ -10,16 +10,16 @@ Prior approaches to architecture recovery and C2A mapping draw on the same imple
 % =================================
 % Taxonomy Table
 % =================================
-{\fontsize{8.3pt}{10pt}\selectfont
-\renewcommand{\arraystretch}{1.1}
+{\small %\fontsize{9pt}{10.8pt}\selectfont
+\renewcommand{\arraystretch}{1}
 \setlength{\tabcolsep}{3pt}
 \def\yes{\ensuremath{\checkmark}}
 \def\no{\ensuremath{\times}}
-\def\taskrow#1{\addlinespace[3pt]\rowcolor{gray!22}\multicolumn{6}{l}{\normalsize\textbf{#1}} \\}
-\def\famrow#1{\multicolumn{6}{l}{\small\textbf{\emph{#1}}} \\[2pt]}
+\def\taskrow#1{\addlinespace[3pt]\rowcolor{gray!15}\multicolumn{6}{c}{\normalsize\textbf{#1}} \\}
+\def\famrow#1{\addlinespace[1pt]\multicolumn{6}{l}{\normalsize\emph{#1}} \\[2pt]}
 
 \begin{longtable}{@{} >{\raggedright\arraybackslash}p{0.18\textwidth} c c c >{\raggedright\arraybackslash}p{0.32\textwidth} >{\raggedright\arraybackslash}p{0.33\textwidth} @{}}
-\caption[Taxonomy of representative prior approaches.]{Representative approaches to SAR and C2A mapping. SD: static dependencies; F: folder hierarchy or file paths; T: identifiers, comments, or other code text. $^\dagger$ denotes an additional signal not studied in this thesis. Further approaches are discussed in the text. \label{tab:taxonomy}}\\
+\caption[Taxonomy of representative prior approaches.]{Representative approaches to SAR and C2A mapping. SD: static dependencies; F: folder hierarchy or file paths; T: identifiers, comments, or other code text. $\dagger$ denotes an additional signal not studied in this thesis. \label{tab:taxonomy}}\\
 \toprule
 \textbf{Approach} & \textbf{SD} & \textbf{F} & \textbf{T} & \textbf{Paradigm} & \textbf{Primary limitation} \\
 \midrule
@@ -31,7 +31,7 @@ Prior approaches to architecture recovery and C2A mapping draw on the same imple
 \endhead
 \bottomrule
 \endlastfoot
-\taskrow{Software architecture recovery}
+\taskrow{Software Architecture Recovery}
 \famrow{Dependency-based clustering}
 ACDC~\cite{acdc} & \yes & \no & \no & Pattern-driven clustering & Over-fragments into many small clusters \\
 Bunch~\cite{bunch_sahc_nahc} & \yes & \no & \no & Local search (hill climbing variants); optimizes MQ & Hubs and utility classes distort modules; slow on large systems \\
@@ -62,7 +62,7 @@ Amalfitano et al.~\cite{amalfitano2025automated} & \no & \no & \yes & Generative
 
 SemArc~\cite{sar_sem} & \yes & \no & \yes & LLM code interpretation, anchor-based clustering & Scalability; possible benchmark overlap with pretraining data \\
 \midrule
-\taskrow{Code-to-architecture mapping}
+\taskrow{Code-to-Architecture Mapping}
 \famrow{Rule-based and retrieval-based mapping}
 Tzerpos and Holt~\cite{tzerpos1997orphan} & \yes & \no & \yes & Orphan adoption by naming and structure criteria & Hard-coded patterns \\
 HuGMe~\cite{christl2007automated} & \yes & \no & \no & Dependency-based attraction functions for semi-automatic mapping & Requires an initial partial mapping \\
@@ -72,8 +72,9 @@ InMap~\cite{InMap} & \no & \no & \yes & Interactive ranking from module descript
 \famrow{Learned mapping}
 NBAttract~\cite{olsson2022automatically} & \yes & \no & \yes & Semi-supervised Naive Bayes & Dependencies enter as per-file features, not graph structure \\
 \midrule
-\famrow{Embedding-based and LLMs}
-Johansson et al.~\cite{johansson2024mapping} & \no & \no & \yes & Pretrained embeddings with classifiers & No explicit dependency or folder structure \\
+\famrow{Pretrained embeddings and LLMs}
+Johansson et al.~\cite{johansson2026mapping,johansson2024mapping} & \no & \no & \yes & Pretrained embeddings with classifiers & No explicit dependency or folder structure \\
+
 Rukmono et al.~\cite{rukmono2024deductive} & \no & \no & \yes & GPT-4 mapping to a predefined architecture & Scalability as system size grows \\
 \end{longtable}
 }
@@ -96,7 +97,7 @@ Tzerpos and Holt~\cite{tzerpos1997orphan} introduced orphan adoption, the increm
 
 Learned classifiers provide another approach to mapping. Olsson et al.~\cite{olsson2022automatically} propose NBAttract, a semi-supervised Naive Bayes mapper that combines lexical and dependency information encoded via Concrete Dependency Abstraction (CDA). Florean et al.~\cite{florean2021textclassifierscomparison} compare text classifiers and text representations for the same task. Our earlier work~\cite{jabeen2025graph} represents dependencies directly as edges in homogeneous and dependency-type-aware graphs, in contrast to NBAttract's feature-based encoding. It evaluates graph convolutional network (GCN) variants and uses iterative pseudo-labeling to expand a small initial labeled set.
 
-Some mapping studies use pretrained embeddings as classifier inputs, while others prompt general-purpose LLMs to produce mappings. Johansson et al.~\cite{johansson2024mapping} evaluate pretrained embeddings alongside TF-IDF and GloVe as input to method-level classifiers. In follow-up work, Johansson and Caporuscio relate the performance of embedding-based mapping of functions and files to data properties, most consistently class separability~\cite{johansson2026mapping}. Rukmono et al.~\cite{rukmono2024deductive} use chain-of-thought prompting with GPT-4 to map implementation units to a predefined reference architecture. Both approaches use lexical or semantic information, while typed dependencies remain implicit in their inputs.
+Some mapping studies use pretrained embeddings as classifier inputs, while others prompt general-purpose LLMs to produce mappings. Johansson et al.~\cite{johansson2024mapping} evaluate pretrained embeddings alongside traditional representations such as TF-IDF as input to method-level classifiers. In follow-up work, Johansson and Caporuscio relate the performance of embedding-based mapping of functions and files to data properties, most consistently class separability~\cite{johansson2026mapping}. Rukmono et al.~\cite{rukmono2024deductive} use chain-of-thought prompting with GPT-4 to map implementation units to a predefined reference architecture. Both approaches use lexical or semantic information, while typed dependencies remain implicit in their inputs.
 
 \subsection{Limitations Across Recovery and Mapping}
 
