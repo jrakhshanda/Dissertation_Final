@@ -12,22 +12,16 @@ Architecture recovery and mapping are studied through a common graph-based repre
  
 Graph topology determines which software artifacts are represented as nodes. The simplest configuration contains only file nodes. Richer variants add folder nodes, one per directory, member nodes that aggregate the program elements contained in each file, or include both folder and member nodes together. Relation modeling determines how these nodes are connected. Static dependencies may be merged into a single relation or preserved as typed relations such as \emph{call}, \emph{import}, and \emph{inheritance}. Graphs containing additional artifact types also include organizational and containment meta-relations, such as folder-to-folder, folder-to-file, and file-to-member relations.
  
-Input representation determines what information is available to the nodes before message passing. Nodes may start with learnable identity embeddings or with features derived from dependency structure, folder organization, or code content. These features range from token-based representations and structural encodings to pretrained contextual code embeddings.
+Input representation determines what information is available to the nodes before message passing. Nodes may start with learnable identity embeddings or with features derived from dependency structure, folder organization, or code content. These features range from token-based representations and structural encoding to pretrained contextual code embeddings.
  
 The learning mechanism determines how these inputs and graph relations are used to learn file representations. The studies compare random-walk methods and graph neural networks, with learning objectives suited to recovery or mapping.
-
-% \begin{figure}[!thb]
-%     \centering
-%     \includegraphics[width=1\textwidth]{figures/design_space.pdf}
-%     \caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism.. \label{fig:design_space}}
-% \end{figure}
 
 \begin{figure}[!thb]
     \centering
     \begin{adjustbox}{max width=1\textwidth}
         \input{figures/design_space.tex}
     \end{adjustbox}
-\caption[Design space studied in the thesis.]{Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism. \label{fig:design_space}}
+\caption[Design space studied in the thesis.]{\fontsize{9.8}{12}\selectfont Design space studied across the thesis: graph configurations ranging from the SDG to heterogeneous folder-file-member graphs, initialized from structural, organizational, lexical, or contextual signals, and evaluated under unsupervised recovery and supervised mapping through controlled comparisons of relation modeling, graph structure, input representation, and learning mechanism. \label{fig:design_space}}
 \end{figure}
  
 
