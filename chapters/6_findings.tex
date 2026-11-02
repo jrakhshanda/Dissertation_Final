@@ -27,7 +27,7 @@ MoJoFM, ARI, and \cc{} measure agreement with the reference decomposition, while
     \begin{subfigure}{1\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{figures/recovery_cohesion.pdf}
-        \caption{\tmq{}.}
+        \caption{Normalized TurboMQ}
         \label{fig:recovery-graphs}
     \end{subfigure}
     % \par
@@ -208,5 +208,5 @@ In Paper~V, adding member nodes to the file-only graph lowers the median F1 for 
 Paper~I reports small gains from edge attributes on some systems. However, the cross-study evaluation finds no significant improvement over the same model without these attributes (Section~\ref{sec:recovery_cross_study}). Paper~I attributes the limited benefit on TeamMates to edge attributes amplifying noisy cross-module interactions, suggesting that additional interaction detail may be less useful where dependencies poorly reflect module boundaries.
 
 \begin{GrayBox}{Summary of Objective~3}
-Dependency-neighbor aggregation improves mapping beyond the initial file representations, most reliably for GAT and the neighbor MLP. The magnitude of improvement depends on both the predictor and the input representation, with fine-tuned UniXcoder gaining more than Node2Vec, while the preferred aggregation direction varies across systems (RQ3.1). Folder organization provides the strongest additional signal in the evaluated mapping configurations, but does not consistently help correct files misclassified by the directory-based rule. In recovery, higher agreement with the reference architecture can coincide with weaker dependency cohesion (RQ3.2). Adding finer-grained structure does not extend these benefits consistently. Member-level nodes give no consistent improvement in mapping, and edge-level attributes give no significant gain in the cross-study recovery evaluation (RQ3.3).
+Dependency-neighbor aggregation improves mapping beyond the initial file representations, most reliably for GAT and the neighbor MLP. The magnitude of improvement depends on both the predictor and the input representation, with fine-tuned UniXcoder gaining more than Node2Vec, while the preferred aggregation direction varies across systems (RQ3.1). Folder organization provides the strongest additional signal in the evaluated mapping configurations, but does not consistently help correct files misclassified by the directory-based rule. In recovery, higher agreement with the reference architecture can coincide with weaker dependency cohesion (RQ3.2). Adding finer-grained structure does not extend these benefits consistently. Member-level nodes give no consistent improvement in C2A mapping, and edge-level attributes give no significant gain in the architecture recovery (RQ3.3).
 \end{GrayBox}

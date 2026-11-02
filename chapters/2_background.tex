@@ -1,16 +1,16 @@
 \chapter{Background \label{ch:background}}
 \chaptertoc
 
-This chapter presents the background needed to frame the research problem and the methods used in this thesis. It first reviews prior approaches to software architecture recovery and code-to-architecture mapping, with attention to how they represent and combine implementation-level evidence. It then introduces the artifact representations, graph-based learning methods, the graph properties that affect them, the learning paradigms, and the evaluation concepts used in the subsequent chapters.
+This chapter presents the background needed to frame the research problem and the methods used in this thesis. It first reviews prior approaches to architecture recovery and C2A mapping, with attention to how they represent and combine implementation-level evidence. It then introduces artifact representations, graph-based learning methods and relevant graph properties, learning paradigms, and evaluation concepts used in subsequent chapters.
 
 \section{Prior Approaches \label{sec:bg_prior}}
 
-Prior approaches to architecture recovery and C2A mapping draw on the same implementation signals: static dependencies between source files, directory layout, and identifiers and comments in the code. Some also use system version history, which is not studied in this thesis. The approaches differ in how they represent, combine, and learn from these signals. Table~\ref{tab:taxonomy} gives selected examples, with the signals they use, their learning or aggregation paradigm, and a primary limitation; it is not an exhaustive inventory of the work discussed below. The remainder of this section traces the progression shown in the table, from search-based and clustering methods on dependency graphs, through hand-specified multi-signal fusion, to learned representations based on graph embeddings and language models.
+Prior approaches to architecture recovery and C2A mapping draw on implementation signals such as static dependencies, directory layout, and identifiers and comments in the code. Some also use version history or other metadata, which are not studied in this thesis. The approaches differ in how they represent, combine, and learn from these signals. Table~\ref{tab:taxonomy} summarizes representative approaches, their input signals, underlying methods, and main limitations.
 
 % =================================
 % Taxonomy Table
 % =================================
-{\small %\fontsize{9pt}{10.8pt}\selectfont
+{\fontsize{9pt}{10.5pt}\selectfont
 \renewcommand{\arraystretch}{1}
 \setlength{\tabcolsep}{3pt}
 \def\yes{\ensuremath{\checkmark}}
@@ -187,7 +187,7 @@ Contrastive learning trains representations by contrasting positive and negative
 
 The learned embeddings are then partitioned with a clustering algorithm, typically agglomerative hierarchical clustering~\cite{agglomerative}, for architecture recovery. This clustering step is unsupervised: it derives module groups from similarity between embeddings. The number of clusters is either selected automatically from a predefined search range or fixed in advance.
 
-\paragraph{Code-to-architecture mapping.} Mapping starts from known module assignments for a limited number of files, so the studies train a classifier on these labeled files with supervised learning. Because the module set is known and fixed, the classifier assigns each file to one of the $K$ predefined modules through a softmax layer, which yields a probability distribution over the modules, and the highest softmax probability of a prediction is its confidence. It is trained with categorical cross-entropy (CCE), $-\sum_{k=1}^{K} y_k\log\hat{y}_k$, which for a one-hot target is the negative log-probability assigned to the true module.
+\paragraph{C2A mapping.} Mapping starts from known module assignments for a limited number of files, so the studies train a classifier on these labeled files with supervised learning. Because the module set is known and fixed, the classifier assigns each file to one of the $K$ predefined modules through a softmax layer, which yields a probability distribution over the modules, and the highest softmax probability of a prediction is its confidence. It is trained with categorical cross-entropy (CCE), $-\sum_{k=1}^{K} y_k\log\hat{y}_k$, which for a one-hot target is the negative log-probability assigned to the true module.
 
 Unlabeled files can also contribute through iterative self-training~\cite{lee2013pseudo}, which Paper~III applies on top of supervised training. The classifier assigns pseudo-labels to unlabeled files whose confidence exceeds a predefined threshold, retrains on the labeled and pseudo-labeled files, and repeats over successive rounds until no prediction meets the criterion or a maximum number of rounds is reached.
 
