@@ -60,22 +60,22 @@ NEGAR~\cite{negar} & \yes & \no & \no & Node2Vec-based random walks, clustered &
 
 Amalfitano et al.~\cite{amalfitano2025automated} & \no & \no & \yes & Generative LLMs with iterative prompting & Weak on class relationships and fine-grained patterns \\
 
-SemArc~\cite{sar_sem} & \yes & \no & \yes & LLM code interpretation, anchor-based clustering & Scalability; possible benchmark overlap with pretraining data \\
+SemArc~\cite{sar_sem} & \yes & \yes & \yes & LLM code interpretation, anchor-based clustering & Scalability; possible benchmark overlap with pretraining data \\
 \midrule
 \taskrow{Code-to-Architecture Mapping}
 \famrow{Rule-based and retrieval-based mapping}
 Tzerpos and Holt~\cite{tzerpos1997orphan} & \yes & \no & \yes & Orphan adoption by naming and structure criteria & Hard-coded patterns \\
 HuGMe~\cite{christl2007automated} & \yes & \no & \no & Dependency-based attraction functions for semi-automatic mapping & Requires an initial partial mapping \\
 \makecell[tl]{IRAttract\\ LSIAttract~\cite{bittencourt_IR}} & \no & \no & \yes & Information-retrieval based attraction functions & No explicit dependency structure \\
-InMap~\cite{InMap} & \no & \no & \yes & Interactive ranking from module descriptions & No dependency structure \\
+InMap~\cite{InMap} & \no & \yes & \yes & Interactive ranking from module descriptions & No dependency structure \\
 \midrule
 \famrow{Learned mapping}
-NBAttract~\cite{olsson2022automatically} & \yes & \no & \yes & Semi-supervised Naive Bayes & Dependencies enter as per-file features, not graph structure \\
+NBAttract~\cite{olsson2022automatically} & \yes & \yes & \yes & Semi-supervised Naive Bayes & Dependencies enter as per-file features, not graph structure \\
 \midrule
 \famrow{Pretrained embeddings and LLMs}
 Johansson et al.~\cite{johansson2026mapping,johansson2024mapping} & \no & \no & \yes & Pretrained embeddings with classifiers & No explicit dependency or folder structure \\
 
-Rukmono et al.~\cite{rukmono2024deductive} & \no & \no & \yes & GPT-4 mapping to a predefined architecture & Scalability as system size grows \\
+Rukmono et al.~\cite{rukmono2024deductive} & \no & \yes & \yes & GPT-4 mapping to a predefined architecture & Scalability as system size grows \\
 \end{longtable}
 }
 
@@ -103,34 +103,9 @@ Some mapping studies use pretrained embeddings as classifier inputs, while other
 
 Across recovery and mapping, many of the reviewed approaches rely on a single information source, combine sources through predefined rules, or use a fixed representation of each source within a learned model. Comparing the contributions of graph structure, directory organization, and source-code content requires varying these choices under matched conditions. The studies comprising this thesis examine how these signals can be represented, combined, and propagated for architecture recovery and C2A mapping.
 
-% % Studies in this thesis (kept commented out: the Background introduces prior work only; the table is stale and needs the merged dependency type and supervised-only mapping for Paper V if it is ever reinstated)
-% % ======================
-% \begin{table}[!ht]
-% \centering
-% \fontsize{9pt}{10pt}\selectfont
-% \renewcommand{\arraystretch}{1.1}
-% \setlength{\tabcolsep}{3pt}
-% \def\yes{\ensuremath{\checkmark}}
-% \def\no{\ensuremath{\times}}
-% \caption{Studies in this thesis, with the task, signals, and paradigm used in the notation of Table~\ref{tab:taxonomy}. SD: static dependencies; F: folder hierarchy or file paths; T: identifiers or other code content.}
-% \label{tab:thesis_studies}
-% \begin{tabular}{@{} l c c c c >{\raggedright\arraybackslash}p{0.62\textwidth} @{}}
-% \toprule
-% \textbf{Study} & \textbf{Task} & \textbf{SD} & \textbf{F} & \textbf{T} & \textbf{Paradigm} \\
-% \midrule
-% Paper~I & SAR & \yes & \yes & \yes & Relation-specific GAT, contrastive objective \\
-% Paper~II & SAR & \yes & \yes & \yes & Relation-specific GCN/GAT graph autoencoder \\
-% Paper~III & C2A & \yes & \yes & \yes & GCN and GAT with semi-supervised learning \\
-% Paper~IV & SAR & \yes & \yes & \no & Random-walk embeddings, variational graph autoencoder \\
-% Paper~V & C2A & \yes & \yes & \yes & UniXcoder with dependency-guided contrastive tuning, heterogeneous graph transformer, semi-supervised learning \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
-% % =======================
 \section[Representing Artifact Content]{Representing Artifact Content and Organization \label{sec:bg_content}}
 
 A software system carries architectural evidence in more than one form. Its files and members are connected by static dependencies, but they also have names, occupy locations in the folder hierarchy that reflect how developers group related functionality~\cite{garcia2013}, and contain identifiers and comments that encode domain-specific knowledge~\cite{sarif}. In a representation learning framework, dependencies can be represented as graph relations, while the content associated with individual artifacts must be encoded numerically for a learning model to operate on. This section introduces the two families of representation used in the thesis: lexical and contextual.
-
 
 \subsection{Lexical Representations \label{sec:bg_lexical}}
 
